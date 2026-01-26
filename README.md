@@ -38,6 +38,6 @@ Discuss what you need to develop this project. This includes background informat
 <div align="center">
 
 [//]: # (Replace with your collaborators)
-[Justin Pham](https://github.com/Prismfade) • [Khai Thach](https://github.com/Khai-Thach)
+[Justin Pham](https://github.com/Prismfade) • [Khai Thach](https://github.com/Khai-Thach) • [John Livezey](https://github.com/Jawn654)
 
 </div>

@@ -10,3 +10,5 @@ sidebar_position: 4
 - Chatbot will keep track of how manytimes each user responds on a leaderboard
 
 ## Nonfunctional Requirements
+- Leaderboard will give users more of an incentive to communicate with each other
+- Chatbot should be useable on multiple different group communication platforms

@@ -4,20 +4,36 @@ sidebar_position: 1
 
 # System Overview
 
-# Abstract
----
-The BeReal Chatbot is a crossplatform chatbot between different types of chat clients (Discord, Slack, SMS, etc...). The program will be a social media platform built into a bot implemented in chatroom clients. Instead of being a social media that is accessible to everyone, all interaction will be isolated within these chatroom/servers.
+## Abstract
+The **BeReal Chatbot** is a cross-platform chatbot that integrates with multiple chat clients such as Discord, Slack, SMS, and potentially etc...  
+Rather than a traditional public social media platform, the chatbot creates a private, contained social experience within existing chatrooms or servers such as Discord.
 
-# Goal
----
-The goal of the BeReal Chatbot is to provide users a way to interact socially through quicktime events of giving users a context and having them post to the corresponding context.
-For an example:
-\nBot: "@user1 post what you ate earlier"
-    "@user2 post what you are doing right now"
-    "You have 2 minutes to post"
-User1: [post image of spaghetti and meatballs]
-User2: [posts image of them running]
+All user interactions are isolated to their respective chat environments. Can be implemented in communities or work-circles quietly.
 
-# Scope
----
-To 
+## Goal
+The primary goal of the BeReal Chatbot is to encourage social interaction through **time-limited prompts**.  
+At random or scheduled intervals, users are given a shared context and a short window of time to respond.
+
+**Example interaction:**
+
+> **Bot:**  
+> @user1 — Post what you ate earlier  
+> @user2 — Post what you are doing right now  
+> You have 2 minutes to post
+>
+> **User1:** *(uploads image of spaghetti and meatballs)*  
+> **User2:** *(uploads image of themselves running)*
+
+These quick-time events create spontaneous and authentic moments of interaction.
+
+## Scope
+The scope of this project is to strengthen social connections within teams, communities, or workspaces—especially those consisting of both new and existing members.
+
+Feedback has shown that newer members often feel intimidated joining conversations within tight-knit groups that already share inside jokes and established friendships. This social barrier can limit engagement and collaboration.
+
+The BeReal Chatbot aims to bridge this gap by:
+- Encouraging participation from members/employees
+- Create natural conversations between new and existing members
+- Decrease intimidation with new employees
+
+By responding to the same prompt at the same time, users are given an easy and low-pressure way to connect.

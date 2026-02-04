@@ -13,6 +13,8 @@
 
 Section #, as well as any words that quickly give your peers insights into the application like programming language, development platform, type of application, etc.
 
+Section 1
+
 ## Project Abstract
 
 This document proposes a novel application of a text message (SMS or Email) read-out and hands-free call interacted between an Android Smartphone and an infotainment platform (headunit) in a car environment. When a phone receives an SMS or Email, the text message is transferred from the phone to the headunit through a Bluetooth connection. On the headunit, user can control which and when the received SMS or E-mail to be read out through the in-vehicle audio system. The user may press one button on the headunit to activate the hands-free feature to call back the SMS sender.
@@ -20,6 +22,8 @@ This document proposes a novel application of a text message (SMS or Email) read
 ## High Level Requirement
 
 Describe the requirements – i.e., what the product does and how it does it from a user point of view – at a high level.
+
+VibeCheck is a chatbot that sends prompts that will have a timed response others will reply to. Once sent, users can see each other's posts and responses.  
 
 ## Conceptual Design
 
@@ -38,6 +42,6 @@ Discuss what you need to develop this project. This includes background informat
 <div align="center">
 
 [//]: # (Replace with your collaborators)
-[Justin Pham](https://github.com/Prismfade) • [Khai Thach](https://github.com/Khai-Thach) • [John Livezey](https://github.com/Jawn654)
+[Justin Pham](https://github.com/Prismfade) • [Khai Thach](https://github.com/Khai-Thach) • [John Livezey](https://github.com/Jawn654) • [Chris Breeden](https://github.com/CRBreeden) • [Nathan Hollick](https://github.com/) • [Carl Pierre-Louis](https://github.com/carlpielou03)
 
 </div>

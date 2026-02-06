@@ -5,13 +5,14 @@ sidebar_position: 1
 # System Overview
 
 ## Abstract
-The **BeReal Chatbot** is a cross-platform chatbot that integrates with multiple chat clients such as Discord, Slack, SMS, and potentially etc...  
+**VibeCheck** is a cross-platform BeReal-inspired chatbot that integrates with multiple chat clients such as Discord, Slack, and SMS.
+
 Rather than a traditional public social media platform, the chatbot creates a private, contained social experience within existing chatrooms or servers such as Discord.
 
 All user interactions are isolated to their respective chat environments. Can be implemented in communities or work-circles quietly.
 
 ## Goal
-The primary goal of the BeReal Chatbot is to encourage social interaction through **time-limited prompts**.  
+The primary goal of VibeCheck is to encourage social interaction through **time-limited prompts**.  
 At random or scheduled intervals, users are given a shared context and a short window of time to respond.
 
 **Example interaction:**

@@ -12,9 +12,8 @@ sidebar_position: 4
 - Chabot must randomly decide to give users the option to create a prompt
 - Chatbot must make a photo + caption submission option, based on the generated prompt
 - Chatbot must make a text submission option, based on the generated prompt
-- Chatbot must validate the content of the post submission
 - Chatbot must track how many times each user responds
-- Chatbot must be able to display a leaderboard showing who has interacted with it the most
+- Chatbot must be able to display a leaderboard of steak scores from all users
 - Chatbot must track individual user streak scores
 - Chatbot must track late posts
 - Chatbot must track missed posts

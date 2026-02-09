@@ -42,13 +42,5 @@ As a user, I want to be grouped with people who have similar posts as me so that
 2. An invite to a new sub-group in the group chat is sent to users through private message
 3. Users will accept the invite and the chatbot asks questions as a basis of conversation
 
-### Usse Case 7 - Music Addition
-As a user, I want to add music to my post so that I can creat a vibe for the emotional tone I want it to have and the song can provide musical connection with peers
-1. The user is provided the submission UI
-2. Within the submission UI, there's a music search bar to optionally add a song
-3. By default, the preview of the song will be it's most played part and will be the chosen timeframe
-4. A snippet of the song selected can be chosen to fit user needs
-5. Upon submission, the post will also play music. 
-
 
 

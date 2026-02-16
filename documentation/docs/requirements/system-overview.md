@@ -5,36 +5,32 @@ sidebar_position: 1
 # System Overview
 
 ## Abstract
-**VibeCheck** is a cross-platform BeReal-inspired chatbot that integrates with multiple chat clients such as Discord, Slack, and SMS.
-
-Rather than a traditional public social media platform, the chatbot creates a private, contained social experience within existing chatrooms or servers such as Discord.
+**VibeCheck** is a cross-platform BeReal-inspired chatbot that integrates with Slack at the current moment
 
 All user interactions are isolated to their respective chat environments. Can be implemented in communities or work-circles quietly.
 
 ## Goal
-The primary goal of VibeCheck is to encourage social interaction through **time-limited prompts**.  
-At random or scheduled intervals, users are given a shared context and a short window of time to respond.
+The primary goal of VibeCheck is to encourage social interaction through quicktime events similar to BeReal.
+At random or scheduled intervals, users are given multiple prompts to respond to.
 
 **Example interaction:**
 
 > **Bot:**  
-> @user1 — Post what you ate earlier  
-> @user2 — Post what you are doing right now  
+> @Khai — Post what you ate earlier  
+> @Chris — Post what you are doing right now  
 > You have 2 minutes to post
 >
-> **User1:** *(uploads image of spaghetti and meatballs)*  
-> **User2:** *(uploads image of themselves running)*
+> **Khai:** *(uploads image of spaghetti and meatballs)*  
+> **Chris:** *(uploads image of themselves running)*
 
-These quick-time events create spontaneous and authentic moments of interaction.
+These quicktime events create spontaneous and authentic moments of interaction.
 
 ## Scope
-The scope of this project is to strengthen social connections within teams, communities, or workspaces—especially those consisting of both new and existing members.
-
-Feedback has shown that newer members often feel intimidated joining conversations within tight-knit groups that already share inside jokes and established friendships. This social barrier can limit engagement and collaboration.
+The scope of this project is to strengthen social connections within groupchats wheter they are workplace or between groupchats.
 
 The BeReal Chatbot aims to bridge this gap by:
 - Encouraging participation from members/employees
 - Create natural conversations between new and existing members
 - Decrease intimidation with new employees
 
-By responding to the same prompt at the same time, users are given an easy and low-pressure way to connect.
+Hopefully a timelimit of when people would have to type would encourage people to message.

@@ -3,12 +3,12 @@ sidebar_position: 3
 ---
 
 
-# Sequence Diagrams 
-Sequence diagrams showing the data flow for all use cases. One sequence diagram corresponds to one use case and different use cases should have different corresponding sequence diagrams.
+# sequence diagrams 
 
+#### Use Case 1: Reply
 ```mermaid
 sequenceDiagram
-    title: Use Case 1: Reply
+
     participant User
     participant VibeCheck
     participant Database
@@ -16,9 +16,10 @@ sequenceDiagram
     VibeCheck->>Database: store user data
 ```
 
+#### Use Case 2: Personal Use
 ```mermaid
 sequenceDiagram
-    title: Use Case 2: Personal Use
+    
     participant User
     participant Slack
     User->>Slack: select VibeCheck app
@@ -27,9 +28,9 @@ sequenceDiagram
     Slack-->>User: adds VibeCheck app to the user's group
 ```
 
+#### Use Case 3: User Prompts
 ```mermaid
 sequenceDiagram
-    title: Use Case 3: User Prompts
     participant User
     participant Slack
     User->>Slack: select VibeCheck app
@@ -38,9 +39,9 @@ sequenceDiagram
     Slack-->>User: adds VibeCheck app to the user's group
 ```
 
+#### Use Case 4: Streak History
 ```mermaid
 sequenceDiagram
-    title: Use Case 4: Streak History
     participant User
     participant VibeCheck
     participant Database
@@ -50,9 +51,9 @@ sequenceDiagram
     VibeCheck-->>User: sends streak history 
 ```
 
+#### Use Case 5: Post History
 ```mermaid
 sequenceDiagram
-    title: Use Case 5: Post History
     participant User
     participant VibeCheck
     participant Database
@@ -62,9 +63,9 @@ sequenceDiagram
     VibeCheck-->>User: sends post history 
 ```
 
+#### Use Case 6: Peer Connection
 ```mermaid
 sequenceDiagram
-    title: Use Case 6: Peer Connection
     participant User
     participant VibeCheck
     participant Database

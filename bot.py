@@ -18,6 +18,7 @@ def display_current_time():
     return current_time_str
 
 def preSet_time_library(random_number):
+# Library of random times that will be chosen at random
     match random_number:
         case 1:
             return "12:0:00 PM"
@@ -58,18 +59,20 @@ print("Loaded .env from:", env_path)
 print("test")
 client = slack.WebClient(token=token)
 client.chat_postMessage(channel="#bot-test", text="bot online")
-daily_target_time = None
 
+# code for setting random time from preset switch case
+daily_target_time = None
 daily_target_time = preSet_time_library(random.randint(1,11)) 
 print(f"Randomly selected daily target time: {daily_target_time}\n")
 client.chat_postMessage(channel="#bot-test", text="time set for today is " + daily_target_time)
 
 try:
     while True:
+        # displays the current time on console
         current_time = display_current_time()
         if(current_time == "09:30:00 AM"):
             client.chat_postMessage(channel="#bot-test", text="send prompt")
-
+        # if the current time matches the daily target time that was set, a message will be pinged
         if(current_time == daily_target_time):
             client.chat_postMessage(channel="#bot-test", text="random time hit")
             print(f"Random time hit: {daily_target_time}")

@@ -6,15 +6,12 @@ sidebar_position: 4
 
 ## Functional Requirements
 
-### Basics
-- Chatbot must send a message once a day that encourages team engagement and communication
-- Chatbot must enforce quick-time events
-
-
 ### Chatbot Controls
 - Users can create their own prompts
-- Chatbot must be able to display a leaderboard of steak scores from all users
+- Chatbot must enforce quick-time events
+- Chatbot must send a message once a day that encourages team engagement and communication
 - Chatbot must group users based on post details
+- Chatbot must be able to display a leaderboard of steak scores from all users
 
 ### Data Collection
 - Chatbot must track how many times each user responds

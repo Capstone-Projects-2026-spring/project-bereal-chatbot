@@ -1,4 +1,4 @@
-import slack
+from slack_sdk import WebClient
 import os
 from datetime import datetime
 import time
@@ -22,7 +22,7 @@ def display_current_time():
 
 token = os.getenv("SLACK_TOKEN")
 print("Loaded .env from:", env_path)
-client = slack.WebClient(token=token)
+client = WebClient(token=token)
 client.chat_postMessage(channel="#bot-test", text="bot online")
 
 # Code for setting random time from preset switch case

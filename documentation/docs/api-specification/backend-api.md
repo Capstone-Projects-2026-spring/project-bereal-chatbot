@@ -53,10 +53,9 @@ The purpose of the Backend API is to present how Vibecheck solves the way of wor
 
 # Data Field and Methods
 
-### Bot.py - Class
+## Bot.py - Class
 
-getenv("SLACK_TOKEN):
-:::
+### getenv("SLACK_TOKEN"):
 - Purpose: Recieves the token from .env to allow program to connect to Slack.
 
 - Pre-conditions: Requires slack_sdk and dotenv
@@ -68,10 +67,10 @@ getenv("SLACK_TOKEN):
 - Output: Allow users to make commands and interactions with Slack client.
 
 - Exceptions Thrown: Catch when .env is not thrown, but can proceed to check terminal functions.
-:::
 
-### def display_current_time():
-:::
+
+### def display_current_time() -> str:
+
 - Purpose: In terminal, display the corresponding time
 
 - Pre-conditions: Uses datetime, must be imported.
@@ -83,9 +82,9 @@ getenv("SLACK_TOKEN):
 - Output: Prints the current time that gets updated every second. Returns current time constantly as well.
 
 - Exceptions Thrown: No exceptions
-:::
-### def preSet_time_library(random_number):
-:::
+
+### def preSet_time_library(random_number: int) -> str:
+
 - Purpose: Contains library of different preset times
 
 - Parameters:
@@ -100,7 +99,7 @@ getenv("SLACK_TOKEN):
 - Output: Returns string of time in hh:mm:ss "(AM/PM)" format.
 
 - Exceptions Thrown: Checks if parameter is a integer
-:::
+
 
 The purpose of the class.
 

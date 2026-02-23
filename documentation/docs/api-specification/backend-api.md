@@ -159,6 +159,11 @@ Current time is printed and updated.
 ### Returns
 String of current time in "%I:%M:%S %p" format.
 
+### Output 
+Returns string of time in hh:mm:ss "(AM/PM)" format.
+
+### Exceptions Thrown 
+Checks if parameter is a integer.
 </details>
 
 <details>
@@ -171,14 +176,4 @@ Post-conditions if any.
 Parameters and data types
 Return value and output variables
 Exceptions thrown
-
 </details>
-
-\* (PLEASE see note below for details).
-
-### Output 
-Returns string of time in hh:mm:ss "(AM/PM)" format.
-
-### Exceptions Thrown 
-Checks if parameter is a integer.
-

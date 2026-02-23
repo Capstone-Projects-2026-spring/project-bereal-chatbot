@@ -11,6 +11,7 @@ Backend API - Design Document - Part II API
 This Design Document gives the complete design of the software implementation. This information should be in structured comments (e.g. Javadoc) in the source files. We encourage the use of a documentation generation tool to generate a draft of your API that you can augment to include the following details.
 
 Language: Python
+Tools: slack_sdk, dotenv
 
 The purpose of the Backend API is to present how Vibecheck solves the way of working with Slack's API. We've laid out some current functions that are made for the Slack app currently.
 
@@ -95,15 +96,20 @@ In addition to the general documentation requirements the Design Document - Part
     
 - Purpose: Recieves the token from .env to allow program to connect to Slack.
 
-- Pre-conditions: Requires slack_sdk and dotenv
+### Functional - Prompts:
+- Vibecheck sends text-based prompts that is to be responded by users and are encouraged to post text/pictures.
 
-- Post-conditions: Allows program to connect and interact with Slack application
 
-- Returns: Does not return anything
+### Nonfunctional - Scalability
+- Encouraged to work with different platforms such as Discord,, Slack, SMS, etc...
+- Handle many requests and responses.
+- Collect information and responses for leaderboard system instantly.
+- Remain consistent (.env) to scale with many other platforms.
 
-- Output: Allow users to make commands and interactions with Slack client.
 
-- Exceptions Thrown: Catch when .env is not thrown, but can proceed to check terminal functions.
+### Nonfunctional - Security
+- Ensure that users know what data we are collecting.
+- Make sure that authentication key is not leaked.
 
 </details>
 
@@ -113,15 +119,21 @@ In addition to the general documentation requirements the Design Document - Part
     
 - Purpose: In terminal, display the corresponding time
 
-- Pre-conditions: Uses datetime, must be imported.
+# Data Field and Methods
 
-- Post-conditions: Current time is printed and updated.
+## Bot.py - Class
+## getenv("SLACK_TOKEN"):
+### Purpose
+Recieves the token from .env to allow program to connect to Slack.
 
-- Returns: String of current time in "%I:%M:%S %p" format.
+### Pre-conditions
+Requires slack_sdk and dotenv.
 
-- Output: Prints the current time that gets updated every second. Returns current time constantly as well.
+### Post-conditions
+Allows program to connect and interact with Slack application.
 
-- Exceptions Thrown: No exceptions
+### Returns
+Does not return anything.
 
 </details>
 
@@ -130,18 +142,22 @@ In addition to the general documentation requirements the Design Document - Part
     
 - Purpose: Contains library of different preset times
 
-- Parameters:
-    random_number: A number from main program is selected based on case numbers. Used for selecting a random time from library.
+### Exceptions Thrown
+Catch when .env is not thrown, but can proceed to check terminal functions.
 
-- Pre-conditions: Standalone
+## def display_current_time() -> str:
 
-- Post-conditions: A random time is chosen and returned
+### Purpose 
+In terminal, display the corresponding time.
 
-- Returns: String of time in hh:mm:ss "(AM/PM)" format
+### Pre-conditions 
+Uses datetime, must be imported.
 
-- Output: Returns string of time in hh:mm:ss "(AM/PM)" format.
+### Post-conditions
+Current time is printed and updated.
 
-- Exceptions Thrown: Checks if parameter is a integer
+### Returns
+String of current time in "%I:%M:%S %p" format.
 
 </details>
 
@@ -160,8 +176,9 @@ Exceptions thrown
 
 \* (PLEASE see note below for details).
 
-An example of an auto-generated and then augmented API specification is here ([Fiscal Design Document 2\_API.docx](https://templeu.instructure.com/courses/106563/files/16928898?wrap=1 "Fiscal Design Document 2_API.docx") )
+### Output 
+Returns string of time in hh:mm:ss "(AM/PM)" format.
 
-This group developed their API documentation by hand ([Design Document Part 2 API-1\_MovieMatch.docx](https://templeu.instructure.com/courses/106563/files/16928899?wrap=1 "Design Document Part 2 API-1_MovieMatch.docx") )
+### Exceptions Thrown 
+Checks if parameter is a integer.
 
-\*At the top level, or where appropriate, all exceptions should be caught and an error message that is meaningful to the user generated. It is not OK to say ("xxxx has encountered a problem and will now close (OK?)". Error messages and recovery procedures should be documented in the User’s Manual.

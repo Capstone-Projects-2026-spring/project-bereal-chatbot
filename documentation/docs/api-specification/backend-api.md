@@ -93,36 +93,6 @@ In addition to the general documentation requirements the Design Document - Part
 
 <details>
 <summary>getenv("SLACK_TOKEN):</summary>
-    
-- Purpose: Recieves the token from .env to allow program to connect to Slack.
-
-### Functional - Prompts:
-- Vibecheck sends text-based prompts that is to be responded by users and are encouraged to post text/pictures.
-
-
-### Nonfunctional - Scalability
-- Encouraged to work with different platforms such as Discord,, Slack, SMS, etc...
-- Handle many requests and responses.
-- Collect information and responses for leaderboard system instantly.
-- Remain consistent (.env) to scale with many other platforms.
-
-
-### Nonfunctional - Security
-- Ensure that users know what data we are collecting.
-- Make sure that authentication key is not leaked.
-
-</details>
-
-
-<details>
-<summary>display_current_time():</summary>
-    
-- Purpose: In terminal, display the corresponding time
-
-# Data Field and Methods
-
-## Bot.py - Class
-## getenv("SLACK_TOKEN"):
 ### Purpose
 Recieves the token from .env to allow program to connect to Slack.
 
@@ -135,18 +105,16 @@ Allows program to connect and interact with Slack application.
 ### Returns
 Does not return anything.
 
-</details>
-
-<details>
-<summary>preSet_time_library(random_number):</summary>
-    
-- Purpose: Contains library of different preset times
+### Output
+Allow users to make commands and interactions with Slack client.
 
 ### Exceptions Thrown
 Catch when .env is not thrown, but can proceed to check terminal functions.
+</details>
 
-## def display_current_time() -> str:
 
+<details>
+<summary>display_current_time():</summary>
 ### Purpose 
 In terminal, display the corresponding time.
 
@@ -158,6 +126,46 @@ Current time is printed and updated.
 
 ### Returns
 String of current time in "%I:%M:%S %p" format.
+
+### Output
+Prints the current time that gets updated every second. Returns current time constantly as well.
+
+### Exceptions Thrown
+No exceptions.
+</details>
+    
+<details>
+<summary>getenv("SLACK_TOKEN")</summary>
+### Purpose
+Recieves the token from .env to allow program to connect to Slack.
+
+### Pre-conditions
+Requires slack_sdk and dotenv.
+
+### Post-conditions
+Allows program to connect and interact with Slack application.
+
+### Returns
+Does not return anything.
+</details>
+
+<details>
+<summary>preSet_time_library(random_number: int) -> str:</summary>
+    
+### Purpose 
+Contains library of different preset times.
+
+### Parameters
+random_number (int): A number from main program is selected based on case numbers. Used for selecting a random time from library.
+
+### Pre-conditions
+Standalone
+
+### Post-conditions 
+A random time is chosen and returned.
+
+### Returns 
+String of time in hh:mm:ss "(AM/PM)" format.
 
 ### Output 
 Returns string of time in hh:mm:ss "(AM/PM)" format.

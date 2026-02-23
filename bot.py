@@ -5,7 +5,11 @@ import time
 from pathlib import Path
 from dotenv import load_dotenv
 import random
+
 from preSet_timeLibrary import preSet_time_library
+
+from slack_bolt import App
+from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 env_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=env_path)
@@ -18,8 +22,6 @@ def display_current_time():
     print(f"\rCurrent Time: {current_time_str}", end="")
     return current_time_str
 
-
-
 token = os.getenv("SLACK_TOKEN")
 print("Loaded .env from:", env_path)
 client = slack.WebClient(token=token)
@@ -31,6 +33,14 @@ daily_target_time = None
 daily_target_time = preSet_time_library(random.randint(1,11)) 
 print(f"Randomly selected daily target time: {daily_target_time}\n")
 client.chat_postMessage(channel="#bot-test", text="time set for today is " + daily_target_time)
+
+# command for user to see what the daily Vibecheck time is
+def commands(app):
+    @app.command("/findTime")
+    def whatIsRandomTime(ack, respond):
+        ack()
+        respond(f"Today's Vibecheck time is {daily_target_time}") 
+
 
 try:
     while True:

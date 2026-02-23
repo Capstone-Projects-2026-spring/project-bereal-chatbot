@@ -94,8 +94,8 @@ def handle_findtime_command(ack, respond):
         print(f"Error handling /findtime command: {e}")
 
 
-def find_time():
-    return daily_target_time
+
+
 
 
 if __name__ == "__main__":

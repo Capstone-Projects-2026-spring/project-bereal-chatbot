@@ -6,33 +6,34 @@ description: Frontend API Design Docuement
 Frontend API - Design Document - Part II API
 =============================
 
-**Purpose**
+# Purpose
 
 This Design Document gives the complete design of the software implementation. This information should be in structured comments (e.g. Javadoc) in the source files. We encourage the use of a documentation generation tool to generate a draft of your API that you can augment to include the following details.
 
-**Requirements**
+# Requirements
 
 In addition to the general documentation requirements the Design Document - Part II API will contain:
 
-General review of the software architecture for each module specified in Design Document - Part I Architecture. Please include your class diagram as an important reference.
+> A general review of the software architecture for each module specified in Design Document - Part I Architecture. Please include your class diagram as an important reference.
 
-**For each class define the data fields, methods.**
+For each class define the data fields, methods.
+<details>
+<summary>Class 1 </summary>
 
-The purpose of the class.
+- The purpose of the class:
+- The purpose of each data field:
+- The purpose of each method:
+- Pre-conditions if any:
+- Post-conditions if any:
+- Parameters and data types:
+- Return value and output variables:
+- Exceptions thrown:
 
-The purpose of each data field.
+</details>
 
-The purpose of each method
 
-Pre-conditions if any.
 
-Post-conditions if any.
-
-Parameters and data types
-
-Return value and output variables
-
-Exceptions thrown\* (PLEASE see note below for details).
+\* (PLEASE see note below for details).
 
 An example of an auto-generated and then augmented API specification is here ([Fiscal Design Document 2\_API.docx](https://templeu.instructure.com/courses/106563/files/16928898?wrap=1 "Fiscal Design Document 2_API.docx") )
 

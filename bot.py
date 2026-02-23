@@ -95,7 +95,6 @@ def handle_findtime_command(ack, respond):
 
 
 def find_time():
-    """Return the daily target time."""
     return daily_target_time
 
 

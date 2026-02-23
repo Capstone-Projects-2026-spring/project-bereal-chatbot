@@ -2,7 +2,7 @@ def preSet_time_library(random_number):
 # Library of random times that will be chosen at random
     match random_number:
         case 1:
-            return "12:0:00 PM"
+            return "12:00:00 PM"
 
         case 2:
             return "12:30:00 PM"

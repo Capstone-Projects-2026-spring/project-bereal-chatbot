@@ -41,9 +41,8 @@ daily_target_time = None
 
 # [display current time function]
 def display_current_time():
-    """Continuously fetches and prints the current local time every second."""
+    """Return formatted current local time and print it inline."""
     now = datetime.now()
-    # Format the time as a string (e.g., "10:23:45 AM")
     current_time_str = now.strftime("%I:%M:%S %p")
     print(f"\rCurrent Time: {current_time_str}", end="")
     return current_time_str

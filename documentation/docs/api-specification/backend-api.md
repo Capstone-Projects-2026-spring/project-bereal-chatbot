@@ -166,8 +166,7 @@ Returns string of time in hh:mm:ss "(AM/PM)" format.
 Checks if parameter is a integer.
 </details>
 
-<details>
-<summary>Requerements for each class</summary>
+<Requerements for each class>
 The purpose of the class.
 The purpose of each data field.
 The purpose of each method
@@ -176,4 +175,4 @@ Post-conditions if any.
 Parameters and data types
 Return value and output variables
 Exceptions thrown
-</details>
+</Requerements for each class>

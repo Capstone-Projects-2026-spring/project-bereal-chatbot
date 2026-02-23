@@ -19,27 +19,27 @@ The purpose of the Backend API is to present how Vibecheck solves the way of wor
 
 ### Functional - Using Slack Token:
 - Using Dotenv, the system is able to recieve and send messages with Slack, allowing the program to interact with Slack.
-- Token is set through .env (which has to be created by the user itself because of token security)
+- Token is set through .env (which has to be created by the user itself because of token security).
 
 
 ### Functional - Start/End Notification:
-- Will probably be removed from final product
-- Allow users to know when product is usable through Slack
+- Will probably be removed from final product.
+- Allow users to know when product is usable through Slack.
 
 
 ### Functional - Random Time Library:
 - Switch cases of preset times that is picked randomly.
-- Uses "hh:mm:ss" time format
+- Uses "hh:mm:ss" time format.
 
 
 ### Functional - Chatbot Controls:
-- Function to add prompts that is isolated to a specific Slack server
-- Admin controls to set time and frequencies of chatbot sending prompts (once a day or many times)
-- Leaderboard kept to show users how frequent they interact with Vibecheck
+- Function to add prompts that is isolated to a specific Slack server.
+- Admin controls to set time and frequencies of chatbot sending prompts (once a day or many times).
+- Leaderboard kept to show users how frequent they interact with Vibecheck.
 
 
 ### Functional - Data Collection:
-- For leaderboards and streaks, frequencies of response to Vibecheck is collected
+- For leaderboards and streaks, frequencies of response to Vibecheck is collected.
 
 
 ### Functional - Prompts:
@@ -48,32 +48,31 @@ The purpose of the Backend API is to present how Vibecheck solves the way of wor
 
 ### Nonfunctional - Scalability
 - Encouraged to work with different platforms such as Discord,, Slack, SMS, etc...
-- Handle many requests and responses
-- Collect information and responses for leaderboard system instantly
-- Remain consistent (.env) to scale with many other platforms
+- Handle many requests and responses.
+- Collect information and responses for leaderboard system instantly.
+- Remain consistent (.env) to scale with many other platforms.
 
 
 ### Nonfunctional - Security
-- Ensure that users know what data we are collecting
-- Make sure that authentication key is not leaked
+- Ensure that users know what data we are collecting.
+- Make sure that authentication key is not leaked.
 
 
 # Data Field and Methods
 
-# Bot.py - Class
-
+## Bot.py - Class
 ## getenv("SLACK_TOKEN"):
 ### Purpose
 Recieves the token from .env to allow program to connect to Slack.
 
 ### Pre-conditions
-Requires slack_sdk and dotenv
+Requires slack_sdk and dotenv.
 
 ### Post-conditions
-Allows program to connect and interact with Slack application
+Allows program to connect and interact with Slack application.
 
 ### Returns
-Does not return anything
+Does not return anything.
 
 ### Output
 Allow users to make commands and interactions with Slack client.
@@ -84,7 +83,7 @@ Catch when .env is not thrown, but can proceed to check terminal functions.
 ## def display_current_time() -> str:
 
 ### Purpose 
-In terminal, display the corresponding time
+In terminal, display the corresponding time.
 
 ### Pre-conditions 
 Uses datetime, must be imported.
@@ -99,12 +98,12 @@ String of current time in "%I:%M:%S %p" format.
 Prints the current time that gets updated every second. Returns current time constantly as well.
 
 ### Exceptions Thrown
-No exceptions
+No exceptions.
 
 ## def preSet_time_library(random_number: int) -> str:
 
 ### Purpose 
-Contains library of different preset times
+Contains library of different preset times.
 
 ### Parameters
     random_number (int): A number from main program is selected based on case numbers. Used for selecting a random time from library.
@@ -113,14 +112,14 @@ Contains library of different preset times
 Standalone
 
 ### Post-conditions 
-A random time is chosen and returned
+A random time is chosen and returned.
 
 ### Returns 
-String of time in hh:mm:ss "(AM/PM)" format
+String of time in hh:mm:ss "(AM/PM)" format.
 
 ### Output 
 Returns string of time in hh:mm:ss "(AM/PM)" format.
 
 ### Exceptions Thrown 
-Checks if parameter is a integer
+Checks if parameter is a integer.
 

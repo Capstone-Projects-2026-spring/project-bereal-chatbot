@@ -13,7 +13,9 @@ from dotenv import load_dotenv
 
 from preSet_timeLibrary import preSet_time_library
 
+
 logging.basicConfig(level=logging.INFO)
+
 
 # [environment setup]
 env_path = Path(__file__).resolve().parent / ".env"
@@ -23,10 +25,14 @@ load_dotenv(dotenv_path=env_path)
 token = os.getenv("SLACK_TOKEN")
 app_token = os.getenv("SLACK_APP_TOKEN")
 
+
 print("Loaded .env from:", env_path)
+
 
 client = WebClient(token=token)
 bolt_app = App(token=token)
+
+
 
 # Global variable for the daily target time
 daily_target_time = None
@@ -43,31 +49,34 @@ def display_current_time():
     return current_time_str
 
 
+
+
 # [background time-checking loop]
 def run_time_checker():
     """Run in a background thread to check time without blocking the bot event loop."""
     global daily_target_time
-    
+   
     # Picks a random number from 1 to 11 that matches different given times in the format of "hh:mm:ss AM/PM"
     daily_target_time = preSet_time_library(random.randint(1, 11))
     print(f"Randomly selected daily target time: {daily_target_time}\n")
-    
+   
     try:
         client.chat_postMessage(channel="#bot-test", text="time set for today is " + daily_target_time)
     except Exception as e:
         print(f"Error posting initial time message: {e}")
 
+
     time.sleep(1)  # Wait for logging to finish before displaying current time
-    
+   
     try:
         while True:
             # Displays the current time on console
             current_time = display_current_time()
-            if current_time == "09:30:00 AM":
+            if current_time == "12:00:00 PM":
                 try:
                     client.chat_postMessage(channel="#bot-test", text="send prompt")
                 except Exception as e:
-                    print(f"Error posting 9:30 AM message: {e}")
+                    print(f"Error posting 12:00:00 PM message: {e}")
             # If the current time matches the daily target time that was set, a message will be pinged
             if current_time == daily_target_time:
                 try:
@@ -76,7 +85,9 @@ def run_time_checker():
                 except Exception as e:
                     print(f"Error posting random time hit message: {e}")
 
+
             time.sleep(1)
+
     except KeyboardInterrupt:
         try:
             client.chat_postMessage(channel="#bot-test", text="bot offline")
@@ -85,8 +96,9 @@ def run_time_checker():
         print(" Program stopped by user.")
 
 
+
 # [find prompt time command]
-@bolt_app.command("/findtime") # only visible to the user that uses this command
+@bolt_app.command("/findtime") # only visible to the user that uses this command (works when bot is running)
 def handle_findtime_command(ack, respond):
     try:
         ack()
@@ -96,56 +108,11 @@ def handle_findtime_command(ack, respond):
         print(f"Error handling /findtime command: {e}")
 
 
-# [set time of prompt command]
-@bolt_app.command("/picktime") # only visible to the user that uses this command
-def pick_time(ack, respond, body):
-    try:
-        ack()
-        text = body.get("text", "").strip()
-        
-        if not text:
-            # Show options if no argument provided
-            time_options = (
-                "Available time options:\n"
-                "1. 12:00 PM\n"
-                "2. 12:30 PM\n"
-                "3. 1:00 PM\n"
-                "4. 1:30 PM\n"
-                "5. 2:00 PM\n"
-                "6. 2:30 PM\n"
-                "7. 3:00 PM\n"
-                "8. 3:30 PM\n"
-                "9. 4:00 PM\n"
-                "10. 4:30 PM\n"
-                "11. 5:00 PM\n\n"
-                "Use `/picktime <number>` to set a specific time (e.g., `/picktime 5` for 2:00 PM)"
-            )
-            respond(time_options)
-        else:
-            # Parse the number and update daily_target_time
-            try:
-                choice = int(text)
 
-                if 1 <= choice <= 11:
-                    global daily_target_time
-
-                    daily_target_time = preSet_time_library(choice)
-                    respond(f"Time set to: {daily_target_time}")
-                    print(f"Daily target time set to: {daily_target_time}")
-
-                else:
-                    respond("Must pick a number between 1 and 11 to set the time.")
-
-            except ValueError:
-                respond("Please provide a valid number between 1 and 11 to set the time")
-
-    except Exception as e:
-        print(f"Error handling /picktime command: {e}")
-
-
-
+# Keep at bottom of file, runs after all other code is defined
 if __name__ == "__main__":
     print("\n[BOOT] Starting bot...")
+
     try:
         client.chat_postMessage(channel="#bot-test", text="bot online")
     except Exception as e:
@@ -159,4 +126,3 @@ if __name__ == "__main__":
     print("[BOOT] Starting Socket Mode handler...")
     handler = SocketModeHandler(bolt_app, app_token)
     handler.start()
-

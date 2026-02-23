@@ -55,40 +55,47 @@ Nonfunctional - Security
 **For each class define the data fields, methods.**
 
 getenv("SLACK_TOKEN):
-    Purpose: Recieves the token from .env to allow program to connect to Slack.
+- Purpose: Recieves the token from .env to allow program to connect to Slack.
 
-    Pre-conditions: Requires slack_sdk and dotenv
+- Pre-conditions: Requires slack_sdk and dotenv
 
-    Post-conditions: Allows program to connect and interact with Slack application
+- Post-conditions: Allows program to connect and interact with Slack application
 
-    Returns: Does not return anything
+- Returns: Does not return anything
 
-    Output: Allow users to make commands and interactions with Slack client.
+- Output: Allow users to make commands and interactions with Slack client.
+
+- Exceptions Thrown: Catch when .env is not thrown, but can proceed to check terminal functions.
 
 def display_current_time():
-    Purpose: In terminal, display the corresponding time
+- Purpose: In terminal, display the corresponding time
 
-    Pre-conditions: Uses datetime, must be imported.
+- Pre-conditions: Uses datetime, must be imported.
 
-    Post-conditions: Current time is printed and updated.
+- Post-conditions: Current time is printed and updated.
 
-    Returns: String of current time in "%I:%M:%S %p" format.
+- Returns: String of current time in "%I:%M:%S %p" format.
 
-    Output: Prints the current time that gets updated every second. Returns current time constantly as well.
+- Output: Prints the current time that gets updated every second. Returns current time constantly as well.
+
+- Exceptions Thrown: No exceptions
 
 def preSet_time_library(random_number):
-    Purpose: Contains library of different preset times
+- Purpose: Contains library of different preset times
 
-    Parameters:
-        random_number: A number from main program is selected based on case numbers. Used for selecting a random time from library.
+- Parameters:
+    random_number: A number from main program is selected based on case numbers. Used for selecting a random time from library.
 
-    Pre-conditions: Standalone
+- Pre-conditions: Standalone
 
-    Post-conditions: A random time is chosen and returned
+- Post-conditions: A random time is chosen and returned
 
-    Returns: String of time in hh:mm:ss "(AM/PM)" format
+- Returns: String of time in hh:mm:ss "(AM/PM)" format
 
-    Output: Returns string of time in hh:mm:ss "(AM/PM)" format.
+- Output: Returns string of time in hh:mm:ss "(AM/PM)" format.
+
+- Exceptions Thrown: Checks if parameter is a integer
+
 The purpose of the class.
 
 The purpose of each data field.

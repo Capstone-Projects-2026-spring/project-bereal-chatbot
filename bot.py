@@ -31,7 +31,6 @@ bolt_app = App(token=token)
 # Global variable for the daily target time
 daily_target_time = None
 
-# client.chat_postMessage(channel="#bot-test", text="bot online")
 
 
 # [display current time function]
@@ -89,7 +88,7 @@ def run_time_checker():
 def handle_findtime_command(ack, respond):
     try:
         ack()
-        respond(f"Today's random scheduled prompt time is {find_time()}")
+        respond(f"Today's random scheduled prompt time is {daily_target_time}")
 
     except Exception as e:
         print(f"Error handling /findtime command: {e}")
@@ -97,7 +96,6 @@ def handle_findtime_command(ack, respond):
 
 def find_time():
     """Return the daily target time."""
-    global daily_target_time
     return daily_target_time
 
 

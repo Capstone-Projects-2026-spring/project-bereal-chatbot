@@ -1,0 +1,100 @@
+prompt_id,prompt,response_type,tags,times_asked,times_responded
+1,"If you could live inside any movie or TV show, which one would you choose and why?",text,tv_movies,0,0
+2,What's the most interesting thing you've learned from a coworker so far?,text,"work_life,personal_life",0,0
+3,Share a photo of your favorite item on your desk and tell us the story behind it.,image,personal_life,0,0
+4,What's a food you love that most people think is weird?,text,food,0,0
+5,"If you had to swap jobs with a coworker, whose role would you want and why?",text,work_life,1,0
+6,What's a skill you have that would be totally useless in a zombie apocalypse?,text,random_fun,0,0
+7,What's the funniest or most surprising thing you've overheard in the office?,text,"work_life,random_fun",0,0
+8,What's the last photo you took on your phone?,image,personal_life,0,0
+9,"If your life had a theme song, what would it be?",text,personal_life,0,0
+10,What's the worst fashion trend from your childhood that you secretly miss?,text,"random_fun,personal_life",0,0
+11,Share a photo of your favorite place to relax or recharge.,image,"personal_life,hobbies",1,0
+12,What's a hobby or interest you have that might surprise your coworkers?,text,"hobbies,personal_life",0,0
+13,What's the weirdest food combo you've ever tried (and did you like it)?,text,food,0,0
+14,"If you could instantly become an expert in one subject, what would it be?",text,"personal_life,random_fun",0,0
+15,What's the most impressive (or embarrassing) thing you can do?,text,"personal_life,random_fun",0,0
+16,Share a photo that captures your personality in one image.,image,personal_life,0,0
+17,What's the strangest or most interesting thing you've done on your commute to work?,text,"work_life,random_fun",0,0
+18,What's the most important lesson you've learned from a coworker?,text,"work_life,personal_life",0,0
+19,Share a photo of the view from your desk or workspace.,image,work_life,0,0
+20,"What's the last book, movie, or TV show that made you think differently about something?",text,"tv_movies,personal_life",0,0
+21,What's the most unusual hobby or interest you have?,text,"hobbies,personal_life",0,0
+22,"If you could only eat one food for the rest of your life, what would it be?",text,"food,would_you_rather",0,0
+23,What's the most interesting place you've traveled to and why?,text,personal_life,0,0
+24,Share a photo of your favorite item from your desk or workspace.,image,work_life,0,0
+25,"If you could time travel to any era, when and where would you go?",text,"random_fun,personal_life",0,0
+26,What's the most embarrassing or funniest thing that's happened to you at work?,text,"work_life,random_fun",0,0
+27,Share a photo of your favorite hobby or interest outside of work.,image,"hobbies,personal_life",0,0
+28,What's the most interesting or unusual thing you collect?,text,"hobbies,personal_life",0,0
+29,What's the most surprising thing you've learned about a coworker so far?,text,"work_life,personal_life",0,0
+30,Share a photo of your favorite snack or drink at work.,image,"food,work_life",0,0
+31,Share a photo that captures your favorite thing about your job.,image,work_life,0,0
+32,What's the most interesting item in your desk drawer or work bag right now?,text,random_fun,0,0
+33,What's the best piece of advice you've ever received?,text,personal_life,0,0
+34,What's the last podcast episode you listened to that you couldn't stop thinking about?,text,tv_movies,0,0
+35,"If you could swap jobs with anyone in the company for a day, who would it be and why?",text,work_life,0,0
+36,What's the most unique or interesting hobby you have?,text,hobbies,0,0
+37,Share a screenshot of your current phone or computer wallpaper and tell us the story behind it.,image,personal_life,0,0
+38,What's the strangest job you've ever had?,text,work_life,0,0
+39,"If you could only eat one meal for the rest of your life, what would it be?",text,food,0,0
+40,What's the most creative use of office supplies you've ever seen?,text,random_fun,0,0
+41,What's the most interesting place you've ever traveled to for work?,text,work_life,0,0
+42,What's the most nostalgic TV show or movie from your childhood?,text,tv_movies,0,0
+43,What's the most embarrassing thing you've ever done at work?,text,work_life,0,0
+44,"If you were a cartoon character, who would you be and why?",text,random_fun,0,0
+45,What's the weirdest food you've ever tried and liked?,text,food,0,0
+46,What's the luckiest thing that's ever happened to you?,text,personal_life,0,0
+47,What's the last book you read that you couldn't put down?,text,tv_movies,0,0
+48,What's the most creative way you've ever used office technology or software?,text,work_life,0,0
+49,Share a photo of your favorite item or decoration in your workspace.,image,personal_life,0,0
+50,What's the most unusual or interesting thing on your bucket list?,text,personal_life,0,0
+51,What's the most impressive or memorable coworker you've ever had?,text,work_life,0,0
+52,"If you could bring back any discontinued food item, what would it be?",text,food,1,0
+53,What's the most creative or unconventional way you've ever celebrated a work milestone or achievement?,text,work_life,0,0
+54,What's the most unique or interesting physical feature of your workspace?,image,random_fun,0,0
+55,What's the most bizarre or amusing work-related dream you've ever had?,text,work_life,0,0
+56,"If you could instantly become an expert in one new skill, what would it be?",text,hobbies,0,0
+57,What's the most adventurous or daring thing you've ever done?,text,personal_life,0,0
+58,"Share a photo of your favorite office supply, tool, or gadget and tell us why you love it.",image,random_fun,0,0
+59,What's the best or most unique gift you've ever received from a coworker?,text,work_life,0,0
+60,What's the most creative or unusual way you've ever celebrated a work milestone or achievement?,text,work_life,0,0
+61,Share a photo of your favorite snack or beverage that gets you through the workday.,image,food,0,0
+62,What's the most unique or interesting hobby you have outside of work?,text,hobbies,0,0
+63,What's the most creative or unexpected way you've ever used office technology or software?,text,work_life,0,0
+64,Share a photo of your favorite office decoration or personal item that brings you joy.,image,personal_life,0,0
+65,What's the most unusual or surprising thing you've learned about a coworker?,text,work_life,0,0
+66,"If you could instantly become an expert in one new skill, what would it be and why?",text,hobbies,1,0
+67,"Share a photo of your favorite work-related meme, GIF, or joke that never fails to make you laugh.",image,random_fun,0,0
+68,What's the most unique or interesting place you've ever traveled to for work?,text,work_life,0,0
+69,"If you could instantly become an expert in one new skill, what would it be and how would you use it?",text,hobbies,0,0
+70,"Share a photo of your favorite work-related item, gadget, or decoration that brings you joy.",image,random_fun,0,0
+71,Show us a photo of your favorite item on your desk!,image,random_fun,0,0
+72,What's the most unusual hobby you've ever tried?,text,hobbies,0,0
+73,What's a TV show or movie you've watched more times than you can count?,text,tv_movies,0,0
+74,What's the best/worst item of clothing you've ever owned?,text,personal_life,0,0
+75,What's a small act of kindness you've witnessed recently?,text,personal_life,0,0
+76,Show us a photo of your favorite snack!,image,food,0,0
+77,"If you could only listen to one album for the rest of your life, what would it be?",text,random_fun,0,0
+78,What's a childhood memory that always makes you smile?,text,personal_life,0,0
+79,Show us a photo of your favorite outdoor spot!,image,hobbies,0,0
+80,"If you could switch jobs with anyone in the company, who would it be?",text,work_life,0,0
+81,Show us a photo that captures your weekend!,image,personal_life,0,0
+82,What's a new skill you've been wanting to learn?,text,hobbies,0,0
+83,"If you could instantly become an expert in one sport, what would it be?",text,sports,0,0
+84,Show us a photo that captures your work-from-home setup!,image,work_life,0,0
+85,What's the most interesting place you've ever traveled to?,text,personal_life,0,0
+86,"If you could switch places with a character from a TV show or movie, who would it be?",text,tv_movies,0,0
+87,Show us a photo that captures your morning routine!,image,personal_life,0,0
+88,What's the most unusual item on your bucket list?,text,personal_life,0,0
+89,"If you could instantly become an expert in one type of cuisine, what would it be?",text,food,0,0
+90,Show us a photo of your pet (or a pet you wish you had)!,image,random_fun,1,0
+91,What's the most interesting or unexpected thing you've learned about a coworker so far?,text,work_life,0,0
+92,"If you could instantly become an expert in one video game, what would it be?",text,random_fun,0,0
+93,Show us a photo that captures your favorite hobby!,image,hobbies,0,0
+94,What's the most interesting historical figure you've learned about?,text,random_fun,0,0
+95,"If you could instantly become an expert in one DIY or home improvement skill, what would it be?",text,hobbies,0,0
+96,Show us a photo that captures your dream vacation!,image,personal_life,0,0
+97,What's the best concert or live performance you've ever been to?,text,personal_life,0,0
+98,"If you could instantly become an expert in one type of art or craft, what would it be?",text,hobbies,0,0
+99,Show us a photo of your favorite piece of decor in your home or workspace!,image,personal_life,0,0

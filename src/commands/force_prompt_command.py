@@ -1,11 +1,12 @@
-# force_prompt_command.py
+# src/commands/force_prompt_command.py
 import logging
-from pGrab import get_random_prompt_text, mark_prompt_asked
+
+from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 
 
 def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_text=None):
     """
-    Pull a random prompt from CSV (via pGrab.py) and post it to Slack.
+    Pull a random prompt from the prompt service and post it to Slack.
     """
     prompt_id, prompt_text = get_random_prompt_text(response_type=response_type)
     mark_prompt_asked(prompt_id)
@@ -57,5 +58,5 @@ def register_force_prompt_command(bolt_app, client):
             )
             respond(f"✅ Posted a prompt to {channel}.")
         except Exception as e:
-            logging.exception(f"Error in /forceprompt: {e}")
+            logging.exception("Error in /forceprompt")
             respond(f"❌ Failed to post prompt: {e}")

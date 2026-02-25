@@ -8,3 +8,8 @@
 .env.test.local
 .env.production.local
 .env
+data/logs/
+*.log
+*.jsonl
+__pycache__/
+node_modules/

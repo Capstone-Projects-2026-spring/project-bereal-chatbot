@@ -13,7 +13,7 @@ prompt_id,prompt,response_type,tags,times_asked,times_responded
 12,What's a hobby or interest you have that might surprise your coworkers?,text,"hobbies,personal_life",0,0
 13,What's the weirdest food combo you've ever tried (and did you like it)?,text,food,0,0
 14,"If you could instantly become an expert in one subject, what would it be?",text,"personal_life,random_fun",0,0
-15,What's the most impressive (or embarrassing) thing you can do?,text,"personal_life,random_fun",0,0
+15,What's the most impressive (or embarrassing) thing you can do?,text,"personal_life,random_fun",1,0
 16,Share a photo that captures your personality in one image.,image,personal_life,0,0
 17,What's the strangest or most interesting thing you've done on your commute to work?,text,"work_life,random_fun",0,0
 18,What's the most important lesson you've learned from a coworker?,text,"work_life,personal_life",0,0
@@ -38,7 +38,7 @@ prompt_id,prompt,response_type,tags,times_asked,times_responded
 37,Share a screenshot of your current phone or computer wallpaper and tell us the story behind it.,image,personal_life,0,0
 38,What's the strangest job you've ever had?,text,work_life,0,0
 39,"If you could only eat one meal for the rest of your life, what would it be?",text,food,0,0
-40,What's the most creative use of office supplies you've ever seen?,text,random_fun,0,0
+40,What's the most creative use of office supplies you've ever seen?,text,random_fun,1,0
 41,What's the most interesting place you've ever traveled to for work?,text,work_life,0,0
 42,What's the most nostalgic TV show or movie from your childhood?,text,tv_movies,0,0
 43,What's the most embarrassing thing you've ever done at work?,text,work_life,0,0
@@ -63,7 +63,7 @@ prompt_id,prompt,response_type,tags,times_asked,times_responded
 62,What's the most unique or interesting hobby you have outside of work?,text,hobbies,0,0
 63,What's the most creative or unexpected way you've ever used office technology or software?,text,work_life,0,0
 64,Share a photo of your favorite office decoration or personal item that brings you joy.,image,personal_life,0,0
-65,What's the most unusual or surprising thing you've learned about a coworker?,text,work_life,0,0
+65,What's the most unusual or surprising thing you've learned about a coworker?,text,work_life,1,0
 66,"If you could instantly become an expert in one new skill, what would it be and why?",text,hobbies,1,0
 67,"Share a photo of your favorite work-related meme, GIF, or joke that never fails to make you laugh.",image,random_fun,0,0
 68,What's the most unique or interesting place you've ever traveled to for work?,text,work_life,0,0

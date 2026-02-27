@@ -96,7 +96,7 @@ def run_time_checker():
 
 
 
-# [find prompt time command]
+# [command to find prompt time ]
 @bolt_app.command("/findtime") # only visible to the user that uses this command (works when bot is running)
 def handle_findtime_command(ack, respond):
     try:
@@ -108,7 +108,7 @@ def handle_findtime_command(ack, respond):
 
 
 
-# [set time of prompt command]
+# [command to set time of prompt ]
 @bolt_app.command("/picktime") # only visible to the user that uses this command (works when bot is running)
 def pick_time(ack, respond, body):
     try:
@@ -156,6 +156,18 @@ def pick_time(ack, respond, body):
     except Exception as e:
         print(f"Error handling /picktime command: {e}")
 
+
+# [command to re-randomize time of prompt]
+@bolt_app.command("/randomtime")
+def random_time(ack, respond):
+    try:
+        ack()
+        global daily_target_time
+        daily_target_time = preSet_time_library(random.randint(1, 11))
+        respond(f"New randomly selected daily target time: {daily_target_time}")
+    
+    except Exception as e:
+        print(f"Error handling random_time command: {e}")
 
 
 # Keep at bottom of file, runs after all other code is defined

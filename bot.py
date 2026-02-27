@@ -28,7 +28,7 @@ client = WebClient(token=token)
 client.chat_postMessage(channel="#bot-test", text="bot online")
 
 # How long (seconds) the bot should listen for responses after sending a prompt
-RESPONSE_WINDOW_SECONDS = int(os.getenv("RESPONSE_WINDOW_SECONDS", "60"))
+RESPONSE_WINDOW_SECONDS = int(os.getenv("RESPONSE_WINDOW_SECONDS", "30"))
 
 
 def listen_for_responses(channel_id: str, duration: int = RESPONSE_WINDOW_SECONDS, after_ts: str | None = None):
@@ -90,7 +90,7 @@ try:
     while True:
         # Displays the current time on console
         current_time = display_current_time()
-        if current_time == "06:18:00 PM":
+        if current_time == "09:56:00 AM":
             # Post the prompt and then listen for replies using the returned channel id and ts
             resp = client.chat_postMessage(channel="#bot-test", text="send prompt")
             posted = getattr(resp, "data", None) or (resp if isinstance(resp, dict) else None)

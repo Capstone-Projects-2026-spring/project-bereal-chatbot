@@ -67,7 +67,7 @@ def run_time_checker():
         print(f"Error posting initial time message: {e}")
 
 
-    time.sleep(1)  # Wait for logging to finish before displaying current time
+    time.sleep(1) # Wait for logging to finish before displaying current time
    
     try:
         while True:

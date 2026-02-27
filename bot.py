@@ -67,7 +67,7 @@ def run_time_checker():
         print(f"Error posting initial time message: {e}")
 
 
-    time.sleep(1)  # Wait for logging to finish before displaying current time
+    time.sleep(1) # Wait for logging to finish before displaying current time
    
     try:
         while True:
@@ -104,6 +104,9 @@ def handle_findtime_command(ack, respond):
     try:
         ack()
         respond(f"Today's random scheduled prompt time is {daily_target_time}")
+    except Exception as e:
+        print(f"Error handling /findtime command: {e}")
+    
 
 # Code for setting random time from preset switch case
 daily_target_time = None
@@ -127,8 +130,8 @@ try:
                 posted_channel_id = posted.get("channel")
 
             # normalize ts to a float-like string when possible
-    except Exception as e:
-        print(f"Error handling /findtime command: {e}")
+except Exception as e:
+    print(f"Error handling /findtime command: {e}")
 
 
 

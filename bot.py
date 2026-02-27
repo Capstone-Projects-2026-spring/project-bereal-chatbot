@@ -50,6 +50,8 @@ def display_current_time():
 
 
 
+# How long (seconds) the bot should listen for responses after sending a prompt
+RESPONSE_WINDOW_SECONDS = int(os.getenv("RESPONSE_WINDOW_SECONDS", "30"))
 # [background time-checking loop]
 def run_time_checker():
     """Run in a background thread to check time without blocking the bot event loop."""
@@ -103,6 +105,28 @@ def handle_findtime_command(ack, respond):
         ack()
         respond(f"Today's random scheduled prompt time is {daily_target_time}")
 
+# Code for setting random time from preset switch case
+daily_target_time = None
+# Picks a random number from 1 to 11 that matches different given times in the format of "hh:mm:ss AM/PM"
+daily_target_time = preSet_time_library(random.randint(1,11)) 
+print(f"Randomly selected daily target time: {daily_target_time}\n")
+client.chat_postMessage(channel="#bot-test", text="time set for today is " + daily_target_time)
+
+try:
+    while True:
+        # Displays the current time on console
+        current_time = display_current_time()
+        if current_time == "09:56:00 AM":
+            # Post the prompt and then listen for replies using the returned channel id and ts
+            resp = client.chat_postMessage(channel="#bot-test", text="send prompt")
+            posted = getattr(resp, "data", None) or (resp if isinstance(resp, dict) else None)
+            after_ts = None
+            posted_channel_id = None
+            if isinstance(posted, dict):
+                after_ts = posted.get("ts")
+                posted_channel_id = posted.get("channel")
+
+            # normalize ts to a float-like string when possible
     except Exception as e:
         print(f"Error handling /findtime command: {e}")
 

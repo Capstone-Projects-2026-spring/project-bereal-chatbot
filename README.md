@@ -39,6 +39,21 @@ To develop VibeCheck, background knowledge in Python, APIs, databases is necessa
 
 No hardware requirements. Resources are commonly available within standard Computer Science department environments.
 
+## Running Tests
+
+1. Install development dependencies:
+
+	`python -m pip install -r requirements-dev.txt`
+
+2. Run all unit tests:
+
+	`python run_tests.py`
+
+Optional:
+
+- Run a specific file: `python run_tests.py tests/test_commands.py`
+- Verbose output: `python run_tests.py -v`
+
 ## Collaborators
 
 <div align="center">

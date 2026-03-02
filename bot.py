@@ -106,32 +106,6 @@ def handle_findtime_command(ack, respond):
         respond(f"Today's random scheduled prompt time is {daily_target_time}")
     except Exception as e:
         print(f"Error handling /findtime command: {e}")
-    
-
-# Code for setting random time from preset switch case
-daily_target_time = None
-# Picks a random number from 1 to 11 that matches different given times in the format of "hh:mm:ss AM/PM"
-daily_target_time = preSet_time_library(random.randint(1,11)) 
-print(f"Randomly selected daily target time: {daily_target_time}\n")
-client.chat_postMessage(channel="#bot-test", text="time set for today is " + daily_target_time)
-
-try:
-    while True:
-        # Displays the current time on console
-        current_time = display_current_time()
-        if current_time == "09:56:00 AM":
-            # Post the prompt and then listen for replies using the returned channel id and ts
-            resp = client.chat_postMessage(channel="#bot-test", text="send prompt")
-            posted = getattr(resp, "data", None) or (resp if isinstance(resp, dict) else None)
-            after_ts = None
-            posted_channel_id = None
-            if isinstance(posted, dict):
-                after_ts = posted.get("ts")
-                posted_channel_id = posted.get("channel")
-
-            # normalize ts to a float-like string when possible
-except Exception as e:
-    print(f"Error handling /findtime command: {e}")
 
 
 

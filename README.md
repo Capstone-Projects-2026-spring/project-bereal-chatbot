@@ -54,6 +54,18 @@ Optional:
 - Run a specific file: `python run_tests.py tests/test_commands.py`
 - Verbose output: `python run_tests.py -v`
 
+## CI/CD with GitHub Actions
+
+Added a new workflow in file `.github/workflows/ci-tests.yml`. Tests are executed by `python run_tests.py` and runs automatically on every `push` and `pull_request`.
+
+[Dependencies installed from `requirements-dev.txt`]
+
+
+To view results:
+
+1. Click the `Actions` tab.
+2. Open the latest `Python CI Tests` run.
+
 ## Collaborators
 
 <div align="center">

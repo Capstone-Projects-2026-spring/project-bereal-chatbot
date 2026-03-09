@@ -12,6 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from preSet_timeLibrary import preSet_time_library
+from time_checker import TimeChecker
 
 
 logging.basicConfig(level=logging.INFO)
@@ -32,69 +33,17 @@ print("Loaded .env from:", env_path)
 client = WebClient(token=token)
 bolt_app = App(token=token)
 
-
-
-# Global variable for the daily target time
-daily_target_time = None
-
-
-
-# [display current time function]
-def display_current_time():
-    """Return formatted current local time and print it inline."""
-    now = datetime.now()
-    current_time_str = now.strftime("%I:%M:%S %p")
-    print(f"\rCurrent Time: {current_time_str}", end="")
-    return current_time_str
+# the TimeChecker instance keeps track of the current target time and
+# performs the periodic Slack posts.  It's referenced by command handlers
+# below and run in a background thread.
+time_checker = TimeChecker(client)
 
 
 
 
 # How long (seconds) the bot should listen for responses after sending a prompt
 RESPONSE_WINDOW_SECONDS = int(os.getenv("RESPONSE_WINDOW_SECONDS", "30"))
-# [background time-checking loop]
-def run_time_checker():
-    """Run in a background thread to check time without blocking the bot event loop."""
-    global daily_target_time
-   
-    # Picks a random number from 1 to 11 that matches different given times in the format of "hh:mm:ss AM/PM"
-    daily_target_time = preSet_time_library(random.randint(1, 11))
-    print(f"Randomly selected daily target time: {daily_target_time}\n")
-   
-    try:
-        client.chat_postMessage(channel="#bot-test", text="time set for today is " + daily_target_time)
-    except Exception as e:
-        print(f"Error posting initial time message: {e}")
 
-
-    time.sleep(1) # Wait for logging to finish before displaying current time
-   
-    try:
-        while True:
-            # Displays the current time on console
-            current_time = display_current_time()
-            if current_time == "12:00:00 PM":
-                try:
-                    client.chat_postMessage(channel="#bot-test", text="send prompt")
-                except Exception as e:
-                    print(f"Error posting 12:00:00 PM message: {e}")
-            # If the current time matches the daily target time that was set, a message will be pinged
-            if current_time == daily_target_time:
-                try:
-                    client.chat_postMessage(channel="#bot-test", text="random time hit")
-                    print(f"Random time hit: {daily_target_time}")
-                except Exception as e:
-                    print(f"Error posting random time hit message: {e}")
-
-
-            time.sleep(1)
-
-    except KeyboardInterrupt:
-        try:
-            client.chat_postMessage(channel="#bot-test", text="bot offline")
-        except Exception as e:
-            print(f"Error posting offline message: {e}")
-        print(" Program stopped by user.")
 
 
 
@@ -103,7 +52,7 @@ def run_time_checker():
 def handle_findtime_command(ack, respond):
     try:
         ack()
-        respond(f"Today's random scheduled prompt time is {daily_target_time}")
+        respond(f"Today's random scheduled prompt time is {time_checker.daily_target_time}")
     except Exception as e:
         print(f"Error handling /findtime command: {e}")
 
@@ -142,11 +91,10 @@ def pick_time(ack, respond, body):
                 choice = int(text)
 
                 if 1 <= choice <= 11:
-                    global daily_target_time
-
-                    daily_target_time = preSet_time_library(choice)
-                    respond(f"Time set to: {daily_target_time}")
-                    print(f"Daily target time set to: {daily_target_time}")
+                    # update the target stored on the time_checker instance
+                    time_checker.daily_target_time = preSet_time_library(choice)
+                    respond(f"Time set to: {time_checker.daily_target_time}")
+                    print(f"Daily target time set to: {time_checker.daily_target_time}")
 
                 else:
                     respond("Must pick a number between 1 and 11 to set the time.")
@@ -163,12 +111,26 @@ def pick_time(ack, respond, body):
 def random_time(ack, respond):
     try:
         ack()
-        global daily_target_time
-        daily_target_time = preSet_time_library(random.randint(1, 11))
-        respond(f"New randomly selected daily target time: {daily_target_time}")
+        time_checker.daily_target_time = preSet_time_library(random.randint(1, 11))
+        respond(f"New randomly selected daily target time: {time_checker.daily_target_time}")
     
     except Exception as e:
         print(f"Error handling random_time command: {e}")
+
+
+# listen for messages in the channel so we can collect user responses
+@bolt_app.event("message")
+def handle_message_event(body, logger=None):
+    try:
+        event = body.get("event", {})
+        if event.get("bot_id"):
+            return
+
+        if time_checker.is_within_response_window(RESPONSE_WINDOW_SECONDS):
+            time_checker.record_response(event, RESPONSE_WINDOW_SECONDS)
+            logging.info(f"Recorded response event: {event.get('text')}")
+    except Exception as e:
+        print(f"Error handling message event: {e}")
 
 
 # Keep at bottom of file, runs after all other code is defined
@@ -182,7 +144,7 @@ if __name__ == "__main__":
 
     # Start the time-checking loop in a background thread
     print("[BOOT] Starting background time checker...")
-    time_thread = threading.Thread(target=run_time_checker, daemon=True)
+    time_thread = threading.Thread(target=time_checker.run, daemon=True)
     time_thread.start()
 
     print("[BOOT] Starting Socket Mode handler...")

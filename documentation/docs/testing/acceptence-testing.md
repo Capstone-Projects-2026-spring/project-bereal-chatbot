@@ -3,4 +3,8 @@ sidebar_position: 3
 ---
 # Acceptance test
 
-Demonstration of all of the functional and non-functional requirements. This can be a combination of automated tests derived from the use-cases (user stories) and manual tests with recorded observation of the results.
+### ***To test functional requirements we will use this test:***
+
+	test_acceptance_user_sets_and_checks_prompt_time
+
+In combination with manual testing through the Slack app.

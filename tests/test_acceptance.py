@@ -23,6 +23,12 @@ class DummyApp:
 
         return decorator
 
+    def event(self, _name):
+        def decorator(func):
+            return func
+
+        return decorator
+
 
 @pytest.fixture
 def bot_module(monkeypatch):

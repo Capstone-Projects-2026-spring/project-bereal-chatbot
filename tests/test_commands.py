@@ -23,6 +23,12 @@ class DummyApp:
 
         return decorator
 
+    def event(self, _name):
+        def decorator(func):
+            return func
+
+        return decorator
+
 
 @pytest.fixture
 def bot_module(monkeypatch):
@@ -41,7 +47,7 @@ def bot_module(monkeypatch):
 
 
 def test_handle_findtime_command_ack_and_respond(bot_module):
-    bot_module.daily_target_time = "02:00:00 PM"
+    bot_module.time_checker.daily_target_time = "02:00:00 PM"
 
     ack = Mock()
     respond = Mock()
@@ -71,7 +77,7 @@ def test_pick_time_with_valid_choice_updates_global(bot_module):
 
     ack.assert_called_once()
     respond.assert_called_once_with("Time set to: 02:00:00 PM")
-    assert bot_module.daily_target_time == "02:00:00 PM"
+    assert bot_module.time_checker.daily_target_time == "02:00:00 PM"
 
 
 def test_pick_time_out_of_range(bot_module):
@@ -104,4 +110,25 @@ def test_random_time_sets_new_target(bot_module, monkeypatch):
 
     ack.assert_called_once()
     respond.assert_called_once_with("New randomly selected daily target time: 01:00:00 PM")
-    assert bot_module.daily_target_time == "01:00:00 PM"
+    assert bot_module.time_checker.daily_target_time == "01:00:00 PM"
+
+
+def test_response_collection_window(bot_module):
+    #from datetime import timedelta
+    bot_module.time_checker.start_response_collection()
+    #bot_module.time_checker.last_prompt_time -= timedelta(seconds=bot_module.RESPONSE_WINDOW_SECONDS + 1)
+    # a message arriving immediately should be recorded (user + text)
+    message = {"event": {"user": "U123", "text": "hello"}}
+    bot_module.handle_message_event(message)
+    assert bot_module.time_checker.responses == [{"user": "U123", "text": "hello"}]
+
+    
+
+def test_late_responses(bot_module):
+    from datetime import timedelta
+    bot_module.time_checker.start_response_collection()
+
+    bot_module.time_checker.last_prompt_time -= timedelta(seconds=bot_module.RESPONSE_WINDOW_SECONDS + 1)
+    bot_module.handle_message_event({"event": {"user": "U456", "text": "late response"}})
+    # responses list unchanged
+    assert bot_module.time_checker.responses == []

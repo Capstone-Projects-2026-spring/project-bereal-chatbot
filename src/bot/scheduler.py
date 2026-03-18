@@ -6,7 +6,7 @@ from services.time_library import preSet_time_library
 from bot.posting import display_current_time, post_csv_prompt
 
 
-def run_time_checker(client, default_channel: str, state) -> None:
+def run_time_checker(client, state) -> None:
     """
     Background loop:
     - picks a random daily time (1..11)
@@ -21,7 +21,8 @@ def run_time_checker(client, default_channel: str, state) -> None:
     print(f"Randomly selected daily target time: {daily_target_time}\n")
 
     try:
-        client.chat_postMessage(channel=default_channel, text="time set for today is " + daily_target_time)
+        channel = state.get_active_channel() or default_channel
+        client.chat_postMessage(channel=channel, text="time set for today is " + daily_target_time)
     except Exception as e:
         print(f"Error posting initial time message: {e}")
 
@@ -30,10 +31,11 @@ def run_time_checker(client, default_channel: str, state) -> None:
     try:
         while True:
             current_time = display_current_time()
+            channel = state.get_active_channel() or default_channel
 
-            if current_time == "12:00:00 PM":
+            if current_time == "7:56:30 AM":
                 try:
-                    post_csv_prompt(client, channel=default_channel, prefix_text="Daily vibe check prompt:")
+                    post_csv_prompt(client, channel=channel, prefix_text="Daily vibe check prompt:")
                 except Exception as e:
                     print(f"Error posting 12:00:00 PM prompt: {e}")
 
@@ -42,7 +44,7 @@ def run_time_checker(client, default_channel: str, state) -> None:
                 try:
                     post_csv_prompt(
                         client,
-                        channel=default_channel,
+                        channel=channel,
                         prefix_text=f"Random vibe check prompt (time hit {daily_target_time}):"
                     )
                     print(f"Random time hit: {daily_target_time}")
@@ -53,7 +55,7 @@ def run_time_checker(client, default_channel: str, state) -> None:
 
     except KeyboardInterrupt:
         try:
-            client.chat_postMessage(channel=default_channel, text="bot offline")
+            client.chat_postMessage(channel=channel, text="bot offline")
         except Exception as e:
             print(f"Error posting offline message: {e}")
         print(" Program stopped by user.")

@@ -18,13 +18,13 @@ def load_config() -> BotConfig:
     load_dotenv(dotenv_path=env_path)
     print("Loaded .env from:", env_path)
 
-    token = os.getenv("SLACK_BOT_TOKEN")
+    token = os.getenv("SLACK_TOKEN")
     app_token = os.getenv("SLACK_APP_TOKEN")
     default_channel = os.getenv("DEFAULT_CHANNEL", "#bot-test")
 
     if not token:
-        raise RuntimeError("Missing SLACK_BOT_TOKEN in .env")
+        raise RuntimeError("Missing SLACK_TOKEN in .env")
     if not app_token:
-        raise RuntimeError("Missing SLACK_APP_TOKEN in .env")
+        raise RuntimeError("Missing SLACK_TOKEN in .env")
 
     return BotConfig(token=token, app_token=app_token, default_channel=default_channel)

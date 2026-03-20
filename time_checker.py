@@ -2,7 +2,8 @@ import time
 import random
 from datetime import datetime, timedelta
 
-from preSet_timeLibrary import preSet_time_library
+
+from services.time_library import preSet_time_library
 
 
 def display_current_time():
@@ -16,8 +17,9 @@ def display_current_time():
 
 class TimeChecker:
 
-    def __init__(self, client):
+    def __init__(self, client, state):
         self.client = client
+        self.state = state
         self.daily_target_time = None
         # response tracking attributes
         self.last_prompt_time = None  # datetime when last prompt was sent
@@ -28,9 +30,8 @@ class TimeChecker:
         print(f"Randomly selected daily target time: {self.daily_target_time}\n")
 
         try:
-            self.client.chat_postMessage(
-                channel="#bot-test", text="time set for today is " + self.daily_target_time
-            )
+            channel = self.state.get_active_channel()
+            self.client.chat_postMessage(channel=channel, text="time set for today is " + self.daily_target_time)
         except Exception as e:
             print(f"Error posting initial time message: {e}")
 
@@ -39,9 +40,10 @@ class TimeChecker:
         try:
             while True:
                 current_time = display_current_time()
-                if current_time == "08:48:00 PM":
+                channel = self.state.get_active_channel()
+                if current_time == "8:04:00 AM":
                     try:
-                        self.client.chat_postMessage(channel="#bot-test", text="send prompt")
+                        self.client.chat_postMessage(channel=channel, text="send prompt")
                         # begin collecting responses for a short window
                         self.start_response_collection()
                     except Exception as e:
@@ -49,7 +51,7 @@ class TimeChecker:
 
                 if current_time == self.daily_target_time:
                     try:
-                        self.client.chat_postMessage(channel="#bot-test", text="random time hit")
+                        self.client.chat_postMessage(channel=channel, text="random time hit")
                         print(f"Random time hit: {self.daily_target_time}")
                         # optional: also treat this as a prompt event
                         self.start_response_collection()
@@ -60,7 +62,8 @@ class TimeChecker:
 
         except KeyboardInterrupt:
             try:
-                self.client.chat_postMessage(channel="#bot-test", text="bot offline")
+                channel = self.state.get_active_channel()
+                self.client.chat_postMessage(channel=channel, text="bot offline")
             except Exception as e:
                 print(f"Error posting offline message: {e}")
             print(" Program stopped by user.")

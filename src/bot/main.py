@@ -13,6 +13,7 @@ from bot.scheduler import run_time_checker
 from commands.force_prompt_command import register_force_prompt_command
 from commands.time_commands import register_time_commands
 from commands.set_channel_command import register_set_channel_command
+from commands.control_panel_commands import register_control_panel
 from app_logging.structured_logger import install_structured_message_logging
 
 
@@ -30,11 +31,12 @@ def main():
     register_force_prompt_command(bolt_app, client)
     register_time_commands(bolt_app, state)
     register_set_channel_command(bolt_app, client, state)
+    register_control_panel(bolt_app, state)
 
     # Online message
-    active_channel = state.get_active_channel()
+    active_channel = state.get_active_channel() or cfg.default_channel
     try:
-        client.chat_postMessage(channel=active_channel or cfg.default_channel, text="bot online")
+        client.chat_postMessage(channel=active_channel, text="bot online")
     except Exception as e:
         print(f"Error posting 'bot online' message: {e}")
 
@@ -42,7 +44,7 @@ def main():
     print("[BOOT] Starting background time checker...")
     time_thread = threading.Thread(
         target=run_time_checker,
-        args=(client, state),
+        args=(client, cfg.default_channel, state),
         daemon=True
     )
     time_thread.start()

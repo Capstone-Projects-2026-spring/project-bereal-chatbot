@@ -21,7 +21,7 @@ def run_time_checker(client, state) -> None:
     print(f"Randomly selected daily target time: {daily_target_time}\n")
 
     try:
-        channel = state.get_active_channel() or default_channel
+        channel = state.get_active_channel() 
         client.chat_postMessage(channel=channel, text="time set for today is " + daily_target_time)
     except Exception as e:
         print(f"Error posting initial time message: {e}")
@@ -31,9 +31,9 @@ def run_time_checker(client, state) -> None:
     try:
         while True:
             current_time = display_current_time()
-            channel = state.get_active_channel() or default_channel
+            channel = state.get_active_channel() 
 
-            if current_time == "7:56:30 AM":
+            if current_time == "8:01:00 AM":
                 try:
                     post_csv_prompt(client, channel=channel, prefix_text="Daily vibe check prompt:")
                 except Exception as e:

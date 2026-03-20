@@ -13,3 +13,9 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+data/logs/
+*.log
+*.jsonl
+__pycache__/
+node_modules/

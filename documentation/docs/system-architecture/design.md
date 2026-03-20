@@ -5,14 +5,14 @@ sidebar_position: 1
 
 ## Components & Interface Overview
 
-VibeCheck is a BeReal-like chatbot project. Since this project is primarily about the bot itself being used in an external application (Slack), its components consist of a prompt manager, scheduler, event handler, and an Excel database. All components are interfaced through the usage of the Slack API.
+VibeCheck is a BeReal-like chatbot project. Since this project is primarily about the bot itself being used in an external application (Slack), its components consist of a prompt manager, scheduler, event handler, and MongoDB as its database. All components are interfaced through the usage of the Slack API.
 
 
-#### Excel Database (Component)
+#### MongoDB Database (Component)
 
 The excel database stores message history, post history, timestamps, responsiveness to certain topics, generated prompts, and relevant logs. 
 
-The data will then be used to give users a timeline of all their posts, a streak score history, and allows the chatbot to create group discussions based on the most interactive topics 
+The data will then be used to give users a timeline of all their posts, a streak score history, and allows the chatbot to create group discussions based on the most interactive topics.
 
 #### Prompt Manager (Component)
 

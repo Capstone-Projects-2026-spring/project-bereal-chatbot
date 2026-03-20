@@ -3,5 +3,4 @@ sidebar_position: 3
 ---
 
 # General Requirements
-Desktop, laptop, or mobile device
-Internet access
+General access to devices such as a desktop, laptop, or mobile device, etc.

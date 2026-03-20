@@ -19,7 +19,7 @@ The purpose of the Backend API is to present how Vibecheck solves the way of wor
 
 In addition to the general documentation requirements the Design Document - Part II API will contain:
 
-![BeReal ChatBot](/img/BeRealChatBot.drawio.png)
+![BeReal ChatBot](/img/VibeCheck-SystemBlockDiagram.png)
 
 <details>
 <summary>Functional - Using Slack Token:</summary>

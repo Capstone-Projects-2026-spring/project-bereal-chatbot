@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 
-from preSet_timeLibrary import preSet_time_library
+from services.time_library import preSet_time_library
 from time_checker import TimeChecker
 
 

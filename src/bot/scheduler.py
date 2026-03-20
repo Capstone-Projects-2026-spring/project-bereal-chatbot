@@ -6,7 +6,6 @@ from datetime import datetime, date
 from services.time_library import preSet_time_library
 from bot.posting import display_current_time, post_csv_prompt
 
-
 _FMT = "%I:%M:%S %p"
 
 
@@ -38,13 +37,10 @@ def _pick_random_time(start_str=None, end_str=None, after: datetime = None) -> s
     # Preset library fallback: only pick times that are in the future
     if after:
         candidates = [preSet_time_library(i) for i in range(1, 12)]
-        future = [t for t in candidates if datetime.strptime(t, _FMT) > after.replace(
-            year=2000, month=1, day=1,
-            hour=after.hour, minute=after.minute, second=after.second
-        )]
+       
         # Rebuild after as a comparable datetime on the same dummy date as candidates
         after_cmp = datetime(2000, 1, 1, after.hour, after.minute, after.second)
-        future = [t for t in candidates if datetime.strptime(t, _FMT) > after_cmp]
+        future = [t for t in candidates if datetime.strptime(t, _FMT).replace(year=2000, month=1, day=1) > after_cmp]
         if future:
             return random.choice(future)
         print("[SCHEDULER] No future preset times available today — will try again tomorrow")
@@ -78,7 +74,8 @@ def run_time_checker(client, default_channel: str, state) -> None:
     print(f"[SCHEDULER] Initial daily target time: {daily_target_time}")
 
     try:
-        client.chat_postMessage(channel=default_channel, text=f"time set for today is {daily_target_time}")
+        channel = state.get_active_channel() or default_channel
+        client.chat_postMessage(channel=channel, text="time set for today is " + daily_target_time)
     except Exception as e:
         print(f"Error posting initial time message: {e}")
 
@@ -88,6 +85,7 @@ def run_time_checker(client, default_channel: str, state) -> None:
     try:
         while True:
             current_time = display_current_time()
+            channel = state.get_active_channel() or default_channel
             today = date.today()
 
             # At midnight, reset the random daily time if in random mode
@@ -103,13 +101,13 @@ def run_time_checker(client, default_channel: str, state) -> None:
                     state.set_daily_target_time(new_time)
                     print(f"[SCHEDULER] New day — daily target time reset to: {new_time}")
                     try:
-                        client.chat_postMessage(channel=default_channel, text=f"time set for today is {new_time}")
+                        client.chat_postMessage(channel = channel, text=f"time set for today is {new_time}")
                     except Exception as e:
                         print(f"Error posting daily reset message: {e}")
 
             if current_time == "12:00:00 PM":
                 try:
-                    post_csv_prompt(client, channel=default_channel, prefix_text="Daily vibe check prompt:")
+                    post_csv_prompt(client, channel=channel, prefix_text="Daily vibe check prompt:")
                 except Exception as e:
                     print(f"Error posting 12:00:00 PM prompt: {e}")
 
@@ -118,7 +116,7 @@ def run_time_checker(client, default_channel: str, state) -> None:
                 try:
                     post_csv_prompt(
                         client,
-                        channel=default_channel,
+                        channel = channel,
                         prefix_text=f"Random vibe check prompt (time hit {target_time}):"
                     )
                     print(f"\n[SCHEDULER] Time hit: {target_time}")
@@ -129,7 +127,8 @@ def run_time_checker(client, default_channel: str, state) -> None:
 
     except KeyboardInterrupt:
         try:
-            client.chat_postMessage(channel=default_channel, text="bot offline")
+            channel = state.get_active_channel() or default_channel
+            client.chat_postMessage(channel=channel, text="bot offline")
         except Exception as e:
             print(f"Error posting offline message: {e}")
         print("Program stopped by user.")

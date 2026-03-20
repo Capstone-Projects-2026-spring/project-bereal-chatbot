@@ -12,6 +12,7 @@ from bot.scheduler import run_time_checker
 
 from commands.force_prompt_command import register_force_prompt_command
 from commands.time_commands import register_time_commands
+from commands.control_panel_commands import register_control_panel
 from app_logging.structured_logger import install_structured_message_logging
 
 
@@ -28,6 +29,7 @@ def main():
     install_structured_message_logging(bolt_app, client, log_file=str(STRUCTURED_JSONL))
     register_force_prompt_command(bolt_app, client)
     register_time_commands(bolt_app, state)
+    register_control_panel(bolt_app, state)
 
     # Online message
     try:

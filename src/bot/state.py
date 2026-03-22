@@ -1,7 +1,7 @@
 # src/bot/state.py
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from threading import Lock
-from typing import Optional
+from typing import Optional, Set
 
 
 @dataclass
@@ -14,6 +14,9 @@ class BotState:
     _random_start_time: Optional[str] = None
     _random_end_time: Optional[str] = None
     _static_time: Optional[str] = None
+    _active_days: Set[str] = field(default_factory=lambda: {
+        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+    })
 
     def set_daily_target_time(self, t: Optional[str]) -> None:
         with self._lock:
@@ -70,6 +73,20 @@ class BotState:
     def get_static_time(self) -> Optional[str]:
         with self._lock:
             return self._static_time
+
+    def set_active_days(self, days: Set[str]) -> None:
+        with self._lock:
+            self._active_days = days
+
+    def get_active_days(self) -> Set[str]:
+        with self._lock:
+            return set(self._active_days)
+
+    def is_today_active(self) -> bool:
+        from datetime import date
+        today = date.today().strftime("%A")  # e.g. "Monday"
+        with self._lock:
+            return today in self._active_days
 
 
 def create_state(default_channel: Optional[str] = None) -> BotState:

@@ -105,23 +105,24 @@ def run_time_checker(client, default_channel: str, state) -> None:
                     except Exception as e:
                         print(f"Error posting daily reset message: {e}")
 
-            if current_time == "12:00:00 PM":
-                try:
-                    post_csv_prompt(client, channel=channel, prefix_text="Daily vibe check prompt:")
-                except Exception as e:
-                    print(f"Error posting 12:00:00 PM prompt: {e}")
+            if state.is_today_active():
+                if current_time == "12:00:00 PM":
+                    try:
+                        post_csv_prompt(client, channel=channel, prefix_text="Daily vibe check prompt:")
+                    except Exception as e:
+                        print(f"Error posting 12:00:00 PM prompt: {e}")
 
-            target_time = _get_target_time(state)
-            if target_time and current_time == target_time:
-                try:
-                    post_csv_prompt(
-                        client,
-                        channel = channel,
-                        prefix_text=f"Random vibe check prompt (time hit {target_time}):"
-                    )
-                    print(f"\n[SCHEDULER] Time hit: {target_time}")
-                except Exception as e:
-                    print(f"Error posting time hit prompt: {e}")
+                target_time = _get_target_time(state)
+                if target_time and current_time == target_time:
+                    try:
+                        post_csv_prompt(
+                            client,
+                            channel=channel,
+                            prefix_text=f"Random vibe check prompt (time hit {target_time}):"
+                        )
+                        print(f"\n[SCHEDULER] Time hit: {target_time}")
+                    except Exception as e:
+                        print(f"Error posting time hit prompt: {e}")
 
             time.sleep(1)
 

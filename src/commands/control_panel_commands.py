@@ -34,8 +34,15 @@ _MODE_OPTIONS = [
 _PRESET_VALUE_MAP = {f"time_{i}": i for i in range(1, 11)}
 
 
+_DAY_OPTIONS = [
+    {"text": {"type": "plain_text", "text": d}, "value": d}
+    for d in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+]
+
+
 def _build_home_view(selected_preset=None, selected_mode=None,
-                     random_start=None, random_end=None, static_time=None) -> dict:
+                     random_start=None, random_end=None, static_time=None,
+                     active_days=None) -> dict:
     preset_initial = next(
         (opt for opt in _PRESET_OPTIONS if opt["value"] == selected_preset),
         _PRESET_OPTIONS[0]
@@ -76,6 +83,10 @@ def _build_home_view(selected_preset=None, selected_mode=None,
     }
     if static_time:
         static_element["initial_value"] = static_time
+
+    if active_days is None:
+        active_days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
+    day_initial = [opt for opt in _DAY_OPTIONS if opt["value"] in active_days]
 
     return {
         "type": "home",
@@ -128,6 +139,22 @@ def _build_home_view(selected_preset=None, selected_mode=None,
                 "dispatch_action": True,
                 "element": static_element,
                 "label": {"type": "plain_text", "text": "*4. Static Set Time (Manual)*"}
+            },
+            {"type": "divider"},
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": "*5. Active Days*"}
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "checkboxes",
+                        "action_id": "active_days_selection",
+                        "initial_options": day_initial,
+                        "options": _DAY_OPTIONS
+                    }
+                ]
             }
         ]
     }
@@ -142,6 +169,7 @@ def _publish_home(client, user_id, state):
             random_start=state.get_random_start_time(),
             random_end=state.get_random_end_time(),
             static_time=state.get_static_time(),
+            active_days=state.get_active_days(),
         )
     )
 
@@ -206,6 +234,18 @@ def register_control_panel(bolt_app, state):
         print(f"[CONTROL PANEL] Static time set to: {value}")
         logger.info(f"Static time set: {value}")
         _dm_admin(client, body["user"]["id"], f":clock1: *Static time* set to `{value.strip()}`")
+
+    @bolt_app.action("active_days_selection")
+    def handle_active_days(ack, body, client, logger):
+        ack()
+        selected = body["actions"][0].get("selected_options", [])
+        days = {opt["value"] for opt in selected}
+        state.set_active_days(days)
+        day_list = ", ".join(sorted(days)) if days else "none"
+        print(f"[CONTROL PANEL] Active days set to: {day_list}")
+        logger.info(f"Active days set: {day_list}")
+        _publish_home(client, body["user"]["id"], state)
+        _dm_admin(client, body["user"]["id"], f":calendar: *Active days* set to: {day_list}")
 
     @bolt_app.action("preset_time_selection")
     def handle_preset_time_selection(ack, body, client, logger):

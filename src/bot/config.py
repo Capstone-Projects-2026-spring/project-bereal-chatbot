@@ -25,6 +25,6 @@ def load_config() -> BotConfig:
     if not token:
         raise RuntimeError("Missing SLACK_TOKEN in .env")
     if not app_token:
-        raise RuntimeError("Missing SLACK_TOKEN in .env")
+        raise RuntimeError("Missing SLACK_APP_TOKEN in .env")
 
     return BotConfig(token=token, app_token=app_token, default_channel=default_channel)

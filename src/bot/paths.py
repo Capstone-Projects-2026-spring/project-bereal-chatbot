@@ -12,8 +12,12 @@ LOGS_DIR = DATA_DIR / "logs"
 
 PROMPTS_CSV = PROMPTS_DIR / "vibecheck_prompts.csv"
 STRUCTURED_JSONL = LOGS_DIR / "slack_messages.jsonl"
+INSTALLATIONS_DIR = DATA_DIR / "installations"
+STATES_DIR = DATA_DIR / "states"
 
 # Ensure folders exist
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 PROMPTS_DIR.mkdir(parents=True, exist_ok=True)
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
+INSTALLATIONS_DIR.mkdir(parents=True, exist_ok=True)
+STATES_DIR.mkdir(parents=True, exist_ok=True)

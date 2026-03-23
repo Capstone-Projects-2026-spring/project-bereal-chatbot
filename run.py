@@ -5,10 +5,13 @@ import sys
 REPO_ROOT = Path(__file__).resolve().parent
 SRC_DIR = REPO_ROOT / "src"
 
-# Put src/ on the import path so "bot", "services", "commands", etc. work.
 sys.path.insert(0, str(SRC_DIR))
 
-from bot.main import main  # now this works because src/ is on sys.path
+# Entry point is oauth_app.py via gunicorn — this file is no longer the main entry point.
+# Kept for local development only.
+from oauth_app import app
 
 if __name__ == "__main__":
-    main()
+    import os
+    port = int(os.environ.get("PORT", 3000))
+    app.run(host="0.0.0.0", port=port)

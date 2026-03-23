@@ -4,7 +4,6 @@ import json
 import os
 import secrets
 import sys
-import threading
 import time
 from pathlib import Path
 from urllib.parse import urlencode
@@ -152,17 +151,27 @@ def slack_oauth_redirect():
     )
 
 
-def _start_bot():
-    """Start the Slack bot in a background thread."""
+def _init_bolt():
     try:
-        from bot.main import main
-        main()
+        from bot.main import create_bolt_app
+        from slack_bolt.adapter.flask import SlackRequestHandler
+        bolt = create_bolt_app()
+        handler = SlackRequestHandler(bolt)
+
+        @app.route("/slack/events", methods=["POST"])
+        def slack_events():
+            return handler.handle(request)
+
+        @app.route("/slack/interactions", methods=["POST"])
+        def slack_interactions():
+            return handler.handle(request)
+
+        print("[BOOT] Bolt handlers registered.")
     except Exception as e:
-        print(f"[BOT] Failed to start: {e}")
+        print(f"[BOT] Failed to init bolt: {e}")
 
 
-# Start bot when gunicorn loads this module
-threading.Thread(target=_start_bot, daemon=True).start()
+_init_bolt()
 
 
 if __name__ == "__main__":

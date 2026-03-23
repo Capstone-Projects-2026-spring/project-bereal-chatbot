@@ -133,7 +133,8 @@ def _build_home_view(selected_preset=None, selected_mode=None,
                 "type": "actions",
                 "elements": [
                     {
-                        "type": "radio_buttons",
+                        "type": "static_select",
+                        "placeholder": {"type": "plain_text", "text": "Select a time..."},
                         "initial_option": preset_initial,
                         "options": _PRESET_OPTIONS,
                         "action_id": "preset_time_selection"

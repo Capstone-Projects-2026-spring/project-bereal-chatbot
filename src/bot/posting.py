@@ -4,11 +4,17 @@ from typing import Optional
 
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 
+_last_printed_minute: str = ""
+
 
 def display_current_time() -> str:
+    global _last_printed_minute
     now = datetime.now()
     current_time_str = now.strftime("%I:%M:%S %p")
-    print(f"\rCurrent Time: {current_time_str}", end="")
+    current_minute = now.strftime("%I:%M %p")
+    if current_minute != _last_printed_minute:
+        print(f"[SCHEDULER] Current Time: {current_time_str}")
+        _last_printed_minute = current_minute
     return current_time_str
 
 

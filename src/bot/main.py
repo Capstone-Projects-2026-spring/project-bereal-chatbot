@@ -55,12 +55,7 @@ def main():
     register_set_channel_command(bolt_app, client, state)
     register_control_panel(bolt_app, state)
 
-    # Online message to primary workspace
-    active_channel = state.get_active_channel() or cfg.default_channel
-    try:
-        client.chat_postMessage(channel=active_channel, text="bot online")
-    except Exception as e:
-        print(f"Error posting 'bot online' message: {e}")
+    print("[BOOT] Bot ready.")
 
     # Background scheduler (runs for primary workspace)
     print("[BOOT] Starting background time checker...")

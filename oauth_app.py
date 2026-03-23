@@ -124,6 +124,23 @@ def slack_oauth_redirect():
         )
         oauth_data = response.data if hasattr(response, "data") else dict(response)
         _save_installation(oauth_data)
+
+        # DM the installer a welcome message
+        bot_token = oauth_data.get("access_token")
+        installer_id = (oauth_data.get("authed_user") or {}).get("id")
+        if bot_token and installer_id:
+            try:
+                WebClient(token=bot_token).chat_postMessage(
+                    channel=installer_id,
+                    text=(
+                        "*VibeCheck is installed!*\n\n"
+                        "Use `/setchannel #your-channel` let me know where you want the app to operate.\n"
+                        "Then open the App Home in our DMs tab to configure the schedule."
+                    )
+                )
+            except Exception:
+                pass  # Don't fail the install if the DM fails
+
     except SlackApiError as e:
         return jsonify({"ok": False, "error": e.response.get("error", "oauth_failed")}), 400
     except Exception as e:

@@ -23,7 +23,7 @@ def load_config() -> BotConfig:
 
     token = os.getenv("SLACK_BOT_TOKEN")
     app_token = os.getenv("SLACK_APP_TOKEN")
-    default_channel = os.getenv("DEFAULT_CHANNEL", "#bot-test")
+    default_channel = os.getenv("DEFAULT_CHANNEL", "")
     client_id = os.getenv("SLACK_CLIENT_ID")
     client_secret = os.getenv("SLACK_CLIENT_SECRET")
     signing_secret = os.getenv("SLACK_SIGNING_SECRET")

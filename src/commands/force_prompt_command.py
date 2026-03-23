@@ -4,7 +4,7 @@ import logging
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 
 
-def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_text=None):
+def _post_random_prompt(client, channel=None, response_type=None, prefix_text=None):
     """
     Pull a random prompt from the prompt service and post it to Slack.
     """
@@ -37,7 +37,7 @@ def register_force_prompt_command(bolt_app, client):
         parts = text.split()
 
         response_type = None
-        channel = "#bot-test"
+        channel = body.get("channel_id", "")
 
         # Parse args in any order:
         # - "text" or "image"

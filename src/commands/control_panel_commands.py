@@ -178,6 +178,23 @@ def _dm_admin(client, user_id, message):
     client.chat_postMessage(channel=user_id, text=message)
 
 
+def _repick_random_time(client, user_id, state):
+    """Re-pick today's target time from the current range and announce it. Only acts in random mode."""
+    from datetime import datetime
+    from bot.scheduler import _pick_random_time
+    mode = state.get_selected_mode()
+    if mode not in ("mode_random", None):
+        return
+    new_time = _pick_random_time(
+        state.get_random_start_time(),
+        state.get_random_end_time(),
+        after=datetime.now()
+    )
+    state.set_daily_target_time(new_time)
+    print(f"[CONTROL PANEL] Re-picked daily target time: {new_time}")
+    _dm_admin(client, user_id, f":dart: New target time for today: `{new_time}`")
+
+
 def register_control_panel(bolt_app, state):
     @bolt_app.event("app_home_opened")
     def update_home_tab(client, event, logger):
@@ -195,6 +212,7 @@ def register_control_panel(bolt_app, state):
         logger.info(f"Mode selected: {value}")
         _publish_home(client, body["user"]["id"], state)
         _dm_admin(client, body["user"]["id"], f":gear: *Operation mode* changed to `{value}`")
+        _repick_random_time(client, body["user"]["id"], state)
 
     @bolt_app.action("start_time")
     def handle_start_time(ack, body, client, logger):
@@ -208,6 +226,7 @@ def register_control_panel(bolt_app, state):
         print(f"[CONTROL PANEL] Random start time set to: {value}")
         logger.info(f"Random start time set: {value}")
         _dm_admin(client, body["user"]["id"], f":clock1: *Random range start* set to `{value.strip()}`")
+        _repick_random_time(client, body["user"]["id"], state)
 
     @bolt_app.action("end_time")
     def handle_end_time(ack, body, client, logger):
@@ -221,6 +240,7 @@ def register_control_panel(bolt_app, state):
         print(f"[CONTROL PANEL] Random end time set to: {value}")
         logger.info(f"Random end time set: {value}")
         _dm_admin(client, body["user"]["id"], f":clock1: *Random range end* set to `{value.strip()}`")
+        _repick_random_time(client, body["user"]["id"], state)
 
     @bolt_app.action("static_entry")
     def handle_static_entry(ack, body, client, logger):

@@ -41,8 +41,30 @@ No hardware requirements. Resources are commonly available within standard Compu
 
 ## How to Run the Project
 
-For this demo, we are currently using our test Slack workspace.
-To run and view the project, we will add people directly to our Slack server.
+- Python 3.11+ installed
+- A Slack app configured for Socket Mode
+- Bot installed to your Slack workspace/channel
+
+1. Install dependencies
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+2. Create a `.env` file in the repo root and add the following into it:
+
+SLACK_BOT_TOKEN=xoxb-your-bot-token
+SLACK_APP_TOKEN=xapp-your-app-level-token
+
+
+3. Run the bot locally
+
+```bash
+python run.py
+```
+
+4. To stop the bot, press 'ctrl+c' in the terminal
+
 
 ## Running Tests
 

@@ -3,4 +3,8 @@ slack-bolt==1.21.2
 python-dotenv==1.0.0
 gunicorn==23.0.0
 pandas>=2.0.0
+<<<<<<< HEAD
 flask>=3.0.0
+=======
+flask>=3.0.0,<4
+>>>>>>> 6fa3c0a6e8db91833d63230ad30020bd9355e589

@@ -19,7 +19,7 @@ def _post_random_prompt(client, channel=None, response_type=None, prefix_text=No
     logging.info(f"Force prompt posted prompt_id={prompt_id} to {channel}")
 
 
-def register_force_prompt_command(bolt_app, client):
+def register_force_prompt_command(bolt_app):
     """
     Registers a slash command:
       /forceprompt
@@ -30,7 +30,7 @@ def register_force_prompt_command(bolt_app, client):
     """
 
     @bolt_app.command("/forceprompt")
-    def force_prompt(ack, respond, body):
+    def force_prompt(ack, respond, body, client):
         ack()
 
         text = (body.get("text") or "").strip()

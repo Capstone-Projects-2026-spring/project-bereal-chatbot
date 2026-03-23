@@ -6,6 +6,7 @@ import secrets
 import sys
 import time
 from pathlib import Path
+from typing import Dict, Tuple
 from urllib.parse import urlencode
 
 from flask import Flask, jsonify, redirect, request
@@ -20,6 +21,8 @@ app = Flask(__name__)
 
 STATE_TTL_SECONDS = 600
 INSTALLATIONS_DIR = Path("data/installations")
+BOLT_HANDLER = None
+BOLT_INIT_ERROR = None
 
 
 def _get_env(name: str) -> str:
@@ -71,7 +74,7 @@ def _save_installation(oauth_response: dict) -> None:
 
 
 @app.get("/health")
-def health() -> tuple[dict, int]:
+def health() -> Tuple[Dict[str, bool], int]:
     return {"ok": True}, 200
 
 
@@ -152,23 +155,39 @@ def slack_oauth_redirect():
 
 
 def _init_bolt():
+    global BOLT_HANDLER, BOLT_INIT_ERROR
     try:
         from bot.main import create_bolt_app
         from slack_bolt.adapter.flask import SlackRequestHandler
         bolt = create_bolt_app()
-        handler = SlackRequestHandler(bolt)
-
-        @app.route("/slack/events", methods=["POST"])
-        def slack_events():
-            return handler.handle(request)
-
-        @app.route("/slack/interactions", methods=["POST"])
-        def slack_interactions():
-            return handler.handle(request)
+        BOLT_HANDLER = SlackRequestHandler(bolt)
+        BOLT_INIT_ERROR = None
 
         print("[BOOT] Bolt handlers registered.")
     except Exception as e:
+        BOLT_HANDLER = None
+        BOLT_INIT_ERROR = str(e)
         print(f"[BOT] Failed to init bolt: {e}")
+
+
+@app.route("/slack/events", methods=["POST"])
+def slack_events():
+    payload = request.get_json(silent=True) or {}
+    if payload.get("type") == "url_verification":
+        return jsonify({"challenge": payload.get("challenge", "")}), 200
+
+    if BOLT_HANDLER is None:
+        return jsonify({"ok": False, "error": "bolt_not_initialized", "details": BOLT_INIT_ERROR}), 503
+
+    return BOLT_HANDLER.handle(request)
+
+
+@app.route("/slack/interactions", methods=["POST"])
+def slack_interactions():
+    if BOLT_HANDLER is None:
+        return jsonify({"ok": False, "error": "bolt_not_initialized", "details": BOLT_INIT_ERROR}), 503
+
+    return BOLT_HANDLER.handle(request)
 
 
 _init_bolt()

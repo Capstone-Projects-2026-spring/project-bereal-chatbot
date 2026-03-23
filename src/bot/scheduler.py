@@ -2,6 +2,7 @@
 import random
 import time
 from datetime import datetime, date
+from typing import Callable
 
 from services.time_library import preSet_time_library
 from bot.posting import display_current_time, post_csv_prompt
@@ -59,7 +60,7 @@ def _get_target_time(state) -> str | None:
     return state.get_daily_target_time()
 
 
-def run_time_checker(client, default_channel: str, state) -> None:
+def run_time_checker(client_provider: Callable[[], object], default_channel: str, state) -> None:
     """
     Background loop that checks the clock every second and posts prompts at the
     configured time(s). Respects the mode set via the control panel.
@@ -75,7 +76,7 @@ def run_time_checker(client, default_channel: str, state) -> None:
 
     try:
         channel = state.get_active_channel() or default_channel
-        client.chat_postMessage(channel=channel, text="time set for today is " + daily_target_time)
+        client_provider().chat_postMessage(channel=channel, text="time set for today is " + daily_target_time)
     except Exception as e:
         print(f"Error posting initial time message: {e}")
 
@@ -101,14 +102,14 @@ def run_time_checker(client, default_channel: str, state) -> None:
                     state.set_daily_target_time(new_time)
                     print(f"[SCHEDULER] New day — daily target time reset to: {new_time}")
                     try:
-                        client.chat_postMessage(channel = channel, text=f"time set for today is {new_time}")
+                        client_provider().chat_postMessage(channel=channel, text=f"time set for today is {new_time}")
                     except Exception as e:
                         print(f"Error posting daily reset message: {e}")
 
             if state.is_today_active():
                 if current_time == "12:00:00 PM":
                     try:
-                        post_csv_prompt(client, channel=channel, prefix_text="Daily vibe check prompt:")
+                        post_csv_prompt(client_provider(), channel=channel, prefix_text="Daily vibe check prompt:")
                     except Exception as e:
                         print(f"Error posting 12:00:00 PM prompt: {e}")
 
@@ -116,7 +117,7 @@ def run_time_checker(client, default_channel: str, state) -> None:
                 if target_time and current_time == target_time:
                     try:
                         post_csv_prompt(
-                            client,
+                            client_provider(),
                             channel=channel,
                             prefix_text=f"Random vibe check prompt (time hit {target_time}):"
                         )
@@ -129,7 +130,7 @@ def run_time_checker(client, default_channel: str, state) -> None:
     except KeyboardInterrupt:
         try:
             channel = state.get_active_channel() or default_channel
-            client.chat_postMessage(channel=channel, text="bot offline")
+            client_provider().chat_postMessage(channel=channel, text="bot offline")
         except Exception as e:
             print(f"Error posting offline message: {e}")
         print("Program stopped by user.")

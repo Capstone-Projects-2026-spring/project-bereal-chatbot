@@ -1,5 +1,8 @@
 # src/bot/main.py
 import threading
+import json
+import os
+from pathlib import Path
 
 from slack_sdk import WebClient
 
@@ -13,6 +16,42 @@ from commands.time_commands import register_time_commands
 from commands.set_channel_command import register_set_channel_command
 from commands.control_panel_commands import register_control_panel
 from app_logging.structured_logger import install_structured_message_logging
+
+
+def _build_scheduler_client_provider(fallback_token: str):
+    preferred_team_id = os.getenv("SLACK_SCHEDULER_TEAM_ID", "").strip()
+    installations_dir = Path("data/installations")
+
+    def _load_installation_token() -> str | None:
+        if not installations_dir.exists():
+            return None
+
+        # Optional: pin scheduler posts to a single installed workspace.
+        if preferred_team_id:
+            preferred_file = installations_dir / f"{preferred_team_id}.json"
+            if preferred_file.exists():
+                try:
+                    data = json.loads(preferred_file.read_text(encoding="utf-8"))
+                    return data.get("access_token")
+                except Exception:
+                    return None
+
+        # Otherwise use the most recently written installation.
+        candidates = [p for p in installations_dir.glob("*.json") if p.is_file()]
+        if not candidates:
+            return None
+        latest = max(candidates, key=lambda p: p.stat().st_mtime)
+        try:
+            data = json.loads(latest.read_text(encoding="utf-8"))
+            return data.get("access_token")
+        except Exception:
+            return None
+
+    def _provider() -> WebClient:
+        token = _load_installation_token() or fallback_token
+        return WebClient(token=token)
+
+    return _provider
 
 
 def create_bolt_app():
@@ -45,15 +84,17 @@ def create_bolt_app():
     client = WebClient(token=cfg.token)
 
     install_structured_message_logging(bolt_app, client, log_file=str(STRUCTURED_JSONL))
-    register_force_prompt_command(bolt_app, client)
+    register_force_prompt_command(bolt_app)
     register_time_commands(bolt_app, state)
-    register_set_channel_command(bolt_app, client, state)
+    register_set_channel_command(bolt_app, state)
     register_control_panel(bolt_app, state)
+
+    scheduler_client_provider = _build_scheduler_client_provider(cfg.token)
 
     # Start background scheduler
     threading.Thread(
         target=run_time_checker,
-        args=(client, cfg.default_channel, state),
+        args=(scheduler_client_provider, cfg.default_channel, state),
         daemon=True
     ).start()
 

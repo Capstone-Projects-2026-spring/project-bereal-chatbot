@@ -39,6 +39,11 @@ To develop VibeCheck, background knowledge in Python, APIs, databases is necessa
 
 No hardware requirements. Resources are commonly available within standard Computer Science department environments.
 
+## How to Run the Project
+
+For this demo, we are currently using our test Slack workspace.
+To run and view the project, we will add people directly to our Slack server.
+
 ## Running Tests
 
 1. Install development dependencies:

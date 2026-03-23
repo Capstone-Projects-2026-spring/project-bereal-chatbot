@@ -13,16 +13,23 @@ def _parse_time(value: str):
         return None
 
 _PRESET_OPTIONS = [
-    {"text": {"type": "plain_text", "text": "12:00:00 PM"}, "value": "time_1"},
-    {"text": {"type": "plain_text", "text": "12:30:00 PM"}, "value": "time_2"},
-    {"text": {"type": "plain_text", "text": "01:00:00 PM"}, "value": "time_3"},
-    {"text": {"type": "plain_text", "text": "01:30:00 PM"}, "value": "time_4"},
-    {"text": {"type": "plain_text", "text": "02:00:00 PM"}, "value": "time_5"},
-    {"text": {"type": "plain_text", "text": "02:30:00 PM"}, "value": "time_6"},
-    {"text": {"type": "plain_text", "text": "03:00:00 PM"}, "value": "time_7"},
-    {"text": {"type": "plain_text", "text": "03:30:00 PM"}, "value": "time_8"},
-    {"text": {"type": "plain_text", "text": "04:00:00 PM"}, "value": "time_9"},
-    {"text": {"type": "plain_text", "text": "04:30:00 PM"}, "value": "time_10"},
+    {"text": {"type": "plain_text", "text": "09:30:00 AM"}, "value": "time_1"},
+    {"text": {"type": "plain_text", "text": "09:35:00 AM"}, "value": "time_2"},
+    {"text": {"type": "plain_text", "text": "09:40:00 AM"}, "value": "time_3"},
+    {"text": {"type": "plain_text", "text": "09:45:00 AM"}, "value": "time_4"},
+    {"text": {"type": "plain_text", "text": "09:50:00 AM"}, "value": "time_5"},
+    {"text": {"type": "plain_text", "text": "09:55:00 AM"}, "value": "time_6"},
+    {"text": {"type": "plain_text", "text": "10:00:00 AM"}, "value": "time_7"},
+    {"text": {"type": "plain_text", "text": "10:05:00 AM"}, "value": "time_8"},
+    {"text": {"type": "plain_text", "text": "10:10:00 AM"}, "value": "time_9"},
+    {"text": {"type": "plain_text", "text": "10:15:00 AM"}, "value": "time_10"},
+    {"text": {"type": "plain_text", "text": "10:20:00 AM"}, "value": "time_11"},
+    {"text": {"type": "plain_text", "text": "10:25:00 AM"}, "value": "time_12"},
+    {"text": {"type": "plain_text", "text": "10:30:00 AM"}, "value": "time_13"},
+    {"text": {"type": "plain_text", "text": "10:35:00 AM"}, "value": "time_14"},
+    {"text": {"type": "plain_text", "text": "10:40:00 AM"}, "value": "time_15"},
+    {"text": {"type": "plain_text", "text": "10:45:00 AM"}, "value": "time_16"},
+    {"text": {"type": "plain_text", "text": "10:50:00 AM"}, "value": "time_17"},
 ]
 
 _MODE_OPTIONS = [
@@ -31,7 +38,7 @@ _MODE_OPTIONS = [
     {"text": {"type": "plain_text", "text": "Static Set Time"}, "value": "mode_static"},
 ]
 
-_PRESET_VALUE_MAP = {f"time_{i}": i for i in range(1, 11)}
+_PRESET_VALUE_MAP = {f"time_{i}": i for i in range(1, 18)}
 
 
 _DAY_OPTIONS = [

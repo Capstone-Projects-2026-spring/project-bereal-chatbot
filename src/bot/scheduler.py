@@ -36,7 +36,7 @@ def _pick_random_time(start_str=None, end_str=None, after: datetime = None) -> s
 
     # Preset library fallback: only pick times that are in the future
     if after:
-        candidates = [preSet_time_library(i) for i in range(1, 12)]
+        candidates = [preSet_time_library(i) for i in range(1, 18)]
        
         # Rebuild after as a comparable datetime on the same dummy date as candidates
         after_cmp = datetime(2000, 1, 1, after.hour, after.minute, after.second)
@@ -45,7 +45,7 @@ def _pick_random_time(start_str=None, end_str=None, after: datetime = None) -> s
             return random.choice(future)
         print("[SCHEDULER] No future preset times available today — will try again tomorrow")
 
-    return preSet_time_library(random.randint(1, 11))
+    return preSet_time_library(random.randint(1, 17))
 
 
 def _get_target_time(state) -> str | None:

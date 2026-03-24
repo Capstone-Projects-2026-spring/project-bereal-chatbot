@@ -40,9 +40,55 @@ To develop VibeCheck, background knowledge in Python, APIs, databases is necessa
 No hardware requirements. Resources are commonly available within standard Computer Science department environments.
 
 ## How to Run the Project
+- Python 3.11+ installed
+- A Slack app configured for Socket Mode
+- Bot installed to your Slack workspace/channel
 
-For this demo, we are currently using our test Slack workspace.
-To run and view the project, we will add people directly to our Slack server.
+Join the Slack workspace: 
+[vibecheckbotteam.slack.com]
+https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw
+
+1. Install dependencies
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+2. Create a `.env` file in the repo root and add the following into it:
+
+SLACK_BOT_TOKEN=xoxb-10423543431858-10437086697397-uwGckNobV3Ea5fyex39GDroO
+SLACK_APP_TOKEN=xapp-1-A0ACNUBUQNR-10544621168608-6983ab5f67a0973fa82a5c42dd6343728284ce078d3570cb94c0dacb4b606c05
+
+3. Run the bot locally
+
+```bash
+python run.py
+```
+
+4. To stop the bot, press 'ctrl+c' in the terminal
+
+After joining the Slack workspace and running the chatbot, navigate to Apps and click on the overflow menu, where you says "More actions"
+<img width="3840" height="1792" alt="Step1" src="https://github.com/user-attachments/assets/b643f4c9-dee1-4736-ab57-d5e85c6581e1" />
+
+Press "Browse apps"
+<img width="3840" height="1775" alt="Step2" src="https://github.com/user-attachments/assets/e8683a01-614b-4401-93e0-64b14bea25ee" />
+
+Hover over Vibe Check and click "Open App"
+<img width="3840" height="2160" alt="Step3" src="https://github.com/user-attachments/assets/7d16a487-d711-4382-a0b1-5c4680f78455" />
+
+Now you should be ready to test our project! 
+<img width="3840" height="1859" alt="Step4" src="https://github.com/user-attachments/assets/902190ee-31fb-41fd-a70a-df0698d40b44" />
+
+Additional Note: Slash commands can also be used in the bot-test channel to test features
+<img width="3165" height="425" alt="image" src="https://github.com/user-attachments/assets/2cc09399-1cd3-4004-aa10-d45c7229b0e5" />
+
+Any and all critiques will be greatly appreciated. Have fun testing! 🙂
+
+## For More Information
+To reach out for further information, you can contact me via email or text:
+- tuq43307@temple.edu
+- 267-241-3304
+
 
 ## Running Tests
 

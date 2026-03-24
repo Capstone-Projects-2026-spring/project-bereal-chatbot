@@ -50,6 +50,7 @@ https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4K
 
 1. Install dependencies
 
+After opening the project in your IDE, run the following command:
 ```bash
 python -m pip install -r requirements.txt
 ```
@@ -68,7 +69,7 @@ python run.py
 
 4. To stop the bot, press 'ctrl+c' in the terminal
 
-After joining the Slack workspace and running the chatbot, navigate to Apps and click on the overflow menu, where you says "More actions"
+After joining the Slack workspace and running the chatbot, navigate to Apps and click on the overflow menu, where it says "More actions"
 <img width="3840" height="1792" alt="Step1" src="https://github.com/user-attachments/assets/b643f4c9-dee1-4736-ab57-d5e85c6581e1" />
 
 Press "Browse apps"

@@ -56,8 +56,9 @@ python -m pip install -r requirements.txt
 
 2. Create a `.env` file in the repo root and add the following into it:
 
-SLACK_BOT_TOKEN=xoxb-10423543431858-10437086697397-uwGckNobV3Ea5fyex39GDroO
-SLACK_APP_TOKEN=xapp-1-A0ACNUBUQNR-10544621168608-6983ab5f67a0973fa82a5c42dd6343728284ce078d3570cb94c0dacb4b606c05
+SLACK_BOT_TOKEN=xoxb-...
+SLACK_APP_TOKEN=xapp-...
+[Contact me for the tokens]
 
 3. Run the bot locally
 

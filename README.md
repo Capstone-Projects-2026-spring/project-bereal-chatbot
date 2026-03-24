@@ -40,34 +40,35 @@ To develop VibeCheck, background knowledge in Python, APIs, databases is necessa
 No hardware requirements. Resources are commonly available within standard Computer Science department environments.
 
 ## How to Run the Project
-- Python 3.11+ installed
-- A Slack app configured for Socket Mode
-- Bot installed to your Slack workspace/channel
 
 Join the Slack workspace: 
 [vibecheckbotteam.slack.com]
 https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw
 
-1. Install dependencies
+1. Clone the repository
+
+2. Install dependencies
 
 After opening the project in your IDE, run the following command:
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-2. Create a `.env` file in the repo root and add the following into it:
+3. Create a `.env` file in the repo root and add the following into it:
 
+```bash
 SLACK_BOT_TOKEN=xoxb-...
 SLACK_APP_TOKEN=xapp-...
-[Contact me for the tokens]
+```
+# [Contact me for the tokens]
 
-3. Run the bot locally
+4. Run the bot locally
 
 ```bash
 python run.py
 ```
 
-4. To stop the bot, press 'ctrl+c' in the terminal
+5. To stop the bot, press 'ctrl+c' in the terminal
 
 After joining the Slack workspace and running the chatbot, navigate to Apps and click on the overflow menu, where it says "More actions"
 <img width="3840" height="1792" alt="Step1" src="https://github.com/user-attachments/assets/b643f4c9-dee1-4736-ab57-d5e85c6581e1" />

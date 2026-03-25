@@ -3,12 +3,15 @@ import os
 import requests
 from flask import Flask, request, redirect
 from pymongo import MongoClient
+from slack_bolt.adapter.flask import SlackRequestHandler
 
 flask_app = Flask(__name__)
 
 SLACK_CLIENT_ID = os.getenv("SLACK_CLIENT_ID")
 SLACK_CLIENT_SECRET = os.getenv("SLACK_CLIENT_SECRET")
 MONGO_URI = os.getenv("MONGO_URI")
+
+_bolt_handler = None
 
 _mongo_client = None
 
@@ -29,6 +32,11 @@ def install():
         f"&redirect_uri={os.getenv('SLACK_REDIRECT_URI')}"
     )
     return redirect(url)
+
+
+@flask_app.route("/slack/events", methods=["POST"])
+def slack_events():
+    return _bolt_handler.handle(request)
 
 
 @flask_app.route("/slack/oauth_redirect")
@@ -64,6 +72,8 @@ def oauth_redirect():
     return "App installed successfully! You can close this tab and start using the bot in Slack."
 
 
-def run_oauth_server():
+def run_oauth_server(bolt_app):
+    global _bolt_handler
+    _bolt_handler = SlackRequestHandler(bolt_app)
     port = int(os.getenv("PORT", 8080))
     flask_app.run(host="0.0.0.0", port=port)

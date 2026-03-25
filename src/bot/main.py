@@ -3,7 +3,6 @@ import threading
 
 from slack_sdk import WebClient
 from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
 from pymongo import MongoClient
 
 from bot.config import load_config
@@ -50,7 +49,7 @@ def main():
 
     authorize = make_authorize(cfg, cfg.mongo_uri)
     client = WebClient(token=cfg.token)
-    bolt_app = App(authorize=authorize, ignoring_self_events_enabled=False)
+    bolt_app = App(authorize=authorize, signing_secret=cfg.signing_secret, ignoring_self_events_enabled=False)
 
     # Logging + commands
     install_structured_message_logging(bolt_app, client, log_file=str(STRUCTURED_JSONL))
@@ -66,10 +65,6 @@ def main():
     except Exception as e:
         print(f"Error posting 'bot online' message: {e}")
 
-    # OAuth web server
-    oauth_thread = threading.Thread(target=run_oauth_server, daemon=True)
-    oauth_thread.start()
-
     # Background time checker
     print("[BOOT] Starting background time checker...")
     time_thread = threading.Thread(
@@ -79,10 +74,9 @@ def main():
     )
     time_thread.start()
 
-    # Socket Mode
-    print("[BOOT] Starting Socket Mode handler...")
-    handler = SocketModeHandler(bolt_app, cfg.app_token)
-    handler.start()
+    # HTTP server (main thread)
+    print("[BOOT] Starting HTTP server...")
+    run_oauth_server(bolt_app)
 
 
 if __name__ == "__main__":

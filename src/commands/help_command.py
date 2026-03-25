@@ -34,6 +34,7 @@ From there you can:
 `/forceprompt` — immediately post a random prompt to the current channel
 `/forceprompt #channel-name` — post a prompt to a specific channel
 `/setchannel #channel-name` — change the active channel
+`/vibestatus` — show current bot configuration
 `/help` — show this message
 """.strip()
 

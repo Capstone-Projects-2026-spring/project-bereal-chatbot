@@ -2,7 +2,7 @@
 
 
 def register_status_command(bolt_app, state):
-    @bolt_app.command("/status")
+    @bolt_app.command("/vibestatus")
     def handle_status(ack, respond):
         ack()
 

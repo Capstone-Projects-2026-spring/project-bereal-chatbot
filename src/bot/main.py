@@ -9,6 +9,7 @@ from bot.config import load_config
 from bot.paths import STRUCTURED_JSONL
 from bot.state import create_state
 from bot.scheduler import run_time_checker
+from bot.oauth_server import run_oauth_server
 
 from commands.force_prompt_command import register_force_prompt_command
 from commands.time_commands import register_time_commands
@@ -39,6 +40,10 @@ def main():
         client.chat_postMessage(channel=active_channel, text="bot online")
     except Exception as e:
         print(f"Error posting 'bot online' message: {e}")
+
+    # OAuth web server
+    oauth_thread = threading.Thread(target=run_oauth_server, daemon=True)
+    oauth_thread.start()
 
     # Background time checker
     print("[BOOT] Starting background time checker...")

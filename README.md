@@ -102,7 +102,7 @@ To reach out for further information, you can contact me via email or text:
 
 2. Run all unit tests:
 
-	`python run_tests.py`
+	`python -m pytest tests/ -v`
 
 Optional:
 

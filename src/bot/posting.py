@@ -7,9 +7,7 @@ from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 
 def display_current_time() -> str:
     now = datetime.now()
-    current_time_str = now.strftime("%I:%M:%S %p")
-    print(f"\rCurrent Time: {current_time_str}", end="")
-    return current_time_str
+    return now.strftime("%I:%M:%S %p")
 
 
 def post_csv_prompt(client, channel: str, prefix_text: Optional[str] = None) -> None:

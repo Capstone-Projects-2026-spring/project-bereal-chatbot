@@ -56,7 +56,7 @@ def oauth_redirect():
             "team_id": data["team"]["id"],
             "team_name": data["team"]["name"],
             "bot_token": data["access_token"],
-            "bot_user_id": data["bot_user"]["id"],
+            "bot_user_id": data.get("bot_user", {}).get("id"),
         }},
         upsert=True
     )

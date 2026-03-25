@@ -1,6 +1,7 @@
 # src/commands/control_panel_commands.py
 from datetime import datetime
 from services.time_library import preSet_time_library
+from bot.state import get_team_id
 
 _TIME_FORMAT = "%I:%M:%S %p"  # e.g. 09:15:00 AM
 
@@ -203,10 +204,12 @@ def _repick_random_time(client, user_id, state):
     _dm_admin(client, user_id, f":dart: New target time for today: `{new_time}`")
 
 
-def register_control_panel(bolt_app, state):
+def register_control_panel(bolt_app, state_manager):
     @bolt_app.event("app_home_opened")
-    def update_home_tab(client, event, logger):
+    def update_home_tab(client, event, body, logger):
         try:
+            team_id = get_team_id(body)
+            state = state_manager.get_state(team_id)
             _publish_home(client, event["user"], state)
         except Exception as e:
             logger.error(f"Error publishing home tab: {e}")
@@ -214,9 +217,12 @@ def register_control_panel(bolt_app, state):
     @bolt_app.action("mode_selection")
     def handle_mode_selection(ack, body, client, logger):
         ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
         value = body["actions"][0]["selected_option"]["value"]
         state.set_selected_mode(value)
-        print(f"[CONTROL PANEL] Operation mode set to: {value}")
+        state.set_active_token(client.token)
+        print(f"[CONTROL PANEL] [{team_id}] Operation mode set to: {value}")
         logger.info(f"Mode selected: {value}")
         _publish_home(client, body["user"]["id"], state)
         _dm_admin(client, body["user"]["id"], f":gear: *Operation mode* changed to `{value}`")
@@ -225,13 +231,15 @@ def register_control_panel(bolt_app, state):
     @bolt_app.action("start_time")
     def handle_start_time(ack, body, client, logger):
         ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
         value = body["actions"][0]["value"]
         if not _parse_time(value):
             _dm_admin(client, body["user"]["id"],
                       f":x: *Invalid start time* `{value}` — must be `HH:MM:SS AM/PM` (e.g. `12:00:00 PM`)")
             return
         state.set_random_start_time(value.strip())
-        print(f"[CONTROL PANEL] Random start time set to: {value}")
+        print(f"[CONTROL PANEL] [{team_id}] Random start time set to: {value}")
         logger.info(f"Random start time set: {value}")
         _dm_admin(client, body["user"]["id"], f":clock1: *Random range start* set to `{value.strip()}`")
         _repick_random_time(client, body["user"]["id"], state)
@@ -239,13 +247,15 @@ def register_control_panel(bolt_app, state):
     @bolt_app.action("end_time")
     def handle_end_time(ack, body, client, logger):
         ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
         value = body["actions"][0]["value"]
         if not _parse_time(value):
             _dm_admin(client, body["user"]["id"],
                       f":x: *Invalid end time* `{value}` — must be `HH:MM:SS AM/PM` (e.g. `05:00:00 PM`)")
             return
         state.set_random_end_time(value.strip())
-        print(f"[CONTROL PANEL] Random end time set to: {value}")
+        print(f"[CONTROL PANEL] [{team_id}] Random end time set to: {value}")
         logger.info(f"Random end time set: {value}")
         _dm_admin(client, body["user"]["id"], f":clock1: *Random range end* set to `{value.strip()}`")
         _repick_random_time(client, body["user"]["id"], state)
@@ -253,24 +263,28 @@ def register_control_panel(bolt_app, state):
     @bolt_app.action("static_entry")
     def handle_static_entry(ack, body, client, logger):
         ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
         value = body["actions"][0]["value"]
         if not _parse_time(value):
             _dm_admin(client, body["user"]["id"],
                       f":x: *Invalid static time* `{value}` — must be `HH:MM:SS AM/PM` (e.g. `09:15:00 AM`)")
             return
         state.set_static_time(value.strip())
-        print(f"[CONTROL PANEL] Static time set to: {value}")
+        print(f"[CONTROL PANEL] [{team_id}] Static time set to: {value}")
         logger.info(f"Static time set: {value}")
         _dm_admin(client, body["user"]["id"], f":clock1: *Static time* set to `{value.strip()}`")
 
     @bolt_app.action("active_days_selection")
     def handle_active_days(ack, body, client, logger):
         ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
         selected = body["actions"][0].get("selected_options", [])
         days = {opt["value"] for opt in selected}
         state.set_active_days(days)
         day_list = ", ".join(sorted(days)) if days else "none"
-        print(f"[CONTROL PANEL] Active days set to: {day_list}")
+        print(f"[CONTROL PANEL] [{team_id}] Active days set to: {day_list}")
         logger.info(f"Active days set: {day_list}")
         _publish_home(client, body["user"]["id"], state)
         _dm_admin(client, body["user"]["id"], f":calendar: *Active days* set to: {day_list}")
@@ -278,13 +292,15 @@ def register_control_panel(bolt_app, state):
     @bolt_app.action("preset_time_selection")
     def handle_preset_time_selection(ack, body, client, logger):
         ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
         value = body["actions"][0]["selected_option"]["value"]
         index = _PRESET_VALUE_MAP.get(value)
         if index is not None:
             t = preSet_time_library(index)
             state.set_daily_target_time(t)
             state.set_selected_preset(value)
-            print(f"[CONTROL PANEL] Preset time selected: {t}")
+            print(f"[CONTROL PANEL] [{team_id}] Preset time selected: {t}")
             logger.info(f"Preset time selected: {t}")
             _publish_home(client, body["user"]["id"], state)
             _dm_admin(client, body["user"]["id"], f":clock1: *Preset time* set to `{t}`")

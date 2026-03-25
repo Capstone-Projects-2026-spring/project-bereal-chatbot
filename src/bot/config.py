@@ -9,8 +9,9 @@ from bot.paths import REPO_ROOT
 @dataclass(frozen=True)
 class BotConfig:
     token: str
-    app_token: str
+    signing_secret: str
     default_channel: str
+    mongo_uri: str
 
 
 def load_config() -> BotConfig:
@@ -19,12 +20,15 @@ def load_config() -> BotConfig:
     print("Loaded .env from:", env_path)
 
     token = os.getenv("SLACK_BOT_TOKEN")
-    app_token = os.getenv("SLACK_APP_TOKEN")
+    signing_secret = os.getenv("SLACK_SIGNING_SECRET")
     default_channel = os.getenv("DEFAULT_CHANNEL", "#bot-test")
+    mongo_uri = os.getenv("MONGO_URI")
 
     if not token:
         raise RuntimeError("Missing SLACK_BOT_TOKEN in .env")
-    if not app_token:
-        raise RuntimeError("Missing SLACK_APP_TOKEN in .env")
+    if not signing_secret:
+        raise RuntimeError("Missing SLACK_SIGNING_SECRET in .env")
+    if not mongo_uri:
+        raise RuntimeError("Missing MONGO_URI in .env")
 
-    return BotConfig(token=token, app_token=app_token, default_channel=default_channel)
+    return BotConfig(token=token, signing_secret=signing_secret, default_channel=default_channel, mongo_uri=mongo_uri)

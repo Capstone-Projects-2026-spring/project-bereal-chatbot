@@ -19,7 +19,7 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
     logging.info(f"Force prompt posted prompt_id={prompt_id} to {channel}")
 
 
-def register_force_prompt_command(bolt_app, client):
+def register_force_prompt_command(bolt_app):
     """
     Registers a slash command:
       /forceprompt
@@ -30,14 +30,14 @@ def register_force_prompt_command(bolt_app, client):
     """
 
     @bolt_app.command("/forceprompt")
-    def force_prompt(ack, respond, body):
+    def force_prompt(ack, respond, body, client):
         ack()
 
         text = (body.get("text") or "").strip()
         parts = text.split()
 
         response_type = None
-        channel = "#bot-test"
+        channel = body.get("channel_id")  # default to the channel where command was used
 
         # Parse args in any order:
         # - "text" or "image"

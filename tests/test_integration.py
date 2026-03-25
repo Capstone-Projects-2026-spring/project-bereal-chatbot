@@ -1,66 +1,51 @@
-import importlib
-import sys
-from unittest.mock import Mock
-
 import pytest
+from bot.state import create_state
 
 
-class DummyClient:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def chat_postMessage(self, *args, **kwargs):
-        return {"ts": "123.456", "channel": "C123"}
+def test_state_default_channel():
+    state = create_state(default_channel="#general")
+    assert state.get_active_channel() == "#general"
 
 
-class DummyApp:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def command(self, _name):
-        def decorator(func):
-            return func
-
-        return decorator
-    
-    def event(self, _name):
-        def decorator(func):
-            return func
-
-        return decorator
+def test_state_set_and_get_active_channel():
+    state = create_state()
+    state.set_active_channel("#announcements")
+    assert state.get_active_channel() == "#announcements"
 
 
-@pytest.fixture
-def bot_module(monkeypatch):
-    import slack_bolt
-    import slack_sdk
-
-    monkeypatch.setenv("SLACK_TOKEN", "xoxb-test")
-    monkeypatch.setenv("SLACK_APP_TOKEN", "xapp-test")
-
-    monkeypatch.setattr(slack_sdk, "WebClient", DummyClient)
-    monkeypatch.setattr(slack_bolt, "App", DummyApp)
-
-    sys.modules.pop("bot", None)
-    return importlib.import_module("bot")
+def test_state_set_and_get_mode():
+    state = create_state()
+    state.set_selected_mode("mode_random")
+    assert state.get_selected_mode() == "mode_random"
 
 
-@pytest.mark.integration
-def test_integration_randomtime_then_findtime(bot_module, monkeypatch):
-    random_ack = Mock()
-    random_respond = Mock()
+def test_state_set_and_get_static_time():
+    state = create_state()
+    state.set_static_time("02:00:00 PM")
+    assert state.get_static_time() == "02:00:00 PM"
 
-    monkeypatch.setattr(bot_module.random, "randint", lambda _a, _b: 11)
 
-    bot_module.random_time(random_ack, random_respond)
+def test_state_active_days_default_all_days():
+    state = create_state()
+    days = state.get_active_days()
+    assert "Monday" in days
+    assert "Saturday" in days
+    assert len(days) == 7
 
-    random_ack.assert_called_once()
-    random_respond.assert_called_once_with("New randomly selected daily target time: 05:00:00 PM")
 
-    find_ack = Mock()
-    find_respond = Mock()
+def test_state_set_active_days():
+    state = create_state()
+    state.set_active_days({"Monday", "Wednesday", "Friday"})
+    assert state.get_active_days() == {"Monday", "Wednesday", "Friday"}
 
-    bot_module.handle_findtime_command(find_ack, find_respond)
 
-    find_ack.assert_called_once()
-    find_respond.assert_called_once_with("Today's random scheduled prompt time is 05:00:00 PM")
+def test_state_is_today_active():
+    state = create_state()
+    # All days active by default so today should always be active
+    assert state.is_today_active() is True
+
+
+def test_state_is_today_inactive_when_days_cleared():
+    state = create_state()
+    state.set_active_days(set())
+    assert state.is_today_active() is False

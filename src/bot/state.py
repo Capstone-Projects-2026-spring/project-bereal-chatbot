@@ -17,6 +17,7 @@ class BotState:
     _active_days: Set[str] = field(default_factory=lambda: {
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     })
+    _active_token: Optional[str] = None
 
     def set_daily_target_time(self, t: Optional[str]) -> None:
         with self._lock:
@@ -29,6 +30,14 @@ class BotState:
     def get_active_channel(self) -> Optional[str]:
         with self._lock:
             return self._active_channel
+
+    def set_active_token(self, token: Optional[str]) -> None:
+        with self._lock:
+            self._active_token = token
+
+    def get_active_token(self) -> Optional[str]:
+        with self._lock:
+            return self._active_token
 
     def get_daily_target_time(self) -> Optional[str]:
         with self._lock:
@@ -89,8 +98,29 @@ class BotState:
             return today in self._active_days
 
 
+def get_team_id(body: dict) -> Optional[str]:
+    """Extract team_id from a Slack request body, handling both slash commands and block actions."""
+    return body.get("team_id") or (body.get("team") or {}).get("id")
+
+
 def create_state(default_channel: Optional[str] = None) -> BotState:
     state = BotState(_lock=Lock())
     if default_channel:
         state.set_active_channel(default_channel)
     return state
+
+
+class StateManager:
+    def __init__(self):
+        self._states = {}
+        self._lock = Lock()
+
+    def get_state(self, team_id: str) -> BotState:
+        with self._lock:
+            if team_id not in self._states:
+                self._states[team_id] = BotState(_lock=Lock())
+            return self._states[team_id]
+
+    def all_states(self) -> dict:
+        with self._lock:
+            return dict(self._states)

@@ -1,39 +1,8 @@
 # structured_logger.py
-import json
-import logging
-from logging.handlers import RotatingFileHandler
-from pathlib import Path
+import os
 from datetime import datetime
 from typing import Any, Dict, Optional
-
-
-def setup_jsonl_logger(
-    log_file: str = "slack_messages.jsonl",
-    level: int = logging.INFO,
-) -> logging.Logger:
-    """
-    Writes one JSON object per line (JSONL).
-    Perfect for piping into pandas / databases.
-    """
-    log_path = Path(log_file).resolve()
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-
-    logger = logging.getLogger("slack_structured")
-    logger.setLevel(level)
-    logger.propagate = False
-
-    if not logger.handlers:
-        handler = RotatingFileHandler(
-            log_path,
-            maxBytes=5_000_000,  # 5MB
-            backupCount=10,
-            encoding="utf-8",
-        )
-        # We write pure JSON per line (no extra formatter noise)
-        handler.setFormatter(logging.Formatter("%(message)s"))
-        logger.addHandler(handler)
-
-    return logger
+from pymongo import MongoClient
 
 
 class SlackNameCache:
@@ -86,16 +55,17 @@ class SlackNameCache:
             return channel_id
 
 
-def install_structured_message_logging(app, client, log_file: str = "slack_messages.jsonl"):
+def install_structured_message_logging(app, client, log_file: str = None):
     """
-    Installs a Bolt event handler that writes DB-ready JSONL rows.
+    Installs a Bolt event handler that saves messages to MongoDB,
+    organized by workspace and channel.
     """
-    logger = setup_jsonl_logger(log_file=log_file)
+    mongo_client = MongoClient(os.getenv("MONGO_URI"))
+    messages_col = mongo_client["vibecheck"]["messages"]
     cache = SlackNameCache(client)
 
     @app.event("message")
     def _on_message(event, body):
-        # workspace/team
         team_id = (
             body.get("team_id")
             or (body.get("authorizations") or [{}])[0].get("team_id")
@@ -104,34 +74,25 @@ def install_structured_message_logging(app, client, log_file: str = "slack_messa
 
         channel_id = event.get("channel")
         user_id = event.get("user")
-        bot_id = event.get("bot_id")
+
+        # Skip bot messages
+        if event.get("bot_id") or not user_id:
+            return
 
         row = {
-            # ingestion metadata (your system)
             "ingested_at_utc": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-
-            # slack ids
             "team_id": team_id,
             "channel_id": channel_id,
             "channel_name": cache.channel_name(channel_id),
-
             "user_id": user_id,
             "user_name": cache.user_name(user_id),
-
-            "bot_id": bot_id,
-
-            # message fields
             "ts": event.get("ts"),
-            "event_ts": body.get("event_id") or body.get("event_time"),  # optional identifiers
-            "client_msg_id": event.get("client_msg_id"),
-            "subtype": event.get("subtype"),
             "thread_ts": event.get("thread_ts"),
-
-            # content
+            "subtype": event.get("subtype"),
             "text": event.get("text"),
         }
 
-        # Write as JSON line
-        logger.info(json.dumps(row, ensure_ascii=False))
-
-    return logger
+        try:
+            messages_col.insert_one(row)
+        except Exception as e:
+            print(f"[LOGGER] Failed to save message to MongoDB: {e}")

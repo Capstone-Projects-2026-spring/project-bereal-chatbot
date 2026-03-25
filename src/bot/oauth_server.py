@@ -1,6 +1,7 @@
 # src/bot/oauth_server.py
 import os
 import requests
+from datetime import datetime
 from flask import Flask, request, redirect
 from pymongo import MongoClient
 from slack_bolt.adapter.flask import SlackRequestHandler
@@ -65,6 +66,8 @@ def oauth_redirect():
             "team_name": data["team"]["name"],
             "bot_token": data["access_token"],
             "bot_user_id": data.get("bot_user", {}).get("id"),
+            "installed_by_user_id": data.get("authed_user", {}).get("id"),
+            "installed_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
         }},
         upsert=True
     )

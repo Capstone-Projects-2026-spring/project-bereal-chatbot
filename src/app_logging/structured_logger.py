@@ -76,10 +76,6 @@ def install_structured_message_logging(app, client, log_file: str = None):
         channel_id = event.get("channel")
         user_id = event.get("user")
 
-        # Skip bot messages
-        if event.get("bot_id") or not user_id:
-            return
-
         # Look up team name to use as collection name
         team_name = None
         if team_id:

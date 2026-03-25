@@ -37,7 +37,7 @@ def register_force_prompt_command(bolt_app):
         parts = text.split()
 
         response_type = None
-        channel = "#bot-test"
+        channel = body.get("channel_id")  # default to the channel where command was used
 
         # Parse args in any order:
         # - "text" or "image"

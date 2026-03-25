@@ -61,7 +61,8 @@ def install_structured_message_logging(app, client, log_file: str = None):
     organized by workspace and channel.
     """
     mongo_client = MongoClient(os.getenv("MONGO_URI"))
-    messages_col = mongo_client["vibecheck"]["messages"]
+    db = mongo_client["vibecheck"]
+    installations_col = db["installations"]
     cache = SlackNameCache(client)
 
     @app.event("message")
@@ -78,6 +79,15 @@ def install_structured_message_logging(app, client, log_file: str = None):
         # Skip bot messages
         if event.get("bot_id") or not user_id:
             return
+
+        # Look up team name to use as collection name
+        team_name = None
+        if team_id:
+            record = installations_col.find_one({"team_id": team_id})
+            if record:
+                team_name = record.get("team_name")
+        collection_name = f"messages_{team_name}" if team_name else f"messages_{team_id or 'unknown'}"
+        messages_col = db[collection_name]
 
         row = {
             "ingested_at_utc": datetime.utcnow().isoformat(timespec="seconds") + "Z",

@@ -24,15 +24,20 @@ def make_authorize(cfg, mongo_uri):
     installations = mongo_client["vibecheck"]["installations"]
 
     def authorize(enterprise_id, team_id, **kwargs):
-        # First try to find the token in MongoDB (installed workspaces)
-        query = {"team_id": team_id}
-        if enterprise_id:
-            query["enterprise_id"] = enterprise_id
-        record = installations.find_one(query)
-        if record:
-            return {"bot_token": record["bot_token"]}
-        # Fall back to the original bot token for the home workspace
-        return {"bot_token": cfg.token}
+        print(f"[AUTHORIZE] called — team_id={team_id} enterprise_id={enterprise_id}")
+        try:
+            query = {"team_id": team_id}
+            if enterprise_id:
+                query["enterprise_id"] = enterprise_id
+            record = installations.find_one(query)
+            if record:
+                print(f"[AUTHORIZE] found token in MongoDB for team_id={team_id}")
+                return {"bot_token": record["bot_token"]}
+            print(f"[AUTHORIZE] no record found, falling back to default token")
+            return {"bot_token": cfg.token}
+        except Exception as e:
+            print(f"[AUTHORIZE] ERROR: {e}")
+            return {"bot_token": cfg.token}
 
     return authorize
 

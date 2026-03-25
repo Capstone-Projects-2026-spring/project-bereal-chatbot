@@ -14,6 +14,7 @@ from bot.oauth_server import run_oauth_server
 
 from commands.force_prompt_command import register_force_prompt_command
 from commands.help_command import register_help_command
+from commands.status_command import register_status_command
 from commands.time_commands import register_time_commands
 from commands.set_channel_command import register_set_channel_command
 from commands.control_panel_commands import register_control_panel
@@ -63,6 +64,7 @@ def main():
     install_structured_message_logging(bolt_app, client, log_file=str(STRUCTURED_JSONL))
     register_force_prompt_command(bolt_app)
     register_help_command(bolt_app)
+    register_status_command(bolt_app, state)
     register_time_commands(bolt_app, state)
     register_set_channel_command(bolt_app, state)
     register_control_panel(bolt_app, state)

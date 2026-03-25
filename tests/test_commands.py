@@ -1,134 +1,108 @@
-import importlib
-import sys
-from unittest.mock import Mock
-
 import pytest
-
-
-class DummyClient:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def chat_postMessage(self, *args, **kwargs):
-        return {"ts": "123.456", "channel": "C123"}
+from unittest.mock import Mock, patch
+from commands.force_prompt_command import register_force_prompt_command
+from commands.set_channel_command import register_set_channel_command
+from bot.state import create_state
 
 
 class DummyApp:
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self):
+        self._commands = {}
 
-    def command(self, _name):
+    def command(self, name):
         def decorator(func):
+            self._commands[name] = func
             return func
-
         return decorator
 
-    def event(self, _name):
-        def decorator(func):
-            return func
-
-        return decorator
+    def get_command(self, name):
+        return self._commands[name]
 
 
 @pytest.fixture
-def bot_module(monkeypatch):
-    import slack_bolt
-    import slack_sdk
-
-    monkeypatch.setenv("SLACK_TOKEN", "xoxb-test")
-    monkeypatch.setenv("SLACK_APP_TOKEN", "xapp-test")
-
-    monkeypatch.setattr(slack_sdk, "WebClient", DummyClient)
-    monkeypatch.setattr(slack_bolt, "App", DummyApp)
-
-    sys.modules.pop("bot", None)
-    module = importlib.import_module("bot")
-    return module
+def app():
+    return DummyApp()
 
 
-def test_handle_findtime_command_ack_and_respond(bot_module):
-    bot_module.time_checker.daily_target_time = "02:00:00 PM"
+@pytest.fixture
+def state():
+    return create_state(default_channel="#bot-test")
+
+
+def test_forceprompt_acks(app):
+    register_force_prompt_command(app)
+    handler = app.get_command("/forceprompt")
 
     ack = Mock()
     respond = Mock()
+    client = Mock()
+    client.chat_postMessage.return_value = {"ok": True}
 
-    bot_module.handle_findtime_command(ack, respond)
+    with patch("commands.force_prompt_command.get_random_prompt_text", return_value=("1", "How are you?")), \
+         patch("commands.force_prompt_command.mark_prompt_asked"):
+        handler(ack=ack, respond=respond, body={"text": "", "channel_id": "C123"}, client=client)
 
     ack.assert_called_once()
-    respond.assert_called_once_with("Today's random scheduled prompt time is 02:00:00 PM")
 
 
-def test_pick_time_without_argument_shows_options(bot_module):
+def test_forceprompt_posts_to_command_channel(app):
+    register_force_prompt_command(app)
+    handler = app.get_command("/forceprompt")
+
     ack = Mock()
     respond = Mock()
+    client = Mock()
+    client.chat_postMessage.return_value = {"ok": True}
 
-    bot_module.pick_time(ack, respond, {"text": ""})
+    with patch("commands.force_prompt_command.get_random_prompt_text", return_value=("1", "How are you?")), \
+         patch("commands.force_prompt_command.mark_prompt_asked"):
+        handler(ack=ack, respond=respond, body={"text": "", "channel_id": "C123"}, client=client)
 
-    ack.assert_called_once()
-    assert respond.call_count == 1
-    assert "Available time options" in respond.call_args[0][0]
+    client.chat_postMessage.assert_called_once()
+    assert client.chat_postMessage.call_args[1]["channel"] == "C123"
 
 
-def test_pick_time_with_valid_choice_updates_global(bot_module):
+def test_forceprompt_posts_to_specified_channel(app):
+    register_force_prompt_command(app)
+    handler = app.get_command("/forceprompt")
+
     ack = Mock()
     respond = Mock()
+    client = Mock()
+    client.chat_postMessage.return_value = {"ok": True}
 
-    bot_module.pick_time(ack, respond, {"text": "5"})
+    with patch("commands.force_prompt_command.get_random_prompt_text", return_value=("1", "How are you?")), \
+         patch("commands.force_prompt_command.mark_prompt_asked"):
+        handler(ack=ack, respond=respond, body={"text": "#general", "channel_id": "C123"}, client=client)
 
-    ack.assert_called_once()
-    respond.assert_called_once_with("Time set to: 02:00:00 PM")
-    assert bot_module.time_checker.daily_target_time == "02:00:00 PM"
+    assert client.chat_postMessage.call_args[1]["channel"] == "#general"
 
 
-def test_pick_time_out_of_range(bot_module):
+def test_setchannel_updates_state(app, state):
+    register_set_channel_command(app, state)
+    handler = app.get_command("/setchannel")
+
     ack = Mock()
     respond = Mock()
+    client = Mock()
+    client.chat_postMessage.return_value = {"ok": True}
 
-    bot_module.pick_time(ack, respond, {"text": "12"})
+    handler(ack=ack, respond=respond, body={"text": "#new-channel"}, client=client)
 
     ack.assert_called_once()
-    respond.assert_called_once_with("Must pick a number between 1 and 11 to set the time.")
+    assert state.get_active_channel() == "#new-channel"
 
 
-def test_pick_time_non_numeric(bot_module):
+def test_setchannel_rejects_missing_channel(app, state):
+    register_set_channel_command(app, state)
+    handler = app.get_command("/setchannel")
+
     ack = Mock()
     respond = Mock()
+    client = Mock()
 
-    bot_module.pick_time(ack, respond, {"text": "abc"})
-
-    ack.assert_called_once()
-    respond.assert_called_once_with("Please provide a valid number between 1 and 11 to set the time")
-
-
-def test_random_time_sets_new_target(bot_module, monkeypatch):
-    ack = Mock()
-    respond = Mock()
-
-    monkeypatch.setattr(bot_module.random, "randint", lambda _a, _b: 3)
-
-    bot_module.random_time(ack, respond)
+    handler(ack=ack, respond=respond, body={"text": ""}, client=client)
 
     ack.assert_called_once()
-    respond.assert_called_once_with("New randomly selected daily target time: 01:00:00 PM")
-    assert bot_module.time_checker.daily_target_time == "01:00:00 PM"
-
-
-def test_response_collection_window(bot_module):
-    #from datetime import timedelta
-    bot_module.time_checker.start_response_collection()
-    #bot_module.time_checker.last_prompt_time -= timedelta(seconds=bot_module.RESPONSE_WINDOW_SECONDS + 1)
-    # a message arriving immediately should be recorded (user + text)
-    message = {"event": {"user": "U123", "text": "hello"}}
-    bot_module.handle_message_event(message)
-    assert bot_module.time_checker.responses == [{"user": "U123", "text": "hello"}]
-
-    
-
-def test_late_responses(bot_module):
-    from datetime import timedelta
-    bot_module.time_checker.start_response_collection()
-
-    bot_module.time_checker.last_prompt_time -= timedelta(seconds=bot_module.RESPONSE_WINDOW_SECONDS + 1)
-    bot_module.handle_message_event({"event": {"user": "U456", "text": "late response"}})
-    # responses list unchanged
-    assert bot_module.time_checker.responses == []
+    respond.assert_called_once()
+    assert state.get_active_channel() != ""

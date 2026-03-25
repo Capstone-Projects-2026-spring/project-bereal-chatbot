@@ -24,19 +24,16 @@ def make_authorize(cfg, mongo_uri):
     installations = mongo_client["vibecheck"]["installations"]
 
     def authorize(enterprise_id, team_id, **kwargs):
-        print(f"[AUTHORIZE] called — team_id={team_id} enterprise_id={enterprise_id}")
         try:
             query = {"team_id": team_id}
             if enterprise_id:
                 query["enterprise_id"] = enterprise_id
             record = installations.find_one(query)
             if record:
-                print(f"[AUTHORIZE] found token in MongoDB for team_id={team_id}")
                 return AuthorizeResult.from_auth_test_response(
                     auth_test_response=WebClient(token=record["bot_token"]).auth_test(),
                     bot_token=record["bot_token"],
                 )
-            print(f"[AUTHORIZE] no record found, falling back to default token")
             return AuthorizeResult.from_auth_test_response(
                 auth_test_response=WebClient(token=cfg.token).auth_test(),
                 bot_token=cfg.token,

@@ -3,6 +3,7 @@ import threading
 
 from slack_sdk import WebClient
 from slack_bolt import App
+from slack_bolt.authorization import AuthorizeResult
 from pymongo import MongoClient
 
 from bot.config import load_config
@@ -31,12 +32,21 @@ def make_authorize(cfg, mongo_uri):
             record = installations.find_one(query)
             if record:
                 print(f"[AUTHORIZE] found token in MongoDB for team_id={team_id}")
-                return {"bot_token": record["bot_token"]}
+                return AuthorizeResult.from_auth_test_response(
+                    auth_test_response=WebClient(token=record["bot_token"]).auth_test(),
+                    bot_token=record["bot_token"],
+                )
             print(f"[AUTHORIZE] no record found, falling back to default token")
-            return {"bot_token": cfg.token}
+            return AuthorizeResult.from_auth_test_response(
+                auth_test_response=WebClient(token=cfg.token).auth_test(),
+                bot_token=cfg.token,
+            )
         except Exception as e:
             print(f"[AUTHORIZE] ERROR: {e}")
-            return {"bot_token": cfg.token}
+            return AuthorizeResult.from_auth_test_response(
+                auth_test_response=WebClient(token=cfg.token).auth_test(),
+                bot_token=cfg.token,
+            )
 
     return authorize
 

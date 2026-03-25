@@ -4,6 +4,7 @@ import threading
 from slack_sdk import WebClient
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
+from pymongo import MongoClient
 
 from bot.config import load_config
 from bot.paths import STRUCTURED_JSONL
@@ -18,14 +19,33 @@ from commands.control_panel_commands import register_control_panel
 from app_logging.structured_logger import install_structured_message_logging
 
 
+def make_authorize(cfg, mongo_uri):
+    mongo_client = MongoClient(mongo_uri)
+    installations = mongo_client["vibecheck"]["installations"]
+
+    def authorize(enterprise_id, team_id, **kwargs):
+        # First try to find the token in MongoDB (installed workspaces)
+        query = {"team_id": team_id}
+        if enterprise_id:
+            query["enterprise_id"] = enterprise_id
+        record = installations.find_one(query)
+        if record:
+            return {"bot_token": record["bot_token"]}
+        # Fall back to the original bot token for the home workspace
+        return {"bot_token": cfg.token}
+
+    return authorize
+
+
 def main():
     print("\n[BOOT] Starting bot...")
 
     cfg = load_config()
     state = create_state(default_channel=cfg.default_channel)
 
+    authorize = make_authorize(cfg, cfg.mongo_uri)
     client = WebClient(token=cfg.token)
-    bolt_app = App(token=cfg.token, ignoring_self_events_enabled=False)
+    bolt_app = App(authorize=authorize, ignoring_self_events_enabled=False)
 
     # Logging + commands
     install_structured_message_logging(bolt_app, client, log_file=str(STRUCTURED_JSONL))

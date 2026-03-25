@@ -1,6 +1,7 @@
 # src/commands/control_panel_commands.py
 from datetime import datetime
 from services.time_library import preSet_time_library
+from bot.state import get_team_id
 
 _TIME_FORMAT = "%I:%M:%S %p"  # e.g. 09:15:00 AM
 
@@ -207,7 +208,7 @@ def register_control_panel(bolt_app, state_manager):
     @bolt_app.event("app_home_opened")
     def update_home_tab(client, event, body, logger):
         try:
-            team_id = body.get("team_id")
+            team_id = get_team_id(body)
             state = state_manager.get_state(team_id)
             _publish_home(client, event["user"], state)
         except Exception as e:
@@ -216,7 +217,7 @@ def register_control_panel(bolt_app, state_manager):
     @bolt_app.action("mode_selection")
     def handle_mode_selection(ack, body, client, logger):
         ack()
-        team_id = body.get("team_id")
+        team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
         value = body["actions"][0]["selected_option"]["value"]
         state.set_selected_mode(value)
@@ -230,7 +231,7 @@ def register_control_panel(bolt_app, state_manager):
     @bolt_app.action("start_time")
     def handle_start_time(ack, body, client, logger):
         ack()
-        team_id = body.get("team_id")
+        team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
         value = body["actions"][0]["value"]
         if not _parse_time(value):
@@ -246,7 +247,7 @@ def register_control_panel(bolt_app, state_manager):
     @bolt_app.action("end_time")
     def handle_end_time(ack, body, client, logger):
         ack()
-        team_id = body.get("team_id")
+        team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
         value = body["actions"][0]["value"]
         if not _parse_time(value):
@@ -262,7 +263,7 @@ def register_control_panel(bolt_app, state_manager):
     @bolt_app.action("static_entry")
     def handle_static_entry(ack, body, client, logger):
         ack()
-        team_id = body.get("team_id")
+        team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
         value = body["actions"][0]["value"]
         if not _parse_time(value):
@@ -277,7 +278,7 @@ def register_control_panel(bolt_app, state_manager):
     @bolt_app.action("active_days_selection")
     def handle_active_days(ack, body, client, logger):
         ack()
-        team_id = body.get("team_id")
+        team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
         selected = body["actions"][0].get("selected_options", [])
         days = {opt["value"] for opt in selected}
@@ -291,7 +292,7 @@ def register_control_panel(bolt_app, state_manager):
     @bolt_app.action("preset_time_selection")
     def handle_preset_time_selection(ack, body, client, logger):
         ack()
-        team_id = body.get("team_id")
+        team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
         value = body["actions"][0]["selected_option"]["value"]
         index = _PRESET_VALUE_MAP.get(value)

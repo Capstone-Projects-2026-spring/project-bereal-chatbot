@@ -1,4 +1,5 @@
 # src/commands/status_command.py
+from bot.state import get_team_id
 
 
 def register_status_command(bolt_app, state_manager):
@@ -6,7 +7,7 @@ def register_status_command(bolt_app, state_manager):
     def handle_status(ack, respond, body):
         ack()
 
-        team_id = body.get("team_id")
+        team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
 
         mode = state.get_selected_mode() or "not set"

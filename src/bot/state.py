@@ -98,6 +98,11 @@ class BotState:
             return today in self._active_days
 
 
+def get_team_id(body: dict) -> Optional[str]:
+    """Extract team_id from a Slack request body, handling both slash commands and block actions."""
+    return body.get("team_id") or (body.get("team") or {}).get("id")
+
+
 def create_state(default_channel: Optional[str] = None) -> BotState:
     state = BotState(_lock=Lock())
     if default_channel:

@@ -2,11 +2,13 @@
 from services.time_library import preSet_time_library
 
 
-def register_time_commands(bolt_app, state):
+def register_time_commands(bolt_app, state_manager):
     @bolt_app.command("/findtime")
-    def handle_findtime_command(ack, respond):
+    def handle_findtime_command(ack, respond, body):
         try:
             ack()
+            team_id = body.get("team_id")
+            state = state_manager.get_state(team_id)
             respond(f"Today's random scheduled prompt time is {state.get_daily_target_time()}")
         except Exception as e:
             print(f"Error handling /findtime command: {e}")
@@ -15,6 +17,8 @@ def register_time_commands(bolt_app, state):
     def pick_time(ack, respond, body):
         try:
             ack()
+            team_id = body.get("team_id")
+            state = state_manager.get_state(team_id)
             text = body.get("text", "").strip()
 
             if not text:

@@ -1,10 +1,13 @@
 # src/commands/status_command.py
 
 
-def register_status_command(bolt_app, state):
+def register_status_command(bolt_app, state_manager):
     @bolt_app.command("/vibestatus")
-    def handle_status(ack, respond):
+    def handle_status(ack, respond, body):
         ack()
+
+        team_id = body.get("team_id")
+        state = state_manager.get_state(team_id)
 
         mode = state.get_selected_mode() or "not set"
         channel = state.get_active_channel() or "not set"

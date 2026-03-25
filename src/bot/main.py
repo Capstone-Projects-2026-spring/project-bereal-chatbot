@@ -8,7 +8,7 @@ from pymongo import MongoClient
 
 from bot.config import load_config
 from bot.paths import STRUCTURED_JSONL
-from bot.state import create_state
+from bot.state import StateManager
 from bot.scheduler import run_time_checker
 from bot.oauth_server import run_oauth_server
 
@@ -54,7 +54,7 @@ def main():
     print("\n[BOOT] Starting bot...")
 
     cfg = load_config()
-    state = create_state(default_channel=cfg.default_channel)
+    state_manager = StateManager()
 
     authorize = make_authorize(cfg, cfg.mongo_uri)
     client = WebClient(token=cfg.token)
@@ -64,15 +64,14 @@ def main():
     install_structured_message_logging(bolt_app, client, log_file=str(STRUCTURED_JSONL))
     register_force_prompt_command(bolt_app)
     register_help_command(bolt_app)
-    register_status_command(bolt_app, state)
-    register_time_commands(bolt_app, state)
-    register_set_channel_command(bolt_app, state)
-    register_control_panel(bolt_app, state)
+    register_status_command(bolt_app, state_manager)
+    register_time_commands(bolt_app, state_manager)
+    register_set_channel_command(bolt_app, state_manager)
+    register_control_panel(bolt_app, state_manager)
 
-    # Online message
-    active_channel = state.get_active_channel() or cfg.default_channel
+    # Online message to primary workspace
     try:
-        client.chat_postMessage(channel=active_channel, text="bot online")
+        client.chat_postMessage(channel=cfg.default_channel, text="bot online")
     except Exception as e:
         print(f"Error posting 'bot online' message: {e}")
 
@@ -80,7 +79,7 @@ def main():
     print("[BOOT] Starting background time checker...")
     time_thread = threading.Thread(
         target=run_time_checker,
-        args=(client, cfg.default_channel, state),
+        args=(state_manager, client, cfg.default_channel),
         daemon=True
     )
     time_thread.start()

@@ -103,3 +103,19 @@ def create_state(default_channel: Optional[str] = None) -> BotState:
     if default_channel:
         state.set_active_channel(default_channel)
     return state
+
+
+class StateManager:
+    def __init__(self):
+        self._states = {}
+        self._lock = Lock()
+
+    def get_state(self, team_id: str) -> BotState:
+        with self._lock:
+            if team_id not in self._states:
+                self._states[team_id] = BotState(_lock=Lock())
+            return self._states[team_id]
+
+    def all_states(self) -> dict:
+        with self._lock:
+            return dict(self._states)

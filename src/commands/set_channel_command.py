@@ -1,9 +1,9 @@
 import logging
 
-def register_set_channel_command(bolt_app, client, state):
-    
+def register_set_channel_command(bolt_app, state):
+
     @bolt_app.command("/setchannel")
-    def handle_setchannel_command(ack, respond, body):
+    def handle_setchannel_command(ack, respond, body, client):
         try:
             ack()
             text = body.get("text", "").strip()

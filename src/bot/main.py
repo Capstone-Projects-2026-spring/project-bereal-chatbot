@@ -49,9 +49,9 @@ def main():
 
     # Logging + commands
     install_structured_message_logging(bolt_app, client, log_file=str(STRUCTURED_JSONL))
-    register_force_prompt_command(bolt_app, client)
+    register_force_prompt_command(bolt_app)
     register_time_commands(bolt_app, state)
-    register_set_channel_command(bolt_app, client, state)
+    register_set_channel_command(bolt_app, state)
     register_control_panel(bolt_app, state)
 
     # Online message

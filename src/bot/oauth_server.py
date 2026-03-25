@@ -21,7 +21,7 @@ def get_db():
 
 @flask_app.route("/slack/install")
 def install():
-    scopes = "chat:write,channels:history,groups:history,im:history,mpim:history"
+    scopes = "chat:write,channels:history,groups:history,im:history,mpim:history,commands"
     url = (
         f"https://slack.com/oauth/v2/authorize"
         f"?client_id={SLACK_CLIENT_ID}"

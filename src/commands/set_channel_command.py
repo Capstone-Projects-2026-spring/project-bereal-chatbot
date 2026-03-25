@@ -16,6 +16,7 @@ def register_set_channel_command(bolt_app, state):
                 return
             
             state.set_active_channel(text)
+            state.set_active_token(client.token)
             respond(f"Active channel set to {text}")
             channel = state.get_active_channel()
             client.chat_postMessage(channel=channel, text="The bot will now listen to this channel")

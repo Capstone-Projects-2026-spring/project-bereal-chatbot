@@ -216,6 +216,7 @@ def register_control_panel(bolt_app, state):
         ack()
         value = body["actions"][0]["selected_option"]["value"]
         state.set_selected_mode(value)
+        state.set_active_token(client.token)
         print(f"[CONTROL PANEL] Operation mode set to: {value}")
         logger.info(f"Mode selected: {value}")
         _publish_home(client, body["user"]["id"], state)

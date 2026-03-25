@@ -17,6 +17,7 @@ class BotState:
     _active_days: Set[str] = field(default_factory=lambda: {
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     })
+    _active_token: Optional[str] = None
 
     def set_daily_target_time(self, t: Optional[str]) -> None:
         with self._lock:
@@ -29,6 +30,14 @@ class BotState:
     def get_active_channel(self) -> Optional[str]:
         with self._lock:
             return self._active_channel
+
+    def set_active_token(self, token: Optional[str]) -> None:
+        with self._lock:
+            self._active_token = token
+
+    def get_active_token(self) -> Optional[str]:
+        with self._lock:
+            return self._active_token
 
     def get_daily_target_time(self) -> Optional[str]:
         with self._lock:

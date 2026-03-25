@@ -59,6 +59,14 @@ def _get_target_time(state) -> str | None:
     return state.get_daily_target_time()
 
 
+def _get_client(client, state):
+    from slack_sdk import WebClient
+    token = state.get_active_token()
+    if token:
+        return WebClient(token=token)
+    return client
+
+
 def run_time_checker(client, default_channel: str, state) -> None:
     """
     Background loop that checks the clock every second and posts prompts at the
@@ -85,6 +93,7 @@ def run_time_checker(client, default_channel: str, state) -> None:
     try:
         while True:
             current_time = display_current_time()
+            active_client = _get_client(client, state)
             channel = state.get_active_channel() or default_channel
             today = date.today()
 
@@ -101,14 +110,14 @@ def run_time_checker(client, default_channel: str, state) -> None:
                     state.set_daily_target_time(new_time)
                     print(f"[SCHEDULER] New day — daily target time reset to: {new_time}")
                     try:
-                        client.chat_postMessage(channel = channel, text=f"time set for today is {new_time}")
+                        active_client.chat_postMessage(channel=channel, text=f"time set for today is {new_time}")
                     except Exception as e:
                         print(f"Error posting daily reset message: {e}")
 
             if state.is_today_active():
                 if current_time == "12:00:00 PM":
                     try:
-                        post_csv_prompt(client, channel=channel, prefix_text="Daily vibe check prompt:")
+                        post_csv_prompt(active_client, channel=channel, prefix_text="Daily vibe check prompt:")
                     except Exception as e:
                         print(f"Error posting 12:00:00 PM prompt: {e}")
 
@@ -116,7 +125,7 @@ def run_time_checker(client, default_channel: str, state) -> None:
                 if target_time and current_time == target_time:
                     try:
                         post_csv_prompt(
-                            client,
+                            active_client,
                             channel=channel,
                             prefix_text=f"Random vibe check prompt (time hit {target_time}):"
                         )

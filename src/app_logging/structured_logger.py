@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, Optional
 from pymongo import MongoClient
+from services.mongo_service import get_tracker
 
 
 class SlackNameCache:
@@ -102,3 +103,10 @@ def install_structured_message_logging(app, client, log_file: str = None):
             messages_col.insert_one(row)
         except Exception as e:
             print(f"[LOGGER] Failed to save message to MongoDB: {e}")
+
+        # Count this as a response to the active prompt in this channel,
+        # but only for real user messages (not bot posts or subtypes).
+        if user_id and not event.get("subtype"):
+            tracker = get_tracker()
+            if tracker:
+                tracker.record_response(channel_id)

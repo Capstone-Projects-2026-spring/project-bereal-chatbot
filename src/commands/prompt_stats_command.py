@@ -20,8 +20,9 @@ def register_prompt_stats_command(bolt_app):
         lines = ["*Prompt Stats (most asked first)*"]
         for doc in stats[:20]:
             tags = ", ".join(doc.get("tags", [])) or "—"
-            times = doc.get("times_asked", 0)
+            asked = doc.get("times_asked", 0)
+            responded = doc.get("times_responded", 0)
             prompt = doc.get("prompt", "")[:60]
-            lines.append(f"• [{times}x] _{tags}_ — {prompt}…")
+            lines.append(f"• [asked {asked}x | responses {responded}] _{tags}_ — {prompt}…")
 
         respond("\n".join(lines))

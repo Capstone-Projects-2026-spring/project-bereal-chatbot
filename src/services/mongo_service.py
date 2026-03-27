@@ -26,11 +26,13 @@ class PromptTracker:
     def __init__(self, mongo_uri: str) -> None:
         client = MongoClient(mongo_uri)
         self._col = client["vibecheck"]["prompt_stats"]
+        # Maps channel_id -> prompt_id for the most recently posted prompt
+        self._active_prompt: dict[str, str] = {}
 
-    def record_prompt_sent(self, prompt_id: str, prompt_text: str, tags: str) -> None:
+    def record_prompt_sent(self, prompt_id: str, prompt_text: str, tags: str, channel: str) -> None:
         """
-        Upsert the prompt document and increment times_asked by 1.
-        `tags` should be the raw CSV string, e.g. "work_life,personal_life".
+        Upsert the prompt document, increment times_asked, and mark this
+        channel's active prompt so responses can be counted.
         """
         tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
 
@@ -46,6 +48,20 @@ class PromptTracker:
                 "$setOnInsert": {"times_responded": 0},
             },
             upsert=True,
+        )
+        self._active_prompt[channel] = str(prompt_id)
+
+    def record_response(self, channel: str) -> None:
+        """
+        Increment times_responded for whichever prompt is currently active
+        in this channel. No-op if no prompt has been posted yet.
+        """
+        prompt_id = self._active_prompt.get(channel)
+        if not prompt_id:
+            return
+        self._col.update_one(
+            {"prompt_id": prompt_id},
+            {"$inc": {"times_responded": 1}},
         )
 
     def get_all_stats(self) -> list[dict]:

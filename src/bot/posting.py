@@ -17,7 +17,7 @@ def post_csv_prompt(client, channel: str, prefix_text: Optional[str] = None) -> 
 
     tracker = get_tracker()
     if tracker:
-        tracker.record_prompt_sent(prompt_id, prompt_text, tags)
+        tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel)
 
     msg = prompt_text
     if prefix_text:

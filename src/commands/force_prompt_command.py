@@ -14,7 +14,7 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
 
     tracker = get_tracker()
     if tracker:
-        tracker.record_prompt_sent(prompt_id, prompt_text, tags)
+        tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel)
 
     message = prompt_text
     if prefix_text:

@@ -18,6 +18,7 @@ from commands.status_command import register_status_command
 from commands.time_commands import register_time_commands
 from commands.set_channel_command import register_set_channel_command
 from commands.control_panel_commands import register_control_panel
+from commands.prompt_stats_command import register_prompt_stats_command
 from app_logging.structured_logger import install_structured_message_logging
 from services.mongo_service import init_tracker
 
@@ -77,6 +78,7 @@ def main():
     register_time_commands(bolt_app, state_manager)
     register_set_channel_command(bolt_app, state_manager)
     register_control_panel(bolt_app, state_manager)
+    register_prompt_stats_command(bolt_app)
 
     # Online message to primary workspace
     try:

@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock, patch
 from commands.force_prompt_command import register_force_prompt_command
 from commands.set_channel_command import register_set_channel_command
-from bot.state import create_state
+from bot.state import create_state, StateManager
 
 
 class DummyApp:
@@ -27,6 +27,11 @@ def app():
 @pytest.fixture
 def state():
     return create_state(default_channel="#bot-test")
+
+
+@pytest.fixture
+def state_manager():
+    return StateManager()
 
 
 def test_forceprompt_acks(app):
@@ -78,8 +83,8 @@ def test_forceprompt_posts_to_specified_channel(app):
     assert client.chat_postMessage.call_args[1]["channel"] == "#general"
 
 
-def test_setchannel_updates_state(app, state):
-    register_set_channel_command(app, state)
+def test_setchannel_updates_state(app, state_manager):
+    register_set_channel_command(app, state_manager)
     handler = app.get_command("/setchannel")
 
     ack = Mock()
@@ -87,22 +92,22 @@ def test_setchannel_updates_state(app, state):
     client = Mock()
     client.chat_postMessage.return_value = {"ok": True}
 
-    handler(ack=ack, respond=respond, body={"text": "#new-channel"}, client=client)
+    handler(ack=ack, respond=respond, body={"text": "#new-channel", "team_id": "T123"}, client=client)
 
     ack.assert_called_once()
-    assert state.get_active_channel() == "#new-channel"
+    assert state_manager.get_state("T123").get_active_channel() == "#new-channel"
 
 
-def test_setchannel_rejects_missing_channel(app, state):
-    register_set_channel_command(app, state)
+def test_setchannel_rejects_missing_channel(app, state_manager):
+    register_set_channel_command(app, state_manager)
     handler = app.get_command("/setchannel")
 
     ack = Mock()
     respond = Mock()
     client = Mock()
 
-    handler(ack=ack, respond=respond, body={"text": ""}, client=client)
+    handler(ack=ack, respond=respond, body={"text": "", "team_id": "T123"}, client=client)
 
     ack.assert_called_once()
     respond.assert_called_once()
-    assert state.get_active_channel() != ""
+    assert state_manager.get_state("T123").get_active_channel() != "#new-channel"

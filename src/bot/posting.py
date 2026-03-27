@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
+from services.mongo_service import get_tracker
 
 
 def display_current_time() -> str:
@@ -11,8 +12,12 @@ def display_current_time() -> str:
 
 
 def post_csv_prompt(client, channel: str, prefix_text: Optional[str] = None) -> None:
-    prompt_id, prompt_text = get_random_prompt_text()
+    prompt_id, prompt_text, tags = get_random_prompt_text()
     mark_prompt_asked(prompt_id)
+
+    tracker = get_tracker()
+    if tracker:
+        tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel)
 
     msg = prompt_text
     if prefix_text:

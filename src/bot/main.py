@@ -18,7 +18,9 @@ from commands.status_command import register_status_command
 from commands.time_commands import register_time_commands
 from commands.set_channel_command import register_set_channel_command
 from commands.control_panel_commands import register_control_panel
+from commands.prompt_stats_command import register_prompt_stats_command
 from app_logging.structured_logger import install_structured_message_logging
+from services.mongo_service import init_tracker
 
 
 def make_authorize(cfg, mongo_uri):
@@ -56,8 +58,16 @@ def main():
     cfg = load_config()
     state_manager = StateManager()
 
+    init_tracker(cfg.mongo_uri)
+
     authorize = make_authorize(cfg, cfg.mongo_uri)
     client = WebClient(token=cfg.token)
+
+    try:
+        auth_info = client.auth_test()
+        print(f"[BOOT] Bot username: @{auth_info['user']} (team: {auth_info['team']})")
+    except Exception as e:
+        print(f"[BOOT] Could not fetch bot username: {e}")
     bolt_app = App(authorize=authorize, signing_secret=cfg.signing_secret, ignoring_self_events_enabled=False)
 
     # Logging + commands
@@ -68,6 +78,7 @@ def main():
     register_time_commands(bolt_app, state_manager)
     register_set_channel_command(bolt_app, state_manager)
     register_control_panel(bolt_app, state_manager)
+    register_prompt_stats_command(bolt_app)
 
     # Online message to primary workspace
     try:

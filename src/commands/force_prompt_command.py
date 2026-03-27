@@ -2,14 +2,19 @@
 import logging
 
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
+from services.mongo_service import get_tracker
 
 
 def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_text=None):
     """
     Pull a random prompt from the prompt service and post it to Slack.
     """
-    prompt_id, prompt_text = get_random_prompt_text(response_type=response_type)
+    prompt_id, prompt_text, tags = get_random_prompt_text(response_type=response_type)
     mark_prompt_asked(prompt_id)
+
+    tracker = get_tracker()
+    if tracker:
+        tracker.record_prompt_sent(prompt_id, prompt_text, tags)
 
     message = prompt_text
     if prefix_text:

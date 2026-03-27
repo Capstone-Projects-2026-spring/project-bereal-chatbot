@@ -93,12 +93,14 @@ def get_random_prompt(response_type: Optional[str] = None) -> dict:
     return row
 
 
-def get_random_prompt_text(response_type: Optional[str] = None) -> Tuple[str, str]:
+def get_random_prompt_text(response_type: Optional[str] = None) -> Tuple[str, str, str]:
     """
-    Returns (prompt_id, prompt_text)
+    Returns (prompt_id, prompt_text, tags)
     """
     row = get_random_prompt(response_type=response_type)
-    return str(row["prompt_id"]), str(row["prompt_text"])
+    tags_col = _get_col(load_prompts_df(), ["tags", "tag"])
+    tags = str(row.get(tags_col, "")) if tags_col else ""
+    return str(row["prompt_id"]), str(row["prompt_text"]), tags
 
 
 def mark_prompt_asked(prompt_id: str) -> None:

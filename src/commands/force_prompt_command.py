@@ -31,9 +31,9 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
                 }
             ]
         }]
-    client.chat_postMessage(channel=channel, blocks=msg_block, text=message)
+   # client.chat_postMessage(channel=channel, blocks=msg_block, text=message)
 
-   # client.chat_postMessage(channel=channel, text=message)
+    client.chat_postMessage(channel=channel, text=message)
     logging.info(f"Force prompt posted prompt_id={prompt_id} to {channel}")
 
 

@@ -15,6 +15,24 @@ Tools: slack_sdk, dotenv
 
 The purpose of the Backend API is to present how Vibecheck solves the way of working with Slack's API. We've laid out some current functions that are made for the Slack app currently.
 
+# HTTP API Contract
+
+The external HTTP contract is maintained in the OpenAPI source file:
+
+- `documentation/static/openapi.yml.yaml`
+
+Rendered documentation is available in this section:
+
+- `docs/api-specification/openapi-spec`
+
+Contract maintenance checklist (required for each API change):
+
+- Update endpoint summaries to describe behavior.
+- Keep request/response schemas under `components/schemas` and reference them with `$ref`.
+- Document all error responses explicitly.
+- Keep `components/securitySchemes` aligned with authentication behavior.
+- Include example requests/responses for every new endpoint.
+
 # Requirements
 
 In addition to the general documentation requirements the Design Document - Part II API will contain:

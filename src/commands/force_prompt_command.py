@@ -37,7 +37,7 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
                     "type": "section",
                     "text": {
                         "type": "plain_text",
-                        "text": "Testing the sending of a block.",
+                        "text": "Testing the sending of a block." + message,
                     }
                 }
         ]

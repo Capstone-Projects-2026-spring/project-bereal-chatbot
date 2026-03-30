@@ -20,7 +20,20 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
     if prefix_text:
         message = f"{prefix_text}\n\n{prompt_text}"
 
-    client.chat_postMessage(channel=channel, text=message)
+    msg_block = [{
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Testing the sending of a block.",
+                    }
+                }
+            ]
+        }]
+    client.chat_postMessage(channel=channel, blocks=msg_block, text=message)
+
+   # client.chat_postMessage(channel=channel, text=message)
     logging.info(f"Force prompt posted prompt_id={prompt_id} to {channel}")
 
 

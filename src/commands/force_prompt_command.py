@@ -23,6 +23,18 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
    
     msg_block = [
                 {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": ":bangbang: NEW VIBE CHECK :bangbang:",
+                        "emoji": True
+                    },
+                    "level": 1
+                },
+                {
+                    "type": "divider"
+                },
+                {
                     "type": "section",
                     "text": {
                         "type": "plain_text",

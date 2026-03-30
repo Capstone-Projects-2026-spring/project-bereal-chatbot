@@ -45,53 +45,15 @@ Join the Slack workspace:
 [vibecheckbotteam.slack.com]
 https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw
 
-1. Install dependencies
-
-After opening the project in your IDE, run the following command:
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-2. Create a `.env` file in the repo root and add the following into it:
-
-```bash
-SLACK_BOT_TOKEN=xoxb-...
-SLACK_APP_TOKEN=xapp-...
-```
-
-# [Contact me for the tokens]
-
-3. Run the bot locally
-
-```bash
-python run.py
-```
-
-4. To stop the bot, press 'ctrl+c' in the terminal
-
-After joining the Slack workspace and running the chatbot, navigate to Apps and click on the overflow menu, where it says "More actions"
-<img width="3840" height="1792" alt="Step1" src="https://github.com/user-attachments/assets/b643f4c9-dee1-4736-ab57-d5e85c6581e1" />
-
-Press "Browse apps"
-<img width="3840" height="1775" alt="Step2" src="https://github.com/user-attachments/assets/e8683a01-614b-4401-93e0-64b14bea25ee" />
-
-Press Vibe Check and click "Open App"
-<img width="3840" height="1857" alt="image" src="https://github.com/user-attachments/assets/be2d96bb-9307-4b2e-90fc-84da80cd0aaa" />
-
-
-Now you should be ready to test our project! 
-<img width="3840" height="1859" alt="Step4" src="https://github.com/user-attachments/assets/902190ee-31fb-41fd-a70a-df0698d40b44" />
-
-Additional Note: Slash commands can also be used in the bot-test channel to test features
-<img width="3165" height="425" alt="image" src="https://github.com/user-attachments/assets/2cc09399-1cd3-4004-aa10-d45c7229b0e5" />
+You can also add the chatbot to your own workspace: 
+https://slack.com/oauth/v2/authorize?client_id=10423543431858.10430963976773&scope=app_mentions:read,channels:history,channels:read,chat:write,im:history,commands,groups:history,mpim:history&user_scope=files:write,channels:read,channels:write,chat:write  
 
 Any and all critiques will be greatly appreciated. Have fun testing! 🙂
 
-## For More Information
-To reach out for further information, you can contact me via email or text:
-- tuq43307@temple.edu
-- 267-241-3304
+## Contact Information
+To reach out for any concerns regarding this project, you can contact me via email or text:
+
+Khai: tuq43307@temple.edu | 267-241-3304
 
 
 ## Running Tests

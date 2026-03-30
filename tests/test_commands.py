@@ -43,7 +43,7 @@ def test_forceprompt_acks(app):
     client = Mock()
     client.chat_postMessage.return_value = {"ok": True}
 
-    with patch("commands.force_prompt_command.get_random_prompt_text", return_value=("1", "How are you?")), \
+    with patch("commands.force_prompt_command.get_random_prompt_text", return_value=("1", "How are you?", [])), \
          patch("commands.force_prompt_command.mark_prompt_asked"):
         handler(ack=ack, respond=respond, body={"text": "", "channel_id": "C123"}, client=client)
 
@@ -59,7 +59,7 @@ def test_forceprompt_posts_to_command_channel(app):
     client = Mock()
     client.chat_postMessage.return_value = {"ok": True}
 
-    with patch("commands.force_prompt_command.get_random_prompt_text", return_value=("1", "How are you?")), \
+    with patch("commands.force_prompt_command.get_random_prompt_text", return_value=("1", "How are you?", [])), \
          patch("commands.force_prompt_command.mark_prompt_asked"):
         handler(ack=ack, respond=respond, body={"text": "", "channel_id": "C123"}, client=client)
 
@@ -76,7 +76,7 @@ def test_forceprompt_posts_to_specified_channel(app):
     client = Mock()
     client.chat_postMessage.return_value = {"ok": True}
 
-    with patch("commands.force_prompt_command.get_random_prompt_text", return_value=("1", "How are you?")), \
+    with patch("commands.force_prompt_command.get_random_prompt_text", return_value=("1", "How are you?", [])), \
          patch("commands.force_prompt_command.mark_prompt_asked"):
         handler(ack=ack, respond=respond, body={"text": "#general", "channel_id": "C123"}, client=client)
 

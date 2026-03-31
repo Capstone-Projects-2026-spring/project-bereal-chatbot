@@ -18,7 +18,7 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
 
     message = prompt_text
     if prefix_text:
-        message = f"*{prefix_text}*\n\n{prompt_text}"
+        message = f"### **{prefix_text}**\n\n>{prompt_text}"
 
    
     msg_block = [
@@ -37,7 +37,7 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
                 {
                     "type": "section",
                     "text": {
-                        "type": "mrkdwn",
+                        "type": "markdown",
                         "text": message,
                     }
                 }

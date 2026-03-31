@@ -34,11 +34,11 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
                 {
                     "type": "divider"
                 },
-                {
-                    "type": "image",
-                    "image_url": "https://media1.tenor.com/m/1CcXIDK6YboAAAAC/the-simpsons-bart.gif",
-                    "alt_text": "bart simpsons dancing to the vibes."
-                },
+             #   {
+             #       "type": "image",
+             #       "image_url": "https://media1.tenor.com/m/1CcXIDK6YboAAAAC/the-simpsons-bart.gif",
+             #       "alt_text": "bart simpsons dancing to the vibes."
+             #   },
                 {
                 #    "type": "section",
                 #    "text": {

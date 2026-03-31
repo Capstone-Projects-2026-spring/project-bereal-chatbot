@@ -35,11 +35,13 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
                     "type": "divider"
                 },
                 {
-                    "type": "section",
-                    "text": {
-                        "type": "markdown",
-                        "text": message,
-                    }
+                #    "type": "section",
+                #    "text": {
+                #        "type": "mrkdwn",
+                #        "text": message,
+                #    }
+                    "type": "markdown",
+                    "text": message
                 }
         ]
     

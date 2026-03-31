@@ -29,7 +29,7 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
                         "text": ":bangbang: NEW VIBE CHECK :bangbang:",
                         "emoji": True
                     },
-                    "level": 1
+                    "level": 2
                 },
                 {
                     "type": "divider"
@@ -37,7 +37,7 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
                 {
                     "type": "section",
                     "text": {
-                        "type": "plain_text",
+                        "type": "mrkdwn",
                         "text": message,
                     }
                 }

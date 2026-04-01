@@ -108,7 +108,7 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                 if not state.is_today_active():
                     continue
 
-                if current_time == "12:00:00 PM":
+                if current_time == "8:42:00 AM":
                     try:
                         post_csv_prompt(active_client, channel=channel, prefix_text="Daily vibe check prompt:")
                     except Exception as e:

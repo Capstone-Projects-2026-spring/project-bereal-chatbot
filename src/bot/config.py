@@ -12,6 +12,8 @@ class BotConfig:
     signing_secret: str
     default_channel: str
     mongo_uri: str
+    llm_reactions_enabled: bool
+    llm_reactions_probability: float
 
 
 def load_config() -> BotConfig:
@@ -23,6 +25,8 @@ def load_config() -> BotConfig:
     signing_secret = os.getenv("SLACK_SIGNING_SECRET")
     default_channel = os.getenv("DEFAULT_CHANNEL", "#bot-test")
     mongo_uri = os.getenv("MONGO_URI")
+    llm_reactions_enabled = os.getenv("LLM_REACTIONS_ENABLED", "true").lower() == "true"
+    llm_reactions_probability = float(os.getenv("LLM_REACTIONS_PROBABILITY", "0.5"))
 
     if not token:
         raise RuntimeError("Missing SLACK_BOT_TOKEN in .env")
@@ -31,4 +35,11 @@ def load_config() -> BotConfig:
     if not mongo_uri:
         raise RuntimeError("Missing MONGO_URI in .env")
 
-    return BotConfig(token=token, signing_secret=signing_secret, default_channel=default_channel, mongo_uri=mongo_uri)
+    return BotConfig(
+        token=token,
+        signing_secret=signing_secret,
+        default_channel=default_channel,
+        mongo_uri=mongo_uri,
+        llm_reactions_enabled=llm_reactions_enabled,
+        llm_reactions_probability=llm_reactions_probability
+    )

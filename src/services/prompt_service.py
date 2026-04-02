@@ -52,7 +52,7 @@ def _get_col(df: pd.DataFrame, candidates) -> Optional[str]:
 
 def get_random_prompt(response_type: Optional[str] = None) -> dict:
     """
-    Return a random row (as dict). If response_type is provided, filter on it when possible.
+    Returns a random row (as dict). If response_type is provided, filter on it when possible.
     """
     df = load_prompts_df()
 
@@ -101,6 +101,59 @@ def get_random_prompt_text(response_type: Optional[str] = None) -> Tuple[str, st
     tags_col = _get_col(load_prompts_df(), ["tags", "tag"])
     tags = str(row.get(tags_col, "")) if tags_col else ""
     return str(row["prompt_id"]), str(row["prompt_text"]), tags
+
+
+def get_available_topics() -> list[str]:
+    """
+    Returns a sorted list of all unique topic tags present in the CSV.
+    """
+    df = load_prompts_df()
+    tags_col = _get_col(df, ["tags", "tag"])
+    if tags_col is None:
+        return []
+
+    topics: set[str] = set()
+    for cell in df[tags_col].dropna().astype(str):
+        for tag in cell.split(","):
+            tag = tag.strip()
+            if tag:
+                topics.add(tag)
+    return sorted(topics)
+
+
+def get_random_prompt_by_topic(topic: str) -> Tuple[str, str, str]:
+    """
+    Returns (prompt_id, prompt_text, tags) for a random prompt matching the given topic tag.
+    Falls back to a fully random prompt if no match is found.
+    """
+    df = load_prompts_df()
+    tags_col = _get_col(df, ["tags", "tag"])
+
+    if tags_col is not None:
+        mask = df[tags_col].astype(str).apply(
+            lambda cell: any(t.strip().lower() == topic.lower() for t in cell.split(","))
+        )
+        filtered = df[mask]
+    else:
+        filtered = pd.DataFrame()
+
+    if filtered.empty:
+        return get_random_prompt_text()
+
+    id_col = _get_col(filtered, ["prompt_id", "id"])
+    text_col = _get_col(filtered, ["prompt_text", "text", "prompt"])
+
+    row = filtered.sample(n=1).iloc[0].to_dict()
+
+    if id_col and id_col != "prompt_id":
+        row["prompt_id"] = row[id_col]
+    if text_col and text_col != "prompt_text":
+        row["prompt_text"] = row[text_col]
+    if not id_col:
+        row["prompt_id"] = str(filtered.sample(n=1).index[0])
+
+    tags_val = str(row.get(tags_col, "")) if tags_col else ""
+    return str(row["prompt_id"]), str(row["prompt_text"]), tags_val
 
 
 def mark_prompt_asked(prompt_id: str) -> None:

@@ -5,72 +5,103 @@ sidebar_position: 3
 
 # sequence diagrams 
 
-#### Use Case 1: Reply
+#### Use Case 1: Installing Bot in a Slack Workspace
+
 ```mermaid
 sequenceDiagram
-
-    participant User
-    participant VibeCheck
-    participant Database
-    User->>VibeCheck: sends post
-    VibeCheck->>Database: store user data
-```
-
-#### Use Case 2: Personal Use
-```mermaid
-sequenceDiagram
-    
-    participant User
+    participant Admin as Workspace Admin
     participant Slack
-    User->>Slack: select VibeCheck app
-    Slack-->>User: Requests user to confirm app selection
-    User->>Slack: Confirms request
-    Slack-->>User: adds VibeCheck app to the user's group
+    participant OAuth as VibeCheck OAuth Server
+    participant DB as MongoDB (installations)
+
+    Admin->>Slack: Opens install URL
+    Slack-->>Admin: Shows OAuth consent screen
+    Admin->>Slack: Approves permissions
+    Slack->>OAuth: Redirects with auth code
+    OAuth->>Slack: Exchanges code for token
+    Slack-->>OAuth: Returns team + token payload
+    OAuth->>DB: Upsert installation by team_id
+    OAuth-->>Admin: Installation success message
 ```
 
-#### Use Case 3: User Prompts
+#### Use Case 2: Setting Active Channel
+
 ```mermaid
 sequenceDiagram
     participant User
     participant Slack
-    User->>Slack: select VibeCheck app
-    Slack-->>User: Requests user to confirm app selection
-    User->>Slack: Confirms request
-    Slack-->>User: adds VibeCheck app to the user's group
+    participant Bot as VibeCheck Bot
+    participant Hub as Workspace Hub
+
+    User->>Slack: /setchannel #channel-name
+    Slack->>Bot: Slash command payload
+    Bot->>Hub: get_workspace(team_id)
+    Bot->>Hub: set_active_channel(channel)
+    Bot->>Hub: set_active_token(token)
+    Bot-->>User: Confirms selected channel
+    Bot->>Slack: Posts confirmation in selected channel
 ```
 
-#### Use Case 4: Streak History
+#### Use Case 3: Configuring Prompt Time
+
 ```mermaid
 sequenceDiagram
     participant User
-    participant VibeCheck
-    participant Database
-    User->>VibeCheck: requests streak history
-    VibeCheck->>Database: accesses user's data
-    Database-->>VibeCheck: returns user's streak data
-    VibeCheck-->>User: sends streak history 
+    participant Slack
+    participant Bot as VibeCheck Bot
+    participant Hub as Workspace Hub
+    participant TimeLib as Time Library
+
+    User->>Slack: /picktime <option>
+    Slack->>Bot: Slash command payload
+    Bot->>Hub: get_workspace(team_id)
+    Bot->>TimeLib: Convert option to preset time
+    TimeLib-->>Bot: Returns selected time
+    Bot->>Hub: set_daily_target_time(time)
+    Bot-->>User: Confirms schedule update
+
+    User->>Slack: /findtime
+    Slack->>Bot: Slash command payload
+    Bot->>Hub: get_daily_target_time()
+    Bot-->>User: Returns current scheduled time
 ```
 
-#### Use Case 5: Post History
+#### Use Case 4: Sending Prompt
+
+```mermaid
+sequenceDiagram
+    participant Trigger as Scheduler or User
+    participant Bot as VibeCheck Bot
+    participant Catalog as Prompt Library (CSV)
+    participant Tracker as Response Tracker
+    participant DB as MongoDB (prompt_stats)
+    participant Slack
+
+    Trigger->>Bot: Time hit or /forceprompt
+    Bot->>Catalog: get_random_prompt()
+    Catalog-->>Bot: prompt_id + text + tags
+    Bot->>Catalog: mark_prompt_asked(prompt_id)
+    Bot->>Tracker: record_prompt_sent(prompt_id, text, tags, channel)
+    Tracker->>DB: Upsert + increment times_asked
+    Bot->>Slack: Post prompt message to channel
+    Tracker-->>Bot: Set active prompt for channel
+```
+
+#### Use Case 5: Viewing Prompt Statistics
+
 ```mermaid
 sequenceDiagram
     participant User
-    participant VibeCheck
-    participant Database
-    User->>VibeCheck: requests post history
-    VibeCheck->>Database: accesses user's data
-    Database-->>VibeCheck: returns user's post data
-    VibeCheck-->>User: sends post history 
-```
+    participant Slack
+    participant Bot as VibeCheck Bot
+    participant Tracker as Response Tracker
+    participant DB as MongoDB (prompt_stats)
 
-#### Use Case 6: Peer Connection
-```mermaid
-sequenceDiagram
-    participant User
-    participant VibeCheck
-    participant Database
-    User->>VibeCheck: sends a groupme request
-    VibeCheck->>Database: access most activity based on topic
-    Database-->>VibeCheck: returns user's topic response data
-    VibeCheck-->>User: sends  a list of topic groups to join 
+    User->>Slack: /promptstats
+    Slack->>Bot: Slash command payload
+    Bot->>Tracker: get_all_stats()
+    Tracker->>DB: Query and sort by times_asked
+    DB-->>Tracker: Prompt stat records
+    Tracker-->>Bot: Formatted top entries
+    Bot-->>User: Prompt statistics summary
 ```

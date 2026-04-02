@@ -51,12 +51,14 @@ https://slack.com/oauth/v2/authorize?client_id=10423543431858.10430963976773&sco
 Any and all critiques will be greatly appreciated. Have fun testing! 🙂
 
 ## Contact Information
-To reach out for any concerns regarding this project, you can contact me via email or text:
+To reach out for any questions, comments, or concerns regarding this project, you can contact me via email or text:
 
 Khai: tuq43307@temple.edu | 267-241-3304
 
 
 ## Running Tests
+
+Run test commands from the project root directory.
 
 1. Install development dependencies:
 
@@ -70,6 +72,8 @@ Optional:
 
 - Run a specific file: `python run_tests.py tests/test_commands.py`
 - Verbose output: `python run_tests.py -v`
+- Run acceptance tests only: `pytest -m acceptance`
+- Run all tests with pytest directly: `pytest`
 
 ## CI/CD with GitHub Actions
 
@@ -88,6 +92,6 @@ To view results:
 <div align="center">
 
 [//]: # (Replace with your collaborators)
-[Justin Pham](https://github.com/Prismfade) • [Khai Thach](https://github.com/Khai-Thach) • [John Livezey](https://github.com/Jawn654) • [Chris Breeden](https://github.com/CRBreeden) • [Nathan Hollick](https://github.com/) • [Carl Pierre-Louis](https://github.com/carlpielou03)
+[Justin Pham](https://github.com/Prismfade) • [Khai Thach](https://github.com/Khai-Thach) • [John Livezey](https://github.com/Jawn654) • [Chris Breeden](https://github.com/CRBreeden) • [Nathan Hollick](https://github.com/tup40793) • [Carl Pierre-Louis](https://github.com/carlpielou03)
 
 </div>

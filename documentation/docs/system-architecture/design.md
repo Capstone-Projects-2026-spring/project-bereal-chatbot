@@ -7,18 +7,42 @@ sidebar_position: 1
 
 VibeCheck is a BeReal-like chatbot project. Since this project is primarily about the bot itself being used in an external application (Slack), its components consist of a prompt manager, scheduler, event handler, and MongoDB as its database. All components are interfaced through the usage of the Slack API.
 
+### Component Interfaces
+
+- Client: Slack workspace users interacting through channel messages, slash commands, and interactive controls.
+- Server: Python Slack Bolt app that receives Slack events and commands, executes scheduling and prompt logic, and posts responses back to Slack.
+- OAuth/HTTP Layer: Flask endpoints for Slack install and OAuth redirect flows.
+- Database: MongoDB for runtime operational state and analytics data.
+- Prompt Catalog Storage: CSV file used as the source prompt dataset.
+
+#### Interface Contracts
+
+- Slack to Server:
+    - Incoming message events for response counting and logging.
+    - Slash commands (for example prompt stats, status/time controls).
+    - Interactive control panel actions.
+- Server to Slack:
+    - chat.postMessage for scheduled prompts, operational messages, and command responses.
+- Server to MongoDB:
+    - Upsert installation records by team id.
+    - Insert message documents into per-workspace message collections.
+    - Upsert and increment prompt usage statistics in prompt_stats.
+- Server to Prompt Catalog CSV:
+    - Read prompts for random prompt selection.
+    - Optional write-back for asked timestamps when supported by CSV columns.
+
 
 #### MongoDB Database (Component)
 
-The excel database stores message history, post history, timestamps, responsiveness to certain topics, generated prompts, and relevant logs. 
+MongoDB stores runtime operational data, including workspace installations, per-workspace message logs, and prompt usage statistics.
 
-The data will then be used to give users a timeline of all their posts, a streak score history, and allows the chatbot to create group discussions based on the most interactive topics.
+The main collections are `installations`, `prompt_stats`, and dynamic `messages_<team_name|team_id>` collections. These records support Slack authorization, analytics commands (such as prompt stats), and response tracking.
 
 #### Prompt Manager (Component)
 
-The prompt manager will load a collection of prompts from the excel database that are each categorized by topic. The prompt will be randomly selected from the database to provide a diverse range of interesting questions.
+The prompt manager loads prompts from a CSV catalog (`data/prompts/vibecheck_prompts.csv`) and randomly selects a prompt, optionally filtered by response type.
 
-Based on the prompt's topic, if the prompt itself attracted high activity rates, the engagement manager will increase the likelihood of selecting that same topic.
+When a prompt is posted, the bot records ask/response activity in MongoDB (`prompt_stats`) so operators can inspect engagement over time.
 
 #### Scheduler (Component)
 
@@ -38,11 +62,11 @@ Algorithms employed in VibeCheck consists of Message counting, prompt selection,
 
 #### Message Counting
 
-Message counting tracks how many messages were sent by a user within a channel. The user id is inputted to the algorithm, which provides the number of responses from that user. Slack has a conversation.history call, which provides up to 200 previous messages the user had made. 
+Message counting tracks user responses to the currently active prompt in each channel. After a prompt is posted, each qualifying incoming message increments `times_responded` for that prompt in MongoDB.
 
 #### Prompt Selection
 
-Prompt selection is how the chabot will pick prompts from the excel database. the chatbot will load the prompts from Excel, which it will then randomly select a topic and pick a prompt from the database. 
+Prompt selection is performed by loading the prompt catalog CSV into memory and sampling a random row. The system normalizes column names and supports optional filtering by `response_type` when that field is available.
 
 #### Post Timing
 
@@ -53,39 +77,130 @@ Prompt selection is how the chabot will pick prompts from the excel database. th
 
 ```mermaid
 erDiagram
-    User ||--o{ Event : messages
-    User {
-        string name
-        int user_id
+    INSTALLATION ||--o{ MESSAGE_LOG : owns
+    PROMPT_CATALOG ||--o| PROMPT_STATISTICS : is_source_for
+
+    INSTALLATION {
+        objectid _id PK
+        string team_id UK
+        string team_name
+        string bot_token
+        string bot_user_id
+        string installed_by_user_id
+        string installed_at
     }
-    Event ||--|{ Chatbot : calls
-    Event {
-        string tokenized
-    }
-    Chatbot ||--|{ Excel-Database : requests
-    Chatbot {
-        string token
-    }
-    Excel-Database {
-        int user_id
+
+    MESSAGE_LOG {
+        objectid _id PK
+        string team_id FK
         string channel_id
-        int message_count
-        int post_count
-        int streak_score
+        string channel_name
+        string user_id
+        string user_name
+        string ts
+        string thread_ts
+        string subtype
+        string text
+        string ingested_at_utc
+    }
+
+    PROMPT_CATALOG {
+        int prompt_id PK
+        string prompt
+        string response_type
+        string tags
+        int times_asked
+        int times_responded
+    }
+
+    PROMPT_STATISTICS {
+        objectid _id PK
+        string prompt_id FK
+        string prompt
+        string tags
+        int times_asked
+        int times_responded
+        datetime last_asked_at
     }
 ```
-##### User Table
 
-- stores the user's information, such as their username and user_id
+##### Installation Collection (`vibecheck.installations`)
 
-##### Event Table
+- Stores one Slack workspace installation per `team_id`, including bot credentials and install metadata.
 
-- Contains a tokenized string of characters from a message sent by the user
+##### Message Log Collections (`vibecheck.messages_<team_name|team_id>`)
 
-##### Chatbot Table
+- Stores ingested Slack message events.
+- Each message document belongs to a workspace via `team_id`.
+- Collection name is dynamic per workspace (`messages_<team_name>` when available, otherwise `messages_<team_id>`).
 
-- chatbot reads the tokenized string and pulls necessary data from the Excel Spreadsheet
+##### Prompt Catalog (CSV: `data/prompts/vibecheck_prompts.csv`)
 
-##### Excel-Database Table
+- Source dataset for prompt selection.
+- Contains prompt metadata used by the bot when posting prompts.
 
-- the database provides the stored information to the chatbot
+##### Prompt Stats Collection (`vibecheck.prompt_stats`)
+
+- Aggregated runtime stats keyed by `prompt_id`.
+- Updated whenever a prompt is posted (`times_asked`) and when users respond in the active channel (`times_responded`).
+
+## Table Design
+
+This section defines the implemented physical data design for MongoDB collections and the CSV prompt catalog.
+
+### Collection: `vibecheck.installations`
+
+| Field | Type | Required | Key/Constraint | Description |
+|---|---|---|---|---|
+| _id | ObjectId | Yes | Primary (Mongo default) | MongoDB document id. |
+| team_id | String | Yes | Unique (application-level upsert key) | Slack workspace/team identifier. |
+| team_name | String | Yes | None | Human-readable Slack workspace name. |
+| bot_token | String | Yes | Sensitive | Bot OAuth token used for workspace authorization. |
+| bot_user_id | String | No | None | Bot user id returned by Slack OAuth. |
+| installed_by_user_id | String | No | None | Installer Slack user id. |
+| installed_at | String (ISO-8601 UTC) | Yes | None | Install timestamp. |
+
+### Collection Family: `vibecheck.messages_<team_name|team_id>`
+
+| Field | Type | Required | Key/Constraint | Description |
+|---|---|---|---|---|
+| _id | ObjectId | Yes | Primary (Mongo default) | MongoDB document id. |
+| team_id | String | No | Logical FK to installations.team_id | Workspace id for this event. |
+| channel_id | String | No | None | Slack channel id. |
+| channel_name | String | No | None | Cached channel name at ingest time. |
+| user_id | String | No | None | Slack user id for sender. |
+| user_name | String | No | None | Cached user display name at ingest time. |
+| ts | String | No | None | Slack event timestamp. |
+| thread_ts | String | No | None | Slack thread root timestamp when present. |
+| subtype | String | No | None | Slack message subtype when present. |
+| text | String | No | None | Message text payload. |
+| ingested_at_utc | String (ISO-8601 UTC) | Yes | None | Ingestion timestamp. |
+
+### Collection: `vibecheck.prompt_stats`
+
+| Field | Type | Required | Key/Constraint | Description |
+|---|---|---|---|---|
+| _id | ObjectId | Yes | Primary (Mongo default) | MongoDB document id. |
+| prompt_id | String | Yes | Upsert key (application-level) | Prompt identifier from prompt catalog. |
+| prompt | String | Yes | None | Prompt text snapshot. |
+| tags | Array[String] | No | None | Normalized tag list derived from CSV tags. |
+| times_asked | Integer | Yes | Non-negative counter | Incremented when prompt is posted. |
+| times_responded | Integer | Yes | Non-negative counter | Incremented on qualifying user responses. |
+| last_asked_at | DateTime (UTC) | No | None | Last time prompt was posted. |
+
+### File Dataset: `data/prompts/vibecheck_prompts.csv`
+
+| Column | Type | Required | Key/Constraint | Description |
+|---|---|---|---|---|
+| prompt_id | Integer | Yes | Logical primary key in dataset | Prompt identifier used by runtime and stats mapping. |
+| prompt | String | Yes | None | Prompt text shown to users. |
+| response_type | String | No | Domain values such as text/image | Used for optional prompt filtering. |
+| tags | String (comma-separated) | No | None | Topic tags used for analytics and grouping. |
+| times_asked | Integer | No | Non-negative recommended | Dataset-level counter field. |
+| times_responded | Integer | No | Non-negative recommended | Dataset-level counter field. |
+
+### Data Integrity Notes
+
+- Relationship from messages to installations is enforced by team_id usage in application logic, not a MongoDB foreign key constraint.
+- Relationship from prompt_stats to prompt catalog is enforced by prompt_id values generated from the CSV dataset.
+- Prompt tags are stored as comma-separated strings in CSV and normalized into arrays in MongoDB prompt_stats.

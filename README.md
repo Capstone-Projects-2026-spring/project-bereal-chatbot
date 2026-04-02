@@ -51,7 +51,7 @@ https://slack.com/oauth/v2/authorize?client_id=10423543431858.10430963976773&sco
 Any and all critiques will be greatly appreciated. Have fun testing! 🙂
 
 ## Contact Information
-To reach out for any concerns regarding this project, you can contact me via email or text:
+To reach out for any questions, comments, or concerns regarding this project, you can contact me via email or text:
 
 Khai: tuq43307@temple.edu | 267-241-3304
 

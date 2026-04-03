@@ -25,7 +25,7 @@ def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Option
     if tracker:
         tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel, team_id)
 
-    msg = prompt_text
+    msg = f">{prompt_text}"
     if prefix_text:
         msg = f"### **{prefix_text.upper()}**\n\n>{prompt_text}"
 

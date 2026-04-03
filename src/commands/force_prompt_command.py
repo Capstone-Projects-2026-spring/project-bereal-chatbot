@@ -17,7 +17,7 @@ def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=N
     if tracker:
         tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel, team_id)
 
-    message = prompt_text
+    message = f">{prompt_text}"
     if prefix_text:
         message = f"### **{prefix_text.upper()}**\n\n>{prompt_text}"
 

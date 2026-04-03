@@ -19,7 +19,7 @@ def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=N
 
     message = f">{prompt_text}"
     if prefix_text:
-        message = f"### **{prefix_text.upper()}**\n\n>{prompt_text}"
+        message = f"### **{prefix_text.upper()}**\n\n>{prompt_text}\n\n```Testing Footnote Idea```"
 
    
     msg_block = randomize_message_block(message)

@@ -96,6 +96,18 @@ def randomize_message_block(message):
         ":exclamation: VIBE CHECK! :exclamation:",
         ":exclamation: VIBE CHECK ALERT :exclamation:",
     ]
+
+    image_lists = [
+        "https://media1.tenor.com/m/1CcXIDK6YboAAAAC/the-simpsons-bart.gif",
+        "https://media1.tenor.com/m/hV2TZljEW1kAAAAd/vibby-vibby-vibes.gif",
+        "https://media.tenor.com/y0hD2LSxx_8AAAAi/vibe.gif",
+        "https://media.tenor.com/X9mVHTwAHXoAAAAi/vibes-woodstock.gif",
+        "https://media1.tenor.com/m/LCpcrdtI0GYAAAAd/vibing-st6.gif",
+        "https://media1.tenor.com/m/3fWNoUgRYFEAAAAd/cat-vibe-cat-meme.gif",
+        "https://media1.tenor.com/m/Tfm5oTF9Xt0AAAAd/cat-sunglasses.gif",
+        "https://media1.tenor.com/m/dEjkUvV_ieoAAAAC/dance-victro.gif",
+        "https://media1.tenor.com/m/HCyNMWQv868AAAAC/good-night.gif",
+    ]
     msg_block = []
     if num <= 3:
          msg_block = [
@@ -132,8 +144,8 @@ def randomize_message_block(message):
                 },
                 {
                     "type": "image",
-                    "image_url": "https://media1.tenor.com/m/1CcXIDK6YboAAAAC/the-simpsons-bart.gif",
-                    "alt_text": "bart simpsons dancing to the vibes."
+                    "image_url": image_lists[random.randint(0, len(image_lists) - 1)],
+                    "alt_text": "an image relating to the vibes."
                 },
                 {
                     "type": "markdown",

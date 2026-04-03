@@ -1,6 +1,7 @@
 # src/commands/control_panel_commands.py
 from datetime import datetime
 from services.time_library import preSet_time_library
+from services.prompt_service import get_available_topics
 from bot.state import get_team_id
 
 _TIME_FORMAT = "%I:%M:%S %p"  # e.g. 09:15:00 AM
@@ -48,9 +49,16 @@ _DAY_OPTIONS = [
 ]
 
 
+def _build_topic_options():
+    topics = get_available_topics()
+    opts = [{"text": {"type": "plain_text", "text": "(any topic)"}, "value": "__none__"}]
+    opts += [{"text": {"type": "plain_text", "text": t}, "value": t} for t in topics]
+    return opts
+
+
 def _build_home_view(selected_preset=None, selected_mode=None,
                      random_start=None, random_end=None, static_time=None,
-                     active_days=None) -> dict:
+                     active_days=None, pending_topic=None) -> dict:
     preset_initial = next(
         (opt for opt in _PRESET_OPTIONS if opt["value"] == selected_preset),
         _PRESET_OPTIONS[0]
@@ -95,6 +103,12 @@ def _build_home_view(selected_preset=None, selected_mode=None,
     if active_days is None:
         active_days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
     day_initial = [opt for opt in _DAY_OPTIONS if opt["value"] in active_days]
+
+    topic_options = _build_topic_options()
+    topic_initial = next(
+        (opt for opt in topic_options if opt["value"] == (pending_topic or "__none__")),
+        topic_options[0]
+    )
 
     return {
         "type": "home",
@@ -164,6 +178,23 @@ def _build_home_view(selected_preset=None, selected_mode=None,
                         "options": _DAY_OPTIONS
                     }
                 ]
+            },
+            {"type": "divider"},
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": "*6. Next Prompt Topic*\nChoose a topic for the next scheduled prompt. Resets to \"any\" after it fires."}
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "static_select",
+                        "placeholder": {"type": "plain_text", "text": "Pick a topic..."},
+                        "initial_option": topic_initial,
+                        "options": topic_options,
+                        "action_id": "topic_selection"
+                    }
+                ]
             }
         ]
     }
@@ -179,6 +210,7 @@ def _publish_home(client, user_id, state):
             random_end=state.get_random_end_time(),
             static_time=state.get_static_time(),
             active_days=state.get_active_days(),
+            pending_topic=state._pending_topic,
         )
     )
 
@@ -304,3 +336,20 @@ def register_control_panel(bolt_app, state_manager):
             logger.info(f"Preset time selected: {t}")
             _publish_home(client, body["user"]["id"], state)
             _dm_admin(client, body["user"]["id"], f":clock1: *Preset time* set to `{t}`")
+
+    @bolt_app.action("topic_selection")
+    def handle_topic_selection(ack, body, client, logger):
+        ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
+        value = body["actions"][0]["selected_option"]["value"]
+        if value == "__none__":
+            state.set_pending_topic(None)
+            print(f"[CONTROL PANEL] [{team_id}] Topic cleared (any)")
+            _dm_admin(client, body["user"]["id"], "No topic selected — topic will still be random.")
+        else:
+            state.set_pending_topic(value)
+            print(f"[CONTROL PANEL] [{team_id}] Pending topic set to: {value}")
+            logger.info(f"Pending topic set: {value}")
+            _dm_admin(client, body["user"]["id"], f"Next prompt topic set to `{value}`.")
+        _publish_home(client, body["user"]["id"], state)

@@ -18,6 +18,18 @@ class BotState:
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     })
     _active_token: Optional[str] = None
+    _pending_topic: Optional[str] = None
+
+    def set_pending_topic(self, topic: Optional[str]) -> None:
+        with self._lock:
+            self._pending_topic = topic
+
+    def get_and_clear_pending_topic(self) -> Optional[str]:
+        """Returns the pending topic and clears it so it only applies once."""
+        with self._lock:
+            topic = self._pending_topic
+            self._pending_topic = None
+            return topic
 
     def set_daily_target_time(self, t: Optional[str]) -> None:
         with self._lock:

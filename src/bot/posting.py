@@ -12,7 +12,7 @@ def display_current_time() -> str:
     return now.strftime("%I:%M:%S %p")
 
 
-def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Optional[str] = None, topic: Optional[str] = None, active_tags: Optional[set] = None) -> None:
+def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Optional[str] = None, topic: Optional[str] = None, active_tags: Optional[set] = None, footnote_text: Optional[str] = None) -> None:
 
     if topic:
         prompt_id, prompt_text, tags = get_random_prompt_by_topic(topic)
@@ -28,6 +28,9 @@ def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Option
     msg = f">{prompt_text}"
     if prefix_text:
         msg = f"### **{prefix_text.upper()}**\n\n>{prompt_text}"
+
+    if footnote_text:
+        message += f"\n\n\n```{footnote_text}```"
 
     msg_block = randomize_message_block(msg)
 

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-description: Backend API Design Docuement
+description: Backend API Design Document
 ---
 
 Backend API - Design Document - Part II API
@@ -8,12 +8,12 @@ Backend API - Design Document - Part II API
 
 # Purpose
 
-This Design Document gives the complete design of the software implementation. This information should be in structured comments (e.g. Javadoc) in the source files. We encourage the use of a documentation generation tool to generate a draft of your API that you can augment to include the following details.
+The purpose of the Backend API is to present how Vibecheck works with Slack's API. This Design Document gives the complete overview of the backend components implemented.
 
 Language: Python
 Tools: slack_sdk, dotenv
 
-The purpose of the Backend API is to present how Vibecheck solves the way of working with Slack's API. We've laid out some current functions that are made for the Slack app currently.
+---
 
 # HTTP API Contract
 
@@ -25,21 +25,9 @@ Rendered documentation is available in this section:
 
 - `docs/api-specification/openapi-spec`
 
-Contract maintenance checklist (required for each API change):
-
-- Update endpoint summaries to describe behavior.
-- Keep request/response schemas under `components/schemas` and reference them with `$ref`.
-- Document all error responses explicitly.
-- Keep `components/securitySchemes` aligned with authentication behavior.
-- Include example requests/responses for every new endpoint.
-
-------
+---
 
 # Requirements
-
-In addition to the general documentation requirements the Design Document - Part II API will contain:
-
-![BeReal ChatBot](/img/VibeCheck-SystemBlockDiagram.png)
 
 ## Functional
 

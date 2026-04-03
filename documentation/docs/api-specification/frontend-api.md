@@ -22,6 +22,8 @@ This contract explains what the Slack-facing interface accepts, what it returns 
 Language: Slack UI / Slack Bolt
 Tools: Slack slash commands, Slack App Home, Block Kit components
 
+---
+
 # Requirements
 
 The frontend API contract must stay synchronized with the actual Slack interaction behavior implemented by the bot.
@@ -35,6 +37,8 @@ This includes:
 - App Home interactive controls and their effects
 - error messages that are meaningful to the user
 
+---
+
 ## Frontend Surface Overview
 
 VibeCheck exposes the following user-facing interaction points in Slack:
@@ -44,6 +48,8 @@ VibeCheck exposes the following user-facing interaction points in Slack:
 3. `/setchannel`
 4. `/forceprompt`
 5. App Home control panel interactions
+
+---
 
 ## Slack Slash Commands
 

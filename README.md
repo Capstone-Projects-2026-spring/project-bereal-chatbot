@@ -62,11 +62,11 @@ Run test commands from the project root directory.
 
 1. Install development dependencies:
 
-	`python -m pip install -r requirements-dev.txt`
+    `python -m pip install -r requirements-dev.txt`
 
 2. Run all unit tests:
 
-	`python run_tests.py`
+    `python run_tests.py`
 
 Optional:
 

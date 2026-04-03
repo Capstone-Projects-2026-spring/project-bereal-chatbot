@@ -1,9 +1,11 @@
 # structured_logger.py
 import os
+import random
 from datetime import datetime
 from typing import Any, Dict, Optional
 from pymongo import MongoClient
 from services.mongo_service import get_tracker
+from services.llm_service import get_reaction_emoji
 
 
 class SlackNameCache:
@@ -56,10 +58,10 @@ class SlackNameCache:
             return channel_id
 
 
-def install_structured_message_logging(app, client, log_file: str = None):
+def install_structured_message_logging(app, client, cfg=None, log_file: str = None):
     """
     Installs a Bolt event handler that saves messages to MongoDB,
-    organized by workspace and channel.
+    organized by workspace and channel. Also optionally adds emoji reactions via LLM.
     """
     mongo_client = MongoClient(os.getenv("MONGO_URI"))
     db = mongo_client["vibecheck"]
@@ -108,5 +110,21 @@ def install_structured_message_logging(app, client, log_file: str = None):
         # but only for real user messages (not bot posts or subtypes).
         if user_id and not event.get("subtype"):
             tracker = get_tracker()
-            if tracker:
-                tracker.record_response(channel_id)
+            if tracker and team_id:
+                tracker.record_response(channel_id, team_id)
+            
+            # Add LLM-generated emoji reaction (if enabled and probabilistically)
+            if cfg and cfg.llm_reactions_enabled:
+                if random.random() < cfg.llm_reactions_probability:
+                    text = event.get("text") or ""
+                    emoji = get_reaction_emoji(text)
+                    if emoji:
+                        try:
+                            client.reactions_add(
+                                name=emoji,
+                                channel=channel_id,
+                                timestamp=event.get("ts")
+                            )
+                            print(f"[REACTION] Added emoji {emoji} to message in {cache.channel_name(channel_id)}")
+                        except Exception as e:
+                            print(f"[REACTION] Failed to add emoji reaction: {e}")

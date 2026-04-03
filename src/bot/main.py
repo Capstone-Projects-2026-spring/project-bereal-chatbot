@@ -19,6 +19,7 @@ from commands.time_commands import register_time_commands
 from commands.set_channel_command import register_set_channel_command
 from commands.control_panel_commands import register_control_panel
 from commands.prompt_stats_command import register_prompt_stats_command
+from commands.pick_topic_command import register_pick_topic_command
 from app_logging.structured_logger import install_structured_message_logging
 from services.mongo_service import init_tracker
 
@@ -71,14 +72,15 @@ def main():
     bolt_app = App(authorize=authorize, signing_secret=cfg.signing_secret, ignoring_self_events_enabled=False)
 
     # Logging + commands
-    install_structured_message_logging(bolt_app, client, log_file=str(STRUCTURED_JSONL))
-    register_force_prompt_command(bolt_app)
+    install_structured_message_logging(bolt_app, client, cfg=cfg, log_file=str(STRUCTURED_JSONL))
+    register_force_prompt_command(bolt_app, state_manager)
     register_help_command(bolt_app)
     register_status_command(bolt_app, state_manager)
     register_time_commands(bolt_app, state_manager)
     register_set_channel_command(bolt_app, state_manager)
     register_control_panel(bolt_app, state_manager)
     register_prompt_stats_command(bolt_app)
+    register_pick_topic_command(bolt_app, state_manager)
 
     # Online message to primary workspace
     try:

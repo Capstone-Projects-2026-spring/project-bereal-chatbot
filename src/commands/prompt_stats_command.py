@@ -4,7 +4,7 @@ from services.mongo_service import get_tracker
 
 def register_prompt_stats_command(bolt_app):
     @bolt_app.command("/promptstats")
-    def handle_prompt_stats(ack, respond):
+    def handle_prompt_stats(ack, respond, body):
         ack()
 
         tracker = get_tracker()
@@ -12,7 +12,8 @@ def register_prompt_stats_command(bolt_app):
             respond("Prompt tracker is not initialized.")
             return
 
-        stats = tracker.get_all_stats()
+        team_id = body.get("team_id") or (body.get("authorizations") or [{}])[0].get("team_id") or ""
+        stats = tracker.get_all_stats(team_id)
         if not stats:
             respond("No prompt stats recorded yet.")
             return

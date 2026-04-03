@@ -1,5 +1,6 @@
 # src/commands/force_prompt_command.py
 import logging
+import random
 
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 from services.mongo_service import get_tracker
@@ -18,37 +19,10 @@ def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=N
 
     message = prompt_text
     if prefix_text:
-        message = f"### **{prefix_text}**\n\n>{prompt_text}"
+        message = f"### **{prefix_text.upper()}**\n\n>{prompt_text}"
 
    
-    msg_block = [
-                {
-                    "type": "header",
-                    "text": {
-                        "type": "plain_text",
-                        "text": ":bangbang: NEW VIBE CHECK :bangbang:",
-                        "emoji": True
-                    },
-                    "level": 2
-                },
-                {
-                    "type": "divider"
-                },
-             #   {
-             #       "type": "image",
-             #       "image_url": "https://media1.tenor.com/m/1CcXIDK6YboAAAAC/the-simpsons-bart.gif",
-             #       "alt_text": "bart simpsons dancing to the vibes."
-             #   },
-                {
-                #    "type": "section",
-                #    "text": {
-                #        "type": "mrkdwn",
-                #        "text": message,
-                #    }
-                    "type": "markdown",
-                    "text": message
-                }
-        ]
+    msg_block = randomize_message_block(message)
     
     
     client.chat_postMessage(channel=channel, blocks=msg_block, text=message)
@@ -105,3 +79,67 @@ def register_force_prompt_command(bolt_app, state_manager=None):
         except Exception as e:
             logging.exception("Error in /forceprompt")
             respond(f"❌ Failed to post prompt: {e}")
+
+def randomize_message_block(message):
+    num = random.randint(1,10)
+    headerMSGs = [
+        ":bangbang: NEW VIBE CHECK :bangbang:",
+        ":bangbang: VIBE CHECK :bangbang:",
+        ":bangbang: VIBE CHECK! :bangbang:",
+        ":bangbang: VIBE CHECK ALERT :bangbang:",
+        ":interrobang: NEW VIBE CHECK :interrobang:",
+        ":interrobang: VIBE CHECK :interrobang:",
+        ":interrobang: VIBE CHECK! :interrobang:",
+        ":interrobang: VIBE CHECK ALERT :interrobang:",
+        ":exclamation: NEW VIBE CHECK :exclamation:",
+        ":exclamation: VIBE CHECK :exclamation:",
+        ":exclamation: VIBE CHECK! :exclamation:",
+        ":exclamation: VIBE CHECK ALERT :exclamation:",
+    ]
+    msg_block = []
+    if num <= 3:
+         msg_block = [
+          {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": headerMSGs[random.randint(0, len(headerMSGs) - 1)] ,
+                        "emoji": True
+                    },
+                    "level": 2
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "markdown",
+                    "text": message
+                }
+            ]
+    else:
+         msg_block = [
+          {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": headerMSGs[random.randint(0, len(headerMSGs) - 1)],
+                        "emoji": True
+                    },
+                    "level": 2
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "image",
+                    "image_url": "https://media1.tenor.com/m/1CcXIDK6YboAAAAC/the-simpsons-bart.gif",
+                    "alt_text": "bart simpsons dancing to the vibes."
+                },
+                {
+                    "type": "markdown",
+                    "text": message
+                }
+            ]
+   
+
+    return msg_block

@@ -93,12 +93,33 @@ def get_random_prompt(response_type: Optional[str] = None) -> dict:
     return row
 
 
-def get_random_prompt_text(response_type: Optional[str] = None) -> Tuple[str, str, str]:
+def get_random_prompt_text(response_type: Optional[str] = None, active_tags: Optional[set] = None) -> Tuple[str, str, str]:
     """
-    Returns (prompt_id, prompt_text, tags)
+    Returns (prompt_id, prompt_text, tags).
+    If active_tags is a non-empty set, only prompts whose tags overlap with it are considered.
     """
-    row = get_random_prompt(response_type=response_type)
-    tags_col = _get_col(load_prompts_df(), ["tags", "tag"])
+    df = load_prompts_df()
+    tags_col = _get_col(df, ["tags", "tag"])
+
+    if active_tags and tags_col:
+        mask = df[tags_col].astype(str).apply(
+            lambda cell: any(t.strip().lower() in {a.lower() for a in active_tags} for t in cell.split(","))
+        )
+        filtered = df[mask]
+        if filtered.empty:
+            filtered = df  # fall back to all prompts if filter matches nothing
+        row = filtered.sample(n=1).iloc[0].to_dict()
+        id_col = _get_col(filtered, ["prompt_id", "id"])
+        text_col = _get_col(filtered, ["prompt_text", "text", "prompt"])
+        if id_col and id_col != "prompt_id":
+            row["prompt_id"] = row[id_col]
+        if text_col and text_col != "prompt_text":
+            row["prompt_text"] = row[text_col]
+        if not id_col:
+            row["prompt_id"] = str(filtered.sample(n=1).index[0])
+    else:
+        row = get_random_prompt(response_type=response_type)
+
     tags = str(row.get(tags_col, "")) if tags_col else ""
     return str(row["prompt_id"]), str(row["prompt_text"]), tags
 

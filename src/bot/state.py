@@ -19,6 +19,15 @@ class BotState:
     })
     _active_token: Optional[str] = None
     _pending_topic: Optional[str] = None
+    _active_tags: Set[str] = field(default_factory=set)  # empty = all tags allowed
+
+    def set_active_tags(self, tags: Set[str]) -> None:
+        with self._lock:
+            self._active_tags = tags
+
+    def get_active_tags(self) -> Set[str]:
+        with self._lock:
+            return set(self._active_tags)
 
     def set_pending_topic(self, topic: Optional[str]) -> None:
         with self._lock:

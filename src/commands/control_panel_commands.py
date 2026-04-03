@@ -49,6 +49,11 @@ _DAY_OPTIONS = [
 ]
 
 
+def _build_tag_options():
+    topics = get_available_topics()
+    return [{"text": {"type": "plain_text", "text": t}, "value": t} for t in topics]
+
+
 def _build_topic_options():
     topics = get_available_topics()
     opts = [{"text": {"type": "plain_text", "text": "(any topic)"}, "value": "__none__"}]
@@ -58,11 +63,7 @@ def _build_topic_options():
 
 def _build_home_view(selected_preset=None, selected_mode=None,
                      random_start=None, random_end=None, static_time=None,
-                     active_days=None, pending_topic=None) -> dict:
-    preset_initial = next(
-        (opt for opt in _PRESET_OPTIONS if opt["value"] == selected_preset),
-        _PRESET_OPTIONS[0]
-    )
+                     active_days=None, pending_topic=None, active_tags=None) -> dict:
     mode_initial = next(
         (opt for opt in _MODE_OPTIONS if opt["value"] == selected_mode),
         None
@@ -76,33 +77,12 @@ def _build_home_view(selected_preset=None, selected_mode=None,
     if mode_initial:
         mode_accessory["initial_option"] = mode_initial
 
-    start_element = {
-        "type": "plain_text_input",
-        "action_id": "start_time",
-        "placeholder": {"type": "plain_text", "text": "HH:MM:SS AM/PM  e.g. 12:00:00 PM"}
-    }
-    if random_start:
-        start_element["initial_value"] = random_start
-
-    end_element = {
-        "type": "plain_text_input",
-        "action_id": "end_time",
-        "placeholder": {"type": "plain_text", "text": "HH:MM:SS AM/PM  e.g. 05:00:00 PM"}
-    }
-    if random_end:
-        end_element["initial_value"] = random_end
-
-    static_element = {
-        "type": "plain_text_input",
-        "action_id": "static_entry",
-        "placeholder": {"type": "plain_text", "text": "HH:MM:SS AM/PM  e.g. 09:15:00 AM"}
-    }
-    if static_time:
-        static_element["initial_value"] = static_time
-
     if active_days is None:
         active_days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
     day_initial = [opt for opt in _DAY_OPTIONS if opt["value"] in active_days]
+
+    tag_options = _build_tag_options()
+    tag_initial = [opt for opt in tag_options if opt["value"] in (active_tags or set())]
 
     topic_options = _build_topic_options()
     topic_initial = next(
@@ -110,22 +90,42 @@ def _build_home_view(selected_preset=None, selected_mode=None,
         topic_options[0]
     )
 
-    return {
-        "type": "home",
-        "blocks": [
-            {
-                "type": "header",
-                "text": {"type": "plain_text", "text": "Time Configuration Settings"}
-            },
+    # --- always-visible blocks ---
+    blocks = [
+        {
+            "type": "header",
+            "text": {"type": "plain_text", "text": "Vibe Check Bot Settings"}
+        },
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*1. Select Operation Mode*"},
+            "accessory": mode_accessory
+        },
+        {"type": "divider"},
+    ]
+
+    # --- dynamic time config based on selected mode ---
+    if selected_mode == "mode_random":
+        start_element = {
+            "type": "plain_text_input",
+            "action_id": "start_time",
+            "placeholder": {"type": "plain_text", "text": "HH:MM:SS AM/PM  e.g. 09:00:00 AM"}
+        }
+        if random_start:
+            start_element["initial_value"] = random_start
+
+        end_element = {
+            "type": "plain_text_input",
+            "action_id": "end_time",
+            "placeholder": {"type": "plain_text", "text": "HH:MM:SS AM/PM  e.g. 05:00:00 PM"}
+        }
+        if random_end:
+            end_element["initial_value"] = random_end
+
+        blocks += [
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": "*1. Select Operation Mode*"},
-                "accessory": mode_accessory
-            },
-            {"type": "divider"},
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": "*2. Random Time Range Parameters:*"}
+                "text": {"type": "mrkdwn", "text": "*2. Random Time Range*\nSet a window — the bot picks a random time within it each day."}
             },
             {
                 "type": "input",
@@ -140,9 +140,17 @@ def _build_home_view(selected_preset=None, selected_mode=None,
                 "label": {"type": "plain_text", "text": "End Time"}
             },
             {"type": "divider"},
+        ]
+
+    elif selected_mode == "mode_preset":
+        preset_initial = next(
+            (opt for opt in _PRESET_OPTIONS if opt["value"] == selected_preset),
+            _PRESET_OPTIONS[0]
+        )
+        blocks += [
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": "*3. Preset Times Select:*"}
+                "text": {"type": "mrkdwn", "text": "*2. Preset Time*\nPick one of the preset times."}
             },
             {
                 "type": "actions",
@@ -157,47 +165,101 @@ def _build_home_view(selected_preset=None, selected_mode=None,
                 ]
             },
             {"type": "divider"},
+        ]
+
+    elif selected_mode == "mode_static":
+        static_element = {
+            "type": "plain_text_input",
+            "action_id": "static_entry",
+            "placeholder": {"type": "plain_text", "text": "HH:MM:SS AM/PM  e.g. 09:15:00 AM"}
+        }
+        if static_time:
+            static_element["initial_value"] = static_time
+
+        blocks += [
             {
                 "type": "input",
                 "dispatch_action": True,
                 "element": static_element,
-                "label": {"type": "plain_text", "text": "*4. Static Set Time (Manual)*"}
+                "label": {"type": "plain_text", "text": "2. Static Set Time"}
             },
             {"type": "divider"},
+        ]
+
+    else:
+        # No mode selected yet — prompt the user
+        blocks += [
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": "*5. Active Days*"}
-            },
-            {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "checkboxes",
-                        "action_id": "active_days_selection",
-                        "initial_options": day_initial,
-                        "options": _DAY_OPTIONS
-                    }
-                ]
+                "text": {"type": "mrkdwn", "text": "_Select a mode above to configure its time settings._"}
             },
             {"type": "divider"},
+        ]
+
+    # --- always-visible: active days ---
+    blocks += [
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*3. Active Days*"}
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "checkboxes",
+                    "action_id": "active_days_selection",
+                    "initial_options": day_initial,
+                    "options": _DAY_OPTIONS
+                }
+            ]
+        },
+        {"type": "divider"},
+    ]
+
+    # --- always-visible: tag filter ---
+    tag_filter_block = {
+        "type": "actions",
+        "elements": [
             {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": "*6. Next Prompt Topic*\nChoose a topic for the next scheduled prompt. Resets to \"any\" after it fires."}
-            },
-            {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "static_select",
-                        "placeholder": {"type": "plain_text", "text": "Pick a topic..."},
-                        "initial_option": topic_initial,
-                        "options": topic_options,
-                        "action_id": "topic_selection"
-                    }
-                ]
+                "type": "checkboxes",
+                "action_id": "tag_filter_selection",
+                "options": tag_options,
             }
         ]
     }
+    if tag_initial:
+        tag_filter_block["elements"][0]["initial_options"] = tag_initial
+
+    blocks += [
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*4. Topic Filter*\nOnly send prompts from these tags. Leave all unchecked for any topic."}
+        },
+        tag_filter_block,
+        {"type": "divider"},
+    ]
+
+    # --- always-visible: next prompt one-time override ---
+    blocks += [
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*5. Next Prompt Override*\nForce the next scheduled prompt to use a specific topic. Resets after it fires."}
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "static_select",
+                    "placeholder": {"type": "plain_text", "text": "Pick a topic..."},
+                    "initial_option": topic_initial,
+                    "options": topic_options,
+                    "action_id": "topic_selection"
+                }
+            ]
+        },
+    ]
+
+    return {"type": "home", "blocks": blocks}
 
 
 def _publish_home(client, user_id, state):
@@ -211,6 +273,7 @@ def _publish_home(client, user_id, state):
             static_time=state.get_static_time(),
             active_days=state.get_active_days(),
             pending_topic=state._pending_topic,
+            active_tags=state.get_active_tags(),
         )
     )
 
@@ -353,3 +416,17 @@ def register_control_panel(bolt_app, state_manager):
             logger.info(f"Pending topic set: {value}")
             _dm_admin(client, body["user"]["id"], f"Next prompt topic set to `{value}`.")
         _publish_home(client, body["user"]["id"], state)
+
+    @bolt_app.action("tag_filter_selection")
+    def handle_tag_filter_selection(ack, body, client, logger):
+        ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
+        selected = body["actions"][0].get("selected_options", [])
+        tags = {opt["value"] for opt in selected}
+        state.set_active_tags(tags)
+        tag_list = ", ".join(sorted(tags)) if tags else "any"
+        print(f"[CONTROL PANEL] [{team_id}] Active tag filter set to: {tag_list}")
+        logger.info(f"Tag filter set: {tag_list}")
+        _publish_home(client, body["user"]["id"], state)
+        _dm_admin(client, body["user"]["id"], f":label: *Topic filter* set to: {tag_list}")

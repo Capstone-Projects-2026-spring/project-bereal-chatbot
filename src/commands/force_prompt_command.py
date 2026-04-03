@@ -6,7 +6,7 @@ from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 from services.mongo_service import get_tracker
 
 
-def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=None, prefix_text=None, active_tags=None):
+def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=None, prefix_text=None, footnote_text=None, active_tags=None):
     """
     Pull a random prompt from the prompt service and post it to Slack.
     """
@@ -19,7 +19,7 @@ def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=N
 
     message = f">{prompt_text}"
     if prefix_text:
-        message = f"### **{prefix_text.upper()}**\n\n>{prompt_text}\n\n```Testing Footnote Idea```"
+        message = f"### **{prefix_text.upper()}**\n\n>{prompt_text}\n\n\n```{footnote_text}```"
 
    
     msg_block = randomize_message_block(message)
@@ -72,7 +72,8 @@ def register_force_prompt_command(bolt_app, state_manager=None):
                 channel=channel,
                 team_id=team_id,
                 response_type=response_type,
-                prefix_text="Forced vibe check prompt:",
+                prefix_text="Prompt of the Moment:",
+                footnote_text="forced vibe check",
                 active_tags=active_tags,
             )
             respond(f"✅ Posted a prompt to {channel}.")

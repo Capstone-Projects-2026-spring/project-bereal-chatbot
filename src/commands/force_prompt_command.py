@@ -5,7 +5,7 @@ from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 from services.mongo_service import get_tracker
 
 
-def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_text=None):
+def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=None, prefix_text=None):
     """
     Pull a random prompt from the prompt service and post it to Slack.
     """
@@ -14,7 +14,7 @@ def _post_random_prompt(client, channel="#bot-test", response_type=None, prefix_
 
     tracker = get_tracker()
     if tracker:
-        tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel)
+        tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel, team_id)
 
     message = prompt_text
     if prefix_text:
@@ -76,6 +76,7 @@ def register_force_prompt_command(bolt_app):
 
         response_type = None
         channel = body.get("channel_id")  # default to the channel where command was used
+        team_id = body.get("team_id") or (body.get("authorizations") or [{}])[0].get("team_id") or ""
 
         # Parse args in any order:
         # - "text" or "image"
@@ -91,6 +92,7 @@ def register_force_prompt_command(bolt_app):
             _post_random_prompt(
                 client=client,
                 channel=channel,
+                team_id=team_id,
                 response_type=response_type,
                 prefix_text="Forced vibe check prompt:"
             )

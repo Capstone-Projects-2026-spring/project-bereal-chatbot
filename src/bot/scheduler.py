@@ -111,7 +111,7 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                 if current_time == "8:42:00 AM":
                     try:
                         topic = state.get_and_clear_pending_topic()
-                        post_csv_prompt(active_client, channel=channel, prefix_text="Daily vibe check prompt:", topic=topic)
+                        post_csv_prompt(active_client, channel=channel, team_id=team_id, prefix_text="Daily vibe check prompt:", topic=topic)
                     except Exception as e:
                         print(f"[SCHEDULER] [{team_id}] Error posting 12 PM prompt: {e}")
 
@@ -122,6 +122,7 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                         post_csv_prompt(
                             active_client,
                             channel=channel,
+                            team_id=team_id,
                             prefix_text=f"Random vibe check prompt (time hit {target_time}):",
                             topic=topic,
                         )

@@ -11,8 +11,8 @@ def display_current_time() -> str:
     return now.strftime("%I:%M:%S %p")
 
 
-def post_csv_prompt(client, channel: str, prefix_text: Optional[str] = None, topic: Optional[str] = None) -> None:
-    
+def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Optional[str] = None, topic: Optional[str] = None) -> None:
+
     if topic:
         prompt_id, prompt_text, tags = get_random_prompt_by_topic(topic)
     else:
@@ -22,7 +22,7 @@ def post_csv_prompt(client, channel: str, prefix_text: Optional[str] = None, top
 
     tracker = get_tracker()
     if tracker:
-        tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel)
+        tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel, team_id)
 
     msg = prompt_text
     if prefix_text:

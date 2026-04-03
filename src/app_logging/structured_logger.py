@@ -110,8 +110,8 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
         # but only for real user messages (not bot posts or subtypes).
         if user_id and not event.get("subtype"):
             tracker = get_tracker()
-            if tracker:
-                tracker.record_response(channel_id)
+            if tracker and team_id:
+                tracker.record_response(channel_id, team_id)
             
             # Add LLM-generated emoji reaction (if enabled and probabilistically)
             if cfg and cfg.llm_reactions_enabled:

@@ -107,6 +107,7 @@ def randomize_message_block(message):
         "https://media1.tenor.com/m/Tfm5oTF9Xt0AAAAd/cat-sunglasses.gif",
         "https://media1.tenor.com/m/dEjkUvV_ieoAAAAC/dance-victro.gif",
         "https://media1.tenor.com/m/HCyNMWQv868AAAAC/good-night.gif",
+        "https://media.tenor.com/sbfBfp3FeY8AAAAi/oia-uia.gif",
     ]
     msg_block = []
     if num <= 1:
@@ -152,6 +153,4 @@ def randomize_message_block(message):
                     "text": message
                 }
             ]
-   
-
     return msg_block

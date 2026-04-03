@@ -5,11 +5,11 @@ from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 from services.mongo_service import get_tracker
 
 
-def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=None, prefix_text=None):
+def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=None, prefix_text=None, active_tags=None):
     """
     Pull a random prompt from the prompt service and post it to Slack.
     """
-    prompt_id, prompt_text, tags = get_random_prompt_text(response_type=response_type)
+    prompt_id, prompt_text, tags = get_random_prompt_text(response_type=response_type, active_tags=active_tags)
     mark_prompt_asked(prompt_id)
 
     tracker = get_tracker()
@@ -57,7 +57,7 @@ def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=N
     logging.info(f"Force prompt posted prompt_id={prompt_id} to {channel}")
 
 
-def register_force_prompt_command(bolt_app):
+def register_force_prompt_command(bolt_app, state_manager=None):
     """
     Registers a slash command:
       /forceprompt
@@ -78,6 +78,10 @@ def register_force_prompt_command(bolt_app):
         channel = body.get("channel_id")  # default to the channel where command was used
         team_id = body.get("team_id") or (body.get("authorizations") or [{}])[0].get("team_id") or ""
 
+        active_tags = None
+        if state_manager and team_id:
+            active_tags = state_manager.get_state(team_id).get_active_tags() or None
+
         # Parse args in any order:
         # - "text" or "image"
         # - "#channel"
@@ -94,7 +98,8 @@ def register_force_prompt_command(bolt_app):
                 channel=channel,
                 team_id=team_id,
                 response_type=response_type,
-                prefix_text="Forced vibe check prompt:"
+                prefix_text="Forced vibe check prompt:",
+                active_tags=active_tags,
             )
             respond(f"✅ Posted a prompt to {channel}.")
         except Exception as e:

@@ -73,7 +73,7 @@ def main():
 
     # Logging + commands
     install_structured_message_logging(bolt_app, client, cfg=cfg, log_file=str(STRUCTURED_JSONL))
-    register_force_prompt_command(bolt_app)
+    register_force_prompt_command(bolt_app, state_manager)
     register_help_command(bolt_app)
     register_status_command(bolt_app, state_manager)
     register_time_commands(bolt_app, state_manager)

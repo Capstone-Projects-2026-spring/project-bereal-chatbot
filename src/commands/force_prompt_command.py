@@ -109,7 +109,7 @@ def randomize_message_block(message):
         "https://media1.tenor.com/m/HCyNMWQv868AAAAC/good-night.gif",
     ]
     msg_block = []
-    if num <= 3:
+    if num <= 1:
          msg_block = [
           {
                     "type": "header",

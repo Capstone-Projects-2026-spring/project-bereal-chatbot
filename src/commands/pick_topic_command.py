@@ -49,30 +49,5 @@ def register_pick_topic_command(bolt_app, state_manager: StateManager):
 
         respond(f"Topic set, the next prompt will be from the `{topic}` topic.")
         logging.info(f"/picktopic set pending topic={topic} for team={team_id}")
-                tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel)
-
-            msg_blocks = [
-                {
-                    "type": "header",
-                    "text": {
-                        "type": "plain_text",
-                        "text": f":bangbang: NEW VIBE CHECK — {topic.upper()} :bangbang:",
-                        "emoji": True,
-                    },
-                },
-                {"type": "divider"},
-                {
-                    "type": "markdown",
-                    "text": prompt_text,
-                },
-            ]
-
-            client.chat_postMessage(channel=channel, blocks=msg_blocks, text=prompt_text)
-            respond(f"Posted a `{topic}` prompt to <#{channel}>.")
-            logging.info(f"/picktopic posted prompt_id={prompt_id} topic={topic} to {channel}")
-
-        except Exception as e:
-            logging.exception(f"/picktopic error: {e}")
-            respond(f"Failed to post prompt: {e}")
 
 

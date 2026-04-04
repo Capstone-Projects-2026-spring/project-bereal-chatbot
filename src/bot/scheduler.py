@@ -9,6 +9,7 @@ from services.time_library import preSet_time_library
 from bot.posting import display_current_time, post_csv_prompt
 
 _FMT = "%I:%M:%S %p"
+_REMINDER_DELAY_SECONDS = 600  # 10 minutes
 
 
 def _pick_random_time(start_str=None, end_str=None, after: datetime = None) -> str:
@@ -66,6 +67,40 @@ def _ensure_initial_time(state) -> None:
         print(f"[SCHEDULER] Initial time picked for new workspace: {t}")
 
 
+def _send_reminders(client, channel: str, prompt_ts: str) -> None:
+    """DM every channel member who hasn't posted since the vibe check prompt."""
+    try:
+        members = client.conversations_members(channel=channel)["members"]
+    except Exception as e:
+        print(f"[REMINDER] Could not fetch channel members: {e}")
+        return
+
+    try:
+        history = client.conversations_history(channel=channel, oldest=prompt_ts, limit=200)
+        responded = {m["user"] for m in history.get("messages", []) if "user" in m}
+    except Exception as e:
+        print(f"[REMINDER] Could not fetch channel history: {e}")
+        return
+
+    for user_id in members:
+        if user_id in responded:
+            continue
+        try:
+            info = client.users_info(user=user_id)
+            if info["user"].get("is_bot") or info["user"].get("id") == "USLACKBOT":
+                continue
+        except Exception:
+            pass
+        try:
+            client.chat_postMessage(
+                channel=user_id,
+                text="Hey! You missed the vibe check. It's not too late to share how you're doing! :wave:",
+            )
+            print(f"[REMINDER] Sent reminder DM to {user_id}")
+        except Exception as e:
+            print(f"[REMINDER] Could not DM {user_id}: {e}")
+
+
 def run_time_checker(state_manager, fallback_client, default_channel: str) -> None:
     """
     Background loop that checks the clock every second and posts prompts at the
@@ -111,7 +146,9 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                 if current_time == "8:42:00 AM":
                     try:
                         topic = state.get_and_clear_pending_topic()
-                        post_csv_prompt(active_client, channel=channel, team_id=team_id, prefix_text="PROMPT OF THE DAY:", topic=topic, active_tags=state.get_active_tags() or None)
+                        ts = post_csv_prompt(active_client, channel=channel, team_id=team_id, prefix_text="PROMPT OF THE DAY:", topic=topic, active_tags=state.get_active_tags() or None)
+                        if ts:
+                            state.set_last_prompt_ts(ts)
                     except Exception as e:
                         print(f"[SCHEDULER] [{team_id}] Error posting 12 PM prompt: {e}")
 
@@ -119,7 +156,7 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                 if target_time and current_time == target_time:
                     try:
                         topic = state.get_and_clear_pending_topic()
-                        post_csv_prompt(
+                        ts = post_csv_prompt(
                             active_client,
                             channel=channel,
                             team_id=team_id,
@@ -128,9 +165,18 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                             active_tags=state.get_active_tags() or None,
                             footnote_text=f"random vibe check | time hit {target_time}"
                         )
+                        if ts:
+                            state.set_last_prompt_ts(ts)
                         print(f"\n[SCHEDULER] [{team_id}] Time hit: {target_time}")
                     except Exception as e:
                         print(f"[SCHEDULER] [{team_id}] Error posting time hit prompt: {e}")
+
+                prompt_ts = state.get_last_prompt_ts()
+                if prompt_ts and not state.get_reminder_sent():
+                    if time.time() - float(prompt_ts) >= _REMINDER_DELAY_SECONDS:
+                        print(f"[REMINDER] [{team_id}] 10 min elapsed — sending reminder DMs")
+                        _send_reminders(active_client, channel, prompt_ts)
+                        state.set_reminder_sent(True)
 
             time.sleep(1)
 

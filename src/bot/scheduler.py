@@ -9,7 +9,7 @@ from services.time_library import preSet_time_library
 from bot.posting import display_current_time, post_csv_prompt
 
 _FMT = "%I:%M:%S %p"
-_REMINDER_DELAY_SECONDS = 600  # 10 minutes
+
 
 
 def _pick_random_time(start_str=None, end_str=None, after: datetime = None) -> str:
@@ -173,7 +173,8 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
 
                 prompt_ts = state.get_last_prompt_ts()
                 if prompt_ts and not state.get_reminder_sent():
-                    if time.time() - float(prompt_ts) >= _REMINDER_DELAY_SECONDS:
+                    delay_seconds = state.get_reminder_delay_minutes() * 60
+                    if time.time() - float(prompt_ts) >= delay_seconds:
                         print(f"[REMINDER] [{team_id}] 10 min elapsed — sending reminder DMs")
                         _send_reminders(active_client, channel, prompt_ts)
                         state.set_reminder_sent(True)

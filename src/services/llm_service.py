@@ -1,5 +1,6 @@
 import os
-from typing import Optional
+import re
+from typing import Optional, List
 
 try:
     from groq import Groq
@@ -71,10 +72,11 @@ def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> 
         
         emoji_names_str = ", ".join(sorted(list(VALID_SLACK_EMOJI_NAMES)[:50]))  # Show sample
         system_prompt = (
-            f"You are an emoji expert. Given a user's response to a prompt, "
-            f"respond with ONLY a single Slack emoji name (without colons) that captures the sentiment or content. "
-            f"Pick one from valid Slack emoji names list: {emoji_names_str}. "
-            f"No text, no explanation, just the emoji name. Example response: 'thumbsup' or 'heart' or 'laughing'"
+            "You are an emoji expert. Given a user's response to a prompt, "
+            "respond with ONLY a single Slack emoji name that captures the sentiment or content. "
+            "The name must be a valid Slack emoji name: lowercase letters, numbers, underscores, and hyphens only. "
+            "No colons, no Unicode characters, no text, no explanation. "
+            "Examples of valid responses: heart, tada, fire, slightly_smiling_face, origami"
         )
         
         user_msg = f"User response: {message_text}"
@@ -91,21 +93,66 @@ def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> 
             max_tokens=20
         )
         
-        emoji_name = response.choices[0].message.content.strip().lower()
+        emoji = response.choices[0].message.content.strip().strip(":")
         
-        # Clean up the response (remove colons if they tried to use :emoji: format)
-        emoji_name = emoji_name.strip(":")
-        
-        # Validate it's a recognized Slack emoji name
-        if emoji_name in VALID_SLACK_EMOJI_NAMES:
-            return emoji_name
-        
-        # If LLM returned something unrecognized, return None instead of risking an error
-        if emoji_name and not emoji_name.isalnum() and emoji_name != "-1" and emoji_name != "+1":
-            print(f"[LLM] Unrecognized emoji name returned: {emoji_name}")
+        # Validate the Slack emoji name (letters, numbers, underscores, hyphens)
+        if emoji and re.match(r'^[a-z0-9_\-]+$', emoji):
+            return emoji
         
         return None
         
     except Exception as e:
         print(f"[LLM] Error getting emoji reaction: {e}")
         return None
+
+
+def get_social_connector_message(user1_id: str, user2_id: str, shared_tags: List[str]) -> str:
+    """
+    Uses Groq to generate a friendly channel message pairing two users with shared interests.
+    Falls back to a default message if the API call fails or is disabled.
+    """
+    fallback = (
+        f"Hey <@{user1_id}> and <@{user2_id}>, you two might have a lot in common — "
+        f"try getting to know each other more! :wave:"
+    )
+
+    if Groq is None:
+        return fallback
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return fallback
+
+    tags_str = ", ".join(shared_tags)
+
+    try:
+        client = Groq(api_key=api_key)
+
+        system_prompt = (
+            "You are a friendly Slack bot that helps teammates connect. "
+            "Generate a single short, warm message pairing two Slack users based on shared interests. "
+            "Use Slack user mention format exactly as provided: <@USER_ID>. "
+            "Keep it to 1-2 sentences. Be casual and encouraging. End with a relevant Slack emoji."
+        )
+
+        user_msg = (
+            f"Generate a connection message for <@{user1_id}> and <@{user2_id}> "
+            f"who both like: {tags_str}."
+        )
+
+        response = client.chat.completions.create(
+            model="mixtral-8x7b-32768",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_msg},
+            ],
+            temperature=0.8,
+            max_tokens=100,
+        )
+
+        msg = response.choices[0].message.content.strip()
+        return msg if msg else fallback
+
+    except Exception as e:
+        print(f"[LLM] Error getting social connector message: {e}")
+        return fallback

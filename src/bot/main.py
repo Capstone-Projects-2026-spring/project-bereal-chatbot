@@ -20,6 +20,9 @@ from commands.set_channel_command import register_set_channel_command
 from commands.control_panel_commands import register_control_panel
 from commands.prompt_stats_command import register_prompt_stats_command
 from commands.pick_topic_command import register_pick_topic_command
+from commands.pick_tags_command import register_pick_tags_command
+from commands.onboarding import register_onboarding
+from commands.user_prompt_command import register_user_prompt_handlers
 from app_logging.structured_logger import install_structured_message_logging
 from services.mongo_service import init_tracker
 
@@ -81,6 +84,9 @@ def main():
     register_control_panel(bolt_app, state_manager)
     register_prompt_stats_command(bolt_app)
     register_pick_topic_command(bolt_app, state_manager)
+    register_pick_tags_command(bolt_app, state_manager)
+    register_onboarding(bolt_app, state_manager)
+    register_user_prompt_handlers(bolt_app, state_manager)
 
     # Online message to primary workspace
     try:

@@ -20,6 +20,37 @@ class BotState:
     _active_token: Optional[str] = None
     _pending_topic: Optional[str] = None
     _active_tags: Set[str] = field(default_factory=set)  # empty = all tags allowed
+    _last_prompt_ts: Optional[str] = None
+    _reminder_sent: bool = False
+    _reminder_delay_minutes: int = 10
+    _pending_custom_prompt: Optional[str] = None  # user-authored prompt text
+    _user_prompt_creator_used_today: bool = False  # only invite one user to create a prompt
+    _social_connector_used_today: bool = False  # only run social connector once per day
+
+    def set_last_prompt_ts(self, ts: Optional[str]) -> None:
+        with self._lock:
+            self._last_prompt_ts = ts
+            self._reminder_sent = False
+
+    def get_last_prompt_ts(self) -> Optional[str]:
+        with self._lock:
+            return self._last_prompt_ts
+
+    def get_reminder_sent(self) -> bool:
+        with self._lock:
+            return self._reminder_sent
+
+    def set_reminder_sent(self, value: bool) -> None:
+        with self._lock:
+            self._reminder_sent = value
+
+    def get_reminder_delay_minutes(self) -> int:
+        with self._lock:
+            return self._reminder_delay_minutes
+
+    def set_reminder_delay_minutes(self, value: int) -> None:
+        with self._lock:
+            self._reminder_delay_minutes = value
 
     def set_active_tags(self, tags: Set[str]) -> None:
         with self._lock:
@@ -117,6 +148,32 @@ class BotState:
         today = date.today().strftime("%A")  # e.g. "Monday"
         with self._lock:
             return today in self._active_days
+
+    def set_pending_custom_prompt(self, text: Optional[str]) -> None:
+        with self._lock:
+            self._pending_custom_prompt = text
+
+    def get_and_clear_pending_custom_prompt(self) -> Optional[str]:
+        with self._lock:
+            text = self._pending_custom_prompt
+            self._pending_custom_prompt = None
+            return text
+
+    def set_user_prompt_creator_used_today(self, value: bool) -> None:
+        with self._lock:
+            self._user_prompt_creator_used_today = value
+
+    def get_user_prompt_creator_used_today(self) -> bool:
+        with self._lock:
+            return self._user_prompt_creator_used_today
+
+    def set_social_connector_used_today(self, value: bool) -> None:
+        with self._lock:
+            self._social_connector_used_today = value
+
+    def get_social_connector_used_today(self) -> bool:
+        with self._lock:
+            return self._social_connector_used_today
 
 
 def get_team_id(body: dict) -> Optional[str]:

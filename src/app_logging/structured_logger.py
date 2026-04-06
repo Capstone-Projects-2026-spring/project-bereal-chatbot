@@ -124,7 +124,7 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
                         if emoji:
                             try:
                                 client.reactions_add(
-                                    channel =channel_id,
+                                    channel=channel_id,
                                     timestamp=timestamp,
                                     name=emoji
                                 )

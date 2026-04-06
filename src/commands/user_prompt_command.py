@@ -1,6 +1,7 @@
 # src/commands/user_prompt_command.py
 import logging
 import time
+import os
 
 from bot.state import StateManager, get_team_id
 from services.prompt_service import get_available_topics
@@ -203,8 +204,9 @@ def register_user_prompt_handlers(bolt_app, state_manager: StateManager):
         if send_now:
             from bot.posting import post_custom_prompt
             from services.prompt_service import get_random_prompt_by_topic
-            channel = state.get_active_channel()
+            channel = state.get_active_channel() or os.getenv("DEFAULT_CHANNEL")
             prompt_text = custom_text or (get_random_prompt_by_topic(topic)[1] if topic else None)
+            logging.info(f"[USER PROMPT] send_now=True channel={channel!r} prompt_text={prompt_text!r}")
             if prompt_text and channel:
                 ts = post_custom_prompt(
                     client,

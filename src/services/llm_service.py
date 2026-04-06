@@ -37,8 +37,10 @@ def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> 
         
         system_prompt = (
             "You are an emoji expert. Given a user's response to a prompt, "
-            "respond with ONLY a single emoji that captures the sentiment or content. "
-            "No text, no explanation, just one emoji character."
+            "respond with ONLY a single Slack emoji name that captures the sentiment or content. "
+            "The name must be a valid Slack emoji name: lowercase letters, numbers, underscores, and hyphens only. "
+            "No colons, no Unicode characters, no text, no explanation. "
+            "Examples of valid responses: heart, tada, fire, slightly_smiling_face, origami"
         )
         
         user_msg = f"User response: {message_text}"
@@ -55,10 +57,11 @@ def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> 
             max_tokens=10
         )
         
-        emoji = response.choices[0].message.content.strip()
+        emoji = response.choices[0].message.content.strip().strip(":")
         
-        # Validate it's actually an emoji (rough check)
-        if emoji and len(emoji) <= 2:
+        # Validate it looks like a Slack emoji name (letters, numbers, underscores, hyphens)
+        import re
+        if emoji and re.match(r'^[a-z0-9_\-]+$', emoji):
             return emoji
         
         return None

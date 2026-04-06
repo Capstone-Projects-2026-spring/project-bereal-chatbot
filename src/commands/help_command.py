@@ -35,7 +35,18 @@ From there you can:
 `/forceprompt #channel-name` — post a prompt to a specific channel
 `/setchannel #channel-name` — change the active channel
 `/vibestatus` — show current bot configuration
+`/picktags` — set or update your personal topic interest tags
 `/help` — show this message
+
+*User-Created Prompts*
+Once a day, the bot may randomly DM a channel member and invite them to write that day's prompt.
+You'll have *5 minutes* to submit — pick a topic (required) and optionally add your own custom text.
+Admins can also manually assign any user as prompt creator from the *Control Panel* (App Home).
+
+*Social Connector*
+Each afternoon the bot may pair two teammates who share common interest tags and post a friendly
+intro message in the main channel to help them get to know each other.
+Set your interest tags with `/picktags` or during onboarding.
 """.strip()
 
 

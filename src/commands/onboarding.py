@@ -1,5 +1,6 @@
 # src/commands/onboarding.py
 import logging
+import threading
 
 from bot.state import StateManager, get_team_id
 from services.prompt_service import get_available_topics
@@ -53,11 +54,10 @@ def register_onboarding(bolt_app, state_manager: StateManager):
         except Exception as e:
             logging.error(f"[ONBOARDING] Failed to DM user {user_id}: {e}")
 
-    def _lazy_open_interests_modal(body, client):
-        _open_interests_modal(body, client)
-
-    # Use lazy listener so ack() returns HTTP 200 immediately, then opens modal in background thread
-    bolt_app.command("/picktags", lazy=[_lazy_open_interests_modal])(lambda ack: ack())
+    @bolt_app.command("/picktags")
+    def handle_picktags_command(ack, body, client):
+        ack()
+        threading.Thread(target=_open_interests_modal, args=(body, client), daemon=True).start()
 
     @bolt_app.action("onboarding_choose_tags")
     def handle_onboarding_choose_tags(ack, body, client):

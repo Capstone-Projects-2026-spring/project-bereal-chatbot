@@ -1,5 +1,6 @@
 # src/commands/user_prompt_command.py
 import logging
+import time
 
 from bot.state import StateManager, get_team_id
 from services.prompt_service import get_available_topics
@@ -70,6 +71,7 @@ def register_user_prompt_handlers(bolt_app, state_manager: StateManager):
         ack()
 
         team_id = get_team_id(body)
+        expiry = int(time.time()) + 300  # 5-minute window from button click
         topics = get_available_topics()
 
         topic_options = [{"text": {"type": "plain_text", "text": t}, "value": t} for t in topics]
@@ -79,7 +81,7 @@ def register_user_prompt_handlers(bolt_app, state_manager: StateManager):
             view={
                 "type": "modal",
                 "callback_id": "user_prompt_modal",
-                "private_metadata": team_id or "",
+                "private_metadata": f"{team_id}|{expiry}",
                 "title": {"type": "plain_text", "text": "Create Today's Prompt"},
                 "submit": {"type": "plain_text", "text": "Submit"},
                 "close": {"type": "plain_text", "text": "Cancel"},
@@ -134,9 +136,21 @@ def register_user_prompt_handlers(bolt_app, state_manager: StateManager):
 
     @bolt_app.view("user_prompt_modal")
     def handle_user_prompt_modal(ack, body, client):
+        metadata = body["view"].get("private_metadata", "")
+        parts = metadata.split("|", 1)
+        team_id = parts[0] or get_team_id(body)
+        expiry = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else None
+
+        if expiry and time.time() > expiry:
+            ack(
+                response_action="errors",
+                errors={"topic_block": "Sorry, your 5-minute window to create a prompt has expired. The bot will use a regular prompt today."},
+            )
+            logging.info(f"[USER PROMPT] Submission rejected — window expired for team {team_id}")
+            return
+
         ack()
 
-        team_id = body["view"].get("private_metadata") or get_team_id(body)
         state = state_manager.get_state(team_id)
         values = body["view"]["state"]["values"]
 
@@ -187,5 +201,5 @@ def register_user_prompt_handlers(bolt_app, state_manager: StateManager):
 
         client.chat_postMessage(
             channel=user_id,
-            text=f":white_check_mark: Got it! Today's vibe check will use {' '.join(summary_parts)}. Thanks for contributing!",
+            text=f":tada: Got it! Today's vibe check will use {' '.join(summary_parts)}. Thanks for contributing! :tada:",
         )

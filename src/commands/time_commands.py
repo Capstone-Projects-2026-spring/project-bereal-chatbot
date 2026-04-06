@@ -1,6 +1,7 @@
 # src/commands/time_commands.py
 from services.time_library import preSet_time_library
 from bot.state import get_team_id
+from bot.scheduler import _get_target_time
 
 
 def register_time_commands(bolt_app, state_manager):
@@ -10,7 +11,9 @@ def register_time_commands(bolt_app, state_manager):
             ack()
             team_id = get_team_id(body)
             state = state_manager.get_state(team_id)
-            respond(f"Today's random scheduled prompt time is {state.get_daily_target_time()}")
+            target = _get_target_time(state)
+            mode = state.get_selected_mode() or "mode_random"
+            respond(f"Scheduled prompt time: *{target}* (mode: `{mode}`)")
         except Exception as e:
             print(f"Error handling /findtime command: {e}")
 

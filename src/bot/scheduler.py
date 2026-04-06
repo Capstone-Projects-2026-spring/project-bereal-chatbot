@@ -91,8 +91,10 @@ def _pick_random_channel_user(client, channel: str) -> str | None:
 
 def _send_reminders(client, channel: str, prompt_ts: str) -> None:
     """DM every channel member who hasn't posted since the vibe check prompt."""
+    print(f"[REMINDER] Starting reminder send — channel={channel} prompt_ts={prompt_ts}")
     try:
         members = client.conversations_members(channel=channel)["members"]
+        print(f"[REMINDER] Found {len(members)} channel members")
     except Exception as e:
         print(f"[REMINDER] Could not fetch channel members: {e}")
         return
@@ -100,16 +102,19 @@ def _send_reminders(client, channel: str, prompt_ts: str) -> None:
     try:
         history = client.conversations_history(channel=channel, oldest=prompt_ts, limit=200)
         responded = {m["user"] for m in history.get("messages", []) if "user" in m}
+        print(f"[REMINDER] {len(responded)} users already responded")
     except Exception as e:
         print(f"[REMINDER] Could not fetch channel history: {e}")
         return
 
     for user_id in members:
         if user_id in responded:
+            print(f"[REMINDER] Skipping {user_id} — already responded")
             continue
         try:
             info = client.users_info(user=user_id)
             if info["user"].get("is_bot") or info["user"].get("id") == "USLACKBOT":
+                print(f"[REMINDER] Skipping {user_id} — is bot")
                 continue
         except Exception:
             pass
@@ -229,12 +234,19 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                         print(f"[SCHEDULER] [{team_id}] Error posting time hit prompt: {e}")
 
                 prompt_ts = state.get_last_prompt_ts()
-                if prompt_ts and not state.get_reminder_sent():
+                if not prompt_ts:
+                    pass  # no prompt posted yet
+                elif state.get_reminder_sent():
+                    pass  # already reminded
+                else:
                     delay_seconds = state.get_reminder_delay_minutes() * 60
-                    if time.time() - float(prompt_ts) >= delay_seconds:
+                    elapsed = time.time() - float(prompt_ts)
+                    if elapsed >= delay_seconds:
                         print(f"[REMINDER] [{team_id}] {state.get_reminder_delay_minutes()} min elapsed — sending reminder DMs")
                         _send_reminders(active_client, channel, prompt_ts)
                         state.set_reminder_sent(True)
+                    elif int(elapsed) % 15 == 0 and int(elapsed) > 0:
+                        print(f"[REMINDER] [{team_id}] waiting... {int(elapsed)}s elapsed of {delay_seconds}s needed")
 
             time.sleep(1)
 

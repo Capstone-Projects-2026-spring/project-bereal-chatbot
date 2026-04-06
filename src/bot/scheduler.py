@@ -11,6 +11,8 @@ from bot.posting import display_current_time, post_csv_prompt, post_custom_promp
 _FMT = "%I:%M:%S %p"
 _USER_PROMPT_INVITE_TIME = "09:15:00 AM"  # time to DM the randomly selected user
 _USER_PROMPT_INVITE_PROBABILITY = 0.3    # 30% chance each day
+_SOCIAL_CONNECTOR_TIME = "02:00:00 PM"   # time to post social connector message
+_SOCIAL_CONNECTOR_PROBABILITY = 0.5      # 50% chance each day
 
 
 
@@ -160,6 +162,7 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                         except Exception as e:
                             print(f"[SCHEDULER] [{team_id}] Error posting daily reset: {e}")
                     state.set_user_prompt_creator_used_today(False)
+                    state.set_social_connector_used_today(False)
 
                 if not state.is_today_active():
                     continue
@@ -172,6 +175,13 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                         if selected_user:
                             from commands.user_prompt_command import send_user_prompt_invitation
                             send_user_prompt_invitation(active_client, selected_user, team_id)
+
+                # Social connector: pair two users with shared interests (50% chance, once per day at 2:00 PM)
+                if current_time == _SOCIAL_CONNECTOR_TIME and not state.get_social_connector_used_today():
+                    state.set_social_connector_used_today(True)
+                    if random.random() < _SOCIAL_CONNECTOR_PROBABILITY:
+                        from commands.social_connector import send_social_connector_message
+                        send_social_connector_message(active_client, channel, team_id)
 
                 if current_time == "8:42:00 AM":
                     try:

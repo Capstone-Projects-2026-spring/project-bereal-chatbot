@@ -25,6 +25,7 @@ class BotState:
     _reminder_delay_minutes: int = 10
     _pending_custom_prompt: Optional[str] = None  # user-authored prompt text
     _user_prompt_creator_used_today: bool = False  # only invite one user to create a prompt
+    _social_connector_used_today: bool = False  # only run social connector once per day
 
     def set_last_prompt_ts(self, ts: Optional[str]) -> None:
         with self._lock:
@@ -165,6 +166,14 @@ class BotState:
     def get_user_prompt_creator_used_today(self) -> bool:
         with self._lock:
             return self._user_prompt_creator_used_today
+
+    def set_social_connector_used_today(self, value: bool) -> None:
+        with self._lock:
+            self._social_connector_used_today = value
+
+    def get_social_connector_used_today(self) -> bool:
+        with self._lock:
+            return self._social_connector_used_today
 
 
 def get_team_id(body: dict) -> Optional[str]:

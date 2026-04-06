@@ -3,7 +3,7 @@ import logging
 
 from bot.state import StateManager, get_team_id
 from services.prompt_service import get_available_topics
-from services.mongo_service import save_user_interests, get_user_interests
+from services.mongo_service import save_user_interests
 
 
 def register_onboarding(bolt_app, state_manager: StateManager):
@@ -77,12 +77,10 @@ def register_onboarding(bolt_app, state_manager: StateManager):
             )
             return
 
-        existing_tags = set(get_user_interests(team_id, user_id))
         options = [
             {"text": {"type": "plain_text", "text": t}, "value": t}
             for t in topics
         ]
-        initial_options = [opt for opt in options if opt["value"] in existing_tags]
 
         checkboxes_block = {
             "type": "input",
@@ -98,8 +96,6 @@ def register_onboarding(bolt_app, state_manager: StateManager):
                 "options": options,
             },
         }
-        if initial_options:
-            checkboxes_block["element"]["initial_options"] = initial_options
 
         client.views_open(
             trigger_id=body["trigger_id"],

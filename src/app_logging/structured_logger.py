@@ -117,14 +117,17 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
             if cfg and cfg.llm_reactions_enabled:
                 if random.random() < cfg.llm_reactions_probability:
                     text = event.get("text") or ""
-                    emoji = get_reaction_emoji(text)
-                    if emoji:
-                        try:
-                            client.reactions_add(
-                                name=emoji,
-                                channel=channel_id,
-                                timestamp=event.get("ts")
-                            )
-                            print(f"[REACTION] Added emoji {emoji} to message in {cache.channel_name(channel_id)}")
-                        except Exception as e:
-                            print(f"[REACTION] Failed to add emoji reaction: {e}")
+                    timestamp = event.get("ts")
+                    # Validate we have both text and timestamp before calling LLM
+                    if text and timestamp:
+                        emoji = get_reaction_emoji(text)
+                        if emoji:
+                            try:
+                                client.reactions_add(
+                                    channel =channel_id,
+                                    timestamp=timestamp,
+                                    name=emoji
+                                )
+                                print(f"[REACTION] Added emoji :{emoji}: to message in {cache.channel_name(channel_id)}")
+                            except Exception as e:
+                                print(f"[REACTION] Failed to add emoji reaction ({emoji}): {e}")

@@ -278,6 +278,21 @@ def _build_home_view(selected_preset=None, selected_mode=None,
                 }
             ]
         },
+        {"type": "divider"},
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*7. Assign Prompt Creator*\nPick a user to DM them the prompt creation invite! They will have 5 minutes to submit."}
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "users_select",
+                    "placeholder": {"type": "plain_text", "text": "Select a user..."},
+                    "action_id": "admin_assign_prompt_creator"
+                }
+            ]
+        },
     ]
 
     return {"type": "home", "blocks": blocks}
@@ -464,3 +479,16 @@ def register_control_panel(bolt_app, state_manager):
         logger.info(f"Reminder delay set: {value} min")
         _publish_home(client, body["user"]["id"], state)
         _dm_admin(client, body["user"]["id"], f":bell: *Reminder delay* set to `{value} minutes`")
+
+    @bolt_app.action("admin_assign_prompt_creator")
+    def handle_admin_assign_prompt_creator(ack, body, client, logger):
+        ack()
+        team_id = get_team_id(body)
+        selected_user = body["actions"][0].get("selected_user")
+        if not selected_user:
+            return
+        from commands.user_prompt_command import send_user_prompt_invitation
+        send_user_prompt_invitation(client, selected_user, team_id)
+        print(f"[CONTROL PANEL] [{team_id}] Admin assigned prompt creator: {selected_user}")
+        logger.info(f"Admin assigned prompt creator: {selected_user}")
+        _dm_admin(client, body["user"]["id"], f":pencil: Prompt creation invite sent to <@{selected_user}>.")

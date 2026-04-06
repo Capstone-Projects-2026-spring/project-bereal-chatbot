@@ -6,9 +6,13 @@ from datetime import datetime, date
 from slack_sdk import WebClient
 
 from services.time_library import preSet_time_library
-from bot.posting import display_current_time, post_csv_prompt
+from bot.posting import display_current_time, post_csv_prompt, post_custom_prompt
 
 _FMT = "%I:%M:%S %p"
+_USER_PROMPT_INVITE_TIME = "09:15:00 AM"  # time to DM the randomly selected user
+_USER_PROMPT_INVITE_PROBABILITY = 0.3    # 30% chance each day
+_SOCIAL_CONNECTOR_TIME = "02:00:00 PM"   # time to post social connector message
+_SOCIAL_CONNECTOR_PROBABILITY = 0.5      # 50% chance each day
 
 
 
@@ -65,6 +69,24 @@ def _ensure_initial_time(state) -> None:
         )
         state.set_daily_target_time(t)
         print(f"[SCHEDULER] Initial time picked for new workspace: {t}")
+
+
+def _pick_random_channel_user(client, channel: str) -> str | None:
+    """Return a random non-bot member of the channel, or None on failure."""
+    try:
+        members = client.conversations_members(channel=channel)["members"]
+        eligible = []
+        for user_id in members:
+            try:
+                info = client.users_info(user=user_id)["user"]
+                if not info.get("is_bot") and info.get("id") != "USLACKBOT" and not info.get("deleted"):
+                    eligible.append(user_id)
+            except Exception:
+                pass
+        return random.choice(eligible) if eligible else None
+    except Exception as e:
+        print(f"[SCHEDULER] Could not pick random user: {e}")
+        return None
 
 
 def _send_reminders(client, channel: str, prompt_ts: str) -> None:
@@ -139,14 +161,36 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                             active_client.chat_postMessage(channel=channel, text=f"time set for today is {new_time}")
                         except Exception as e:
                             print(f"[SCHEDULER] [{team_id}] Error posting daily reset: {e}")
+                    state.set_user_prompt_creator_used_today(False)
+                    state.set_social_connector_used_today(False)
 
                 if not state.is_today_active():
                     continue
 
+                # Randomly invite a user to create today's prompt (30% chance, once per day at 9:15 AM)
+                if current_time == _USER_PROMPT_INVITE_TIME and not state.get_user_prompt_creator_used_today():
+                    state.set_user_prompt_creator_used_today(True)
+                    if random.random() < _USER_PROMPT_INVITE_PROBABILITY:
+                        selected_user = _pick_random_channel_user(active_client, channel)
+                        if selected_user:
+                            from commands.user_prompt_command import send_user_prompt_invitation
+                            send_user_prompt_invitation(active_client, selected_user, team_id)
+
+                # Social connector: pair two users with shared interests (50% chance, once per day at 2:00 PM)
+                if current_time == _SOCIAL_CONNECTOR_TIME and not state.get_social_connector_used_today():
+                    state.set_social_connector_used_today(True)
+                    if random.random() < _SOCIAL_CONNECTOR_PROBABILITY:
+                        from commands.social_connector import send_social_connector_message
+                        send_social_connector_message(active_client, channel, team_id)
+
                 if current_time == "8:42:00 AM":
                     try:
-                        topic = state.get_and_clear_pending_topic()
-                        ts = post_csv_prompt(active_client, channel=channel, team_id=team_id, prefix_text="PROMPT OF THE DAY:", topic=topic, active_tags=state.get_active_tags() or None)
+                        custom_text = state.get_and_clear_pending_custom_prompt()
+                        if custom_text:
+                            ts = post_custom_prompt(active_client, custom_text, channel=channel, team_id=team_id, prefix_text="PROMPT OF THE DAY:")
+                        else:
+                            topic = state.get_and_clear_pending_topic()
+                            ts = post_csv_prompt(active_client, channel=channel, team_id=team_id, prefix_text="PROMPT OF THE DAY:", topic=topic, active_tags=state.get_active_tags() or None)
                         if ts:
                             state.set_last_prompt_ts(ts)
                     except Exception as e:
@@ -155,16 +199,27 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                 target_time = _get_target_time(state)
                 if target_time and current_time == target_time:
                     try:
-                        topic = state.get_and_clear_pending_topic()
-                        ts = post_csv_prompt(
-                            active_client,
-                            channel=channel,
-                            team_id=team_id,
-                            prefix_text=f"Prompt of the day:",
-                            topic=topic,
-                            active_tags=state.get_active_tags() or None,
-                            footnote_text=f"random vibe check | time hit {target_time}"
-                        )
+                        custom_text = state.get_and_clear_pending_custom_prompt()
+                        if custom_text:
+                            ts = post_custom_prompt(
+                                active_client,
+                                custom_text,
+                                channel=channel,
+                                team_id=team_id,
+                                prefix_text="Prompt of the day:",
+                                footnote_text=f"user-created vibe check | time hit {target_time}",
+                            )
+                        else:
+                            topic = state.get_and_clear_pending_topic()
+                            ts = post_csv_prompt(
+                                active_client,
+                                channel=channel,
+                                team_id=team_id,
+                                prefix_text=f"Prompt of the day:",
+                                topic=topic,
+                                active_tags=state.get_active_tags() or None,
+                                footnote_text=f"random vibe check | time hit {target_time}"
+                            )
                         if ts:
                             state.set_last_prompt_ts(ts)
                         print(f"\n[SCHEDULER] [{team_id}] Time hit: {target_time}")

@@ -24,7 +24,7 @@ class BotState:
     _reminder_sent: bool = False
     _reminder_delay_minutes: int = 10
     _pending_custom_prompt: Optional[str] = None  # user-authored prompt text
-    _user_prompt_creator_used_today: bool = False  # only invite one user per day
+    _user_prompt_creator_used_today: bool = False  # only invite one user to create a prompt
 
     def set_last_prompt_ts(self, ts: Optional[str]) -> None:
         with self._lock:

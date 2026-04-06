@@ -30,7 +30,7 @@ def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Option
         msg = f"### **{prefix_text.upper()}**\n\n>{prompt_text}"
 
     if footnote_text:
-        message += f"\n\n\n```{footnote_text}```"
+        msg += f"\n\n\n```{footnote_text}```"
 
     msg_block = randomize_message_block(msg)
 

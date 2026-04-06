@@ -232,7 +232,7 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                 if prompt_ts and not state.get_reminder_sent():
                     delay_seconds = state.get_reminder_delay_minutes() * 60
                     if time.time() - float(prompt_ts) >= delay_seconds:
-                        print(f"[REMINDER] [{team_id}] 10 min elapsed — sending reminder DMs")
+                        print(f"[REMINDER] [{team_id}] {state.get_reminder_delay_minutes()} min elapsed — sending reminder DMs")
                         _send_reminders(active_client, channel, prompt_ts)
                         state.set_reminder_sent(True)
 

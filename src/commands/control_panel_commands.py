@@ -63,7 +63,8 @@ def _build_topic_options():
 
 def _build_home_view(selected_preset=None, selected_mode=None,
                      random_start=None, random_end=None, static_time=None,
-                     active_days=None, pending_topic=None, active_tags=None) -> dict:
+                     active_days=None, pending_topic=None, active_tags=None,
+                     reminder_delay_minutes=10) -> dict:
     mode_initial = next(
         (opt for opt in _MODE_OPTIONS if opt["value"] == selected_mode),
         None
@@ -257,6 +258,26 @@ def _build_home_view(selected_preset=None, selected_mode=None,
                 }
             ]
         },
+        {"type": "divider"},
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": f"*6. Reminder Delay*\nSend DM reminders this many minutes after a prompt posts. Currently: *{reminder_delay_minutes} min*"}
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "static_select",
+                    "placeholder": {"type": "plain_text", "text": "Select delay..."},
+                    "initial_option": {"text": {"type": "plain_text", "text": f"{reminder_delay_minutes} minutes"}, "value": str(reminder_delay_minutes)},
+                    "options": [
+                        {"text": {"type": "plain_text", "text": f"{m} minutes"}, "value": str(m)}
+                        for m in [1, 2, 5, 10, 15, 20, 30, 45, 60]
+                    ],
+                    "action_id": "reminder_delay_selection"
+                }
+            ]
+        },
     ]
 
     return {"type": "home", "blocks": blocks}
@@ -274,6 +295,7 @@ def _publish_home(client, user_id, state):
             active_days=state.get_active_days(),
             pending_topic=state._pending_topic,
             active_tags=state.get_active_tags(),
+            reminder_delay_minutes=state.get_reminder_delay_minutes(),
         )
     )
 
@@ -430,3 +452,15 @@ def register_control_panel(bolt_app, state_manager):
         logger.info(f"Tag filter set: {tag_list}")
         _publish_home(client, body["user"]["id"], state)
         _dm_admin(client, body["user"]["id"], f":label: *Topic filter* set to: {tag_list}")
+
+    @bolt_app.action("reminder_delay_selection")
+    def handle_reminder_delay_selection(ack, body, client, logger):
+        ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
+        value = int(body["actions"][0]["selected_option"]["value"])
+        state.set_reminder_delay_minutes(value)
+        print(f"[CONTROL PANEL] [{team_id}] Reminder delay set to: {value} min")
+        logger.info(f"Reminder delay set: {value} min")
+        _publish_home(client, body["user"]["id"], state)
+        _dm_admin(client, body["user"]["id"], f":bell: *Reminder delay* set to `{value} minutes`")

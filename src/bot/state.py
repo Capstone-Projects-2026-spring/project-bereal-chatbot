@@ -20,6 +20,34 @@ class BotState:
     _active_token: Optional[str] = None
     _pending_topic: Optional[str] = None
     _active_tags: Set[str] = field(default_factory=set)  # empty = all tags allowed
+    _last_prompt_ts: Optional[str] = None
+    _reminder_sent: bool = False
+    _reminder_delay_minutes: int = 10
+
+    def set_last_prompt_ts(self, ts: Optional[str]) -> None:
+        with self._lock:
+            self._last_prompt_ts = ts
+            self._reminder_sent = False
+
+    def get_last_prompt_ts(self) -> Optional[str]:
+        with self._lock:
+            return self._last_prompt_ts
+
+    def get_reminder_sent(self) -> bool:
+        with self._lock:
+            return self._reminder_sent
+
+    def set_reminder_sent(self, value: bool) -> None:
+        with self._lock:
+            self._reminder_sent = value
+
+    def get_reminder_delay_minutes(self) -> int:
+        with self._lock:
+            return self._reminder_delay_minutes
+
+    def set_reminder_delay_minutes(self, value: int) -> None:
+        with self._lock:
+            self._reminder_delay_minutes = value
 
     def set_active_tags(self, tags: Set[str]) -> None:
         with self._lock:

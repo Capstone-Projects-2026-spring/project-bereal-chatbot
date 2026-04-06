@@ -34,7 +34,8 @@ def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Option
 
     msg_block = randomize_message_block(msg)
 
-    client.chat_postMessage(channel=channel, blocks=msg_block,text=msg)
+    resp = client.chat_postMessage(channel=channel, blocks=msg_block, text=msg)
+    return resp.get("ts")
 
 def randomize_message_block(message):
     num = random.randint(1,10)

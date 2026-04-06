@@ -24,6 +24,7 @@ from commands.onboarding import register_onboarding
 from commands.user_prompt_command import register_user_prompt_handlers
 from app_logging.structured_logger import install_structured_message_logging
 from services.mongo_service import init_tracker, init_user_interests
+from services.prompt_service import load_prompts_df
 
 
 def make_authorize(cfg, mongo_uri):
@@ -63,6 +64,7 @@ def main():
 
     init_tracker(cfg.mongo_uri)
     init_user_interests(cfg.mongo_uri)
+    load_prompts_df()  # pre-warm CSV cache so /picktags and /picktopic open instantly
 
     authorize = make_authorize(cfg, cfg.mongo_uri)
     client = WebClient(token=cfg.token)

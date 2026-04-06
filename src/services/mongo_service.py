@@ -105,3 +105,9 @@ def get_user_interests(team_id: str, user_id: str) -> list[str]:
     col = _get_user_interests_col()
     doc = col.find_one({"team_id": team_id, "user_id": user_id})
     return doc.get("tags", []) if doc else []
+
+
+def get_all_user_interests(team_id: str) -> list[dict]:
+    """Return all users with their interest tags for a given workspace."""
+    col = _get_user_interests_col()
+    return list(col.find({"team_id": team_id}, {"_id": 0, "user_id": 1, "tags": 1}))

@@ -126,18 +126,20 @@ def get_random_prompt_text(response_type: Optional[str] = None, active_tags: Opt
 
 def get_available_topics() -> list[str]:
     """
-    Returns the hardcoded list of available topic interest tags.
-    These are purely for user interest tracking and do not affect prompt selection.
+    Returns a sorted list of all unique topic tags present in the CSV.
     """
-    return [
-        "FilmFanatic",
-        "FoodLover",
-        "Hobbyist",
-        "JustForFun",
-        "LifeStories",
-        "OfficeCulture",
-        "WouldYouRather",
-    ]
+    df = load_prompts_df()
+    tags_col = _get_col(df, ["tags", "tag"])
+    if tags_col is None:
+        return []
+
+    topics: set[str] = set()
+    for cell in df[tags_col].dropna().astype(str):
+        for tag in cell.split(","):
+            tag = tag.strip()
+            if tag:
+                topics.add(tag)
+    return sorted(topics)
 
 
 def get_random_prompt_by_topic(topic: str) -> Tuple[str, str, str]:

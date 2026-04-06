@@ -1,6 +1,7 @@
 # src/services/mongo_service.py
 from __future__ import annotations
 
+import os
 from datetime import datetime, timezone
 
 from pymongo import MongoClient
@@ -77,3 +78,30 @@ def init_tracker(mongo_uri: str) -> PromptTracker:
 
 def get_tracker() -> PromptTracker | None:
     return _tracker
+
+
+_mongo_client: MongoClient | None = None
+
+
+def _get_user_interests_col():
+    global _mongo_client
+    if _mongo_client is None:
+        _mongo_client = MongoClient(os.getenv("MONGO_URI"))
+    return _mongo_client["vibecheck"]["user_interests"]
+
+
+def save_user_interests(team_id: str, user_id: str, tags: list[str]) -> None:
+    """Upsert the interest tags for a user. Tags are purely cosmetic."""
+    col = _get_user_interests_col()
+    col.update_one(
+        {"team_id": team_id, "user_id": user_id},
+        {"$set": {"tags": tags, "updated_at": datetime.now(timezone.utc)}},
+        upsert=True,
+    )
+
+
+def get_user_interests(team_id: str, user_id: str) -> list[str]:
+    """Return the stored interest tags for a user, or an empty list."""
+    col = _get_user_interests_col()
+    doc = col.find_one({"team_id": team_id, "user_id": user_id})
+    return doc.get("tags", []) if doc else []

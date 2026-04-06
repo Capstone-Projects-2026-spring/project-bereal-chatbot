@@ -83,6 +83,14 @@ def get_tracker() -> PromptTracker | None:
 _mongo_client: MongoClient | None = None
 
 
+def init_user_interests(mongo_uri: str) -> None:
+    """Pre-warm the MongoDB connection for user interests at startup."""
+    global _mongo_client
+    _mongo_client = MongoClient(mongo_uri)
+    # Ping to force connection establishment now rather than on first user request
+    _mongo_client.admin.command("ping")
+
+
 def _get_user_interests_col():
     global _mongo_client
     if _mongo_client is None:

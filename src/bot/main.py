@@ -23,7 +23,7 @@ from commands.pick_topic_command import register_pick_topic_command
 from commands.onboarding import register_onboarding
 from commands.user_prompt_command import register_user_prompt_handlers
 from app_logging.structured_logger import install_structured_message_logging
-from services.mongo_service import init_tracker
+from services.mongo_service import init_tracker, init_user_interests
 
 
 def make_authorize(cfg, mongo_uri):
@@ -62,6 +62,7 @@ def main():
     state_manager = StateManager()
 
     init_tracker(cfg.mongo_uri)
+    init_user_interests(cfg.mongo_uri)
 
     authorize = make_authorize(cfg, cfg.mongo_uri)
     client = WebClient(token=cfg.token)

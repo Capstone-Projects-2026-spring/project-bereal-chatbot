@@ -130,6 +130,22 @@ def register_user_prompt_handlers(bolt_app, state_manager: StateManager):
                             "options": _PRESET_TIME_OPTIONS,
                         },
                     },
+                    {
+                        "type": "input",
+                        "block_id": "send_now_block",
+                        "optional": True,
+                        "label": {"type": "plain_text", "text": "Send immediately"},
+                        "element": {
+                            "type": "checkboxes",
+                            "action_id": "send_now_check",
+                            "options": [
+                                {
+                                    "text": {"type": "plain_text", "text": "Post the prompt to the channel right now"},
+                                    "value": "send_now",
+                                }
+                            ],
+                        },
+                    },
                 ],
             },
         )
@@ -177,27 +193,55 @@ def register_user_prompt_handlers(bolt_app, state_manager: StateManager):
         )
         selected_time = time_opt["value"] if time_opt else None
 
-        if custom_text:
-            state.set_pending_custom_prompt(custom_text)
-            logging.info(f"[USER PROMPT] Custom prompt set for team {team_id}: {custom_text!r}")
-        elif topic:
-            state.set_pending_topic(topic)
-            logging.info(f"[USER PROMPT] Topic set for team {team_id}: {topic}")
+        # Send now checkbox (optional)
+        send_now = bool(
+            values.get("send_now_block", {})
+            .get("send_now_check", {})
+            .get("selected_options")
+        )
 
-        if selected_time:
-            state.set_daily_target_time(selected_time)
-            logging.info(f"[USER PROMPT] Time overridden for team {team_id}: {selected_time}")
+        if send_now:
+            from bot.posting import post_custom_prompt
+            from services.prompt_service import get_random_prompt_by_topic
+            channel = state.get_active_channel()
+            prompt_text = custom_text or (get_random_prompt_by_topic(topic)[1] if topic else None)
+            if prompt_text and channel:
+                ts = post_custom_prompt(
+                    client,
+                    prompt_text,
+                    channel=channel,
+                    team_id=team_id,
+                    prefix_text="Prompt of the day:",
+                    footnote_text="user-created vibe check",
+                )
+                if ts:
+                    state.set_last_prompt_ts(ts)
+                logging.info(f"[USER PROMPT] Sent immediately to {channel} for team {team_id}")
+        else:
+            if custom_text:
+                state.set_pending_custom_prompt(custom_text)
+                logging.info(f"[USER PROMPT] Custom prompt set for team {team_id}: {custom_text!r}")
+            elif topic:
+                state.set_pending_topic(topic)
+                logging.info(f"[USER PROMPT] Topic set for team {team_id}: {topic}")
+
+            if selected_time:
+                state.set_daily_target_time(selected_time)
+                logging.info(f"[USER PROMPT] Time overridden for team {team_id}: {selected_time}")
 
         user_id = body["user"]["id"]
         summary_parts = []
-        if custom_text:
-            summary_parts.append(f"prompt: _{custom_text}_")
-        elif topic:
-            summary_parts.append(f"topic: `{topic}`")
+        if send_now:
+            summary_parts.append("sent to the channel now")
         else:
-            summary_parts.append("a random prompt")
-        if selected_time:
-            summary_parts.append(f"at `{selected_time}`")
+            if custom_text:
+                summary_parts.append(f"prompt: _{custom_text}_")
+            elif topic:
+                summary_parts.append(f"topic: `{topic}`")
+            else:
+                summary_parts.append("a random prompt")
+            if selected_time:
+                summary_parts.append(f"at `{selected_time}`")
 
         client.chat_postMessage(
             channel=user_id,

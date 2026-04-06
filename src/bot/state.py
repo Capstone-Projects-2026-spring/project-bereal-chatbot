@@ -23,6 +23,8 @@ class BotState:
     _last_prompt_ts: Optional[str] = None
     _reminder_sent: bool = False
     _reminder_delay_minutes: int = 10
+    _pending_custom_prompt: Optional[str] = None  # user-authored prompt text
+    _user_prompt_creator_used_today: bool = False  # only invite one user per day
 
     def set_last_prompt_ts(self, ts: Optional[str]) -> None:
         with self._lock:
@@ -145,6 +147,24 @@ class BotState:
         today = date.today().strftime("%A")  # e.g. "Monday"
         with self._lock:
             return today in self._active_days
+
+    def set_pending_custom_prompt(self, text: Optional[str]) -> None:
+        with self._lock:
+            self._pending_custom_prompt = text
+
+    def get_and_clear_pending_custom_prompt(self) -> Optional[str]:
+        with self._lock:
+            text = self._pending_custom_prompt
+            self._pending_custom_prompt = None
+            return text
+
+    def set_user_prompt_creator_used_today(self, value: bool) -> None:
+        with self._lock:
+            self._user_prompt_creator_used_today = value
+
+    def get_user_prompt_creator_used_today(self) -> bool:
+        with self._lock:
+            return self._user_prompt_creator_used_today
 
 
 def get_team_id(body: dict) -> Optional[str]:

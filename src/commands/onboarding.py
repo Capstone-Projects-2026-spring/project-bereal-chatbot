@@ -53,11 +53,11 @@ def register_onboarding(bolt_app, state_manager: StateManager):
         except Exception as e:
             logging.error(f"[ONBOARDING] Failed to DM user {user_id}: {e}")
 
-    @bolt_app.command("/picktags")
-    def handle_my_interests_command(ack, body, client):
-        """Slash command so existing users can set or update their interest tags."""
-        ack()
+    def _lazy_open_interests_modal(body, client):
         _open_interests_modal(body, client)
+
+    # Use lazy listener so ack() returns HTTP 200 immediately, then opens modal in background thread
+    bolt_app.command("/picktags", lazy=[_lazy_open_interests_modal])(lambda ack: ack())
 
     @bolt_app.action("onboarding_choose_tags")
     def handle_onboarding_choose_tags(ack, body, client):

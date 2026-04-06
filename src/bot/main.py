@@ -74,7 +74,7 @@ def main():
         print(f"[BOOT] Bot username: @{auth_info['user']} (team: {auth_info['team']})")
     except Exception as e:
         print(f"[BOOT] Could not fetch bot username: {e}")
-    bolt_app = App(authorize=authorize, signing_secret=cfg.signing_secret, ignoring_self_events_enabled=False, process_before_response=True)
+    bolt_app = App(authorize=authorize, signing_secret=cfg.signing_secret, ignoring_self_events_enabled=False)
 
     # Logging + commands
     install_structured_message_logging(bolt_app, client, cfg=cfg, log_file=str(STRUCTURED_JSONL))

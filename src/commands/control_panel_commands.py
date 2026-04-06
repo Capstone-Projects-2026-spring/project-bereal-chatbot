@@ -366,14 +366,16 @@ def register_control_panel(bolt_app, state_manager):
         team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
         value = body["actions"][0]["value"]
-        if not _parse_time(value):
+        parsed = _parse_time(value)
+        if not parsed:
             _dm_admin(client, body["user"]["id"],
                       f":x: *Invalid start time* `{value}` — must be `HH:MM:SS AM/PM` (e.g. `12:00:00 PM`)")
             return
-        state.set_random_start_time(value.strip())
-        print(f"[CONTROL PANEL] [{team_id}] Random start time set to: {value}")
-        logger.info(f"Random start time set: {value}")
-        _dm_admin(client, body["user"]["id"], f":clock1: *Random range start* set to `{value.strip()}`")
+        normalized = parsed.strftime("%I:%M:%S %p")
+        state.set_random_start_time(normalized)
+        print(f"[CONTROL PANEL] [{team_id}] Random start time set to: {normalized}")
+        logger.info(f"Random start time set: {normalized}")
+        _dm_admin(client, body["user"]["id"], f":clock1: *Random range start* set to `{normalized}`")
         _repick_random_time(client, body["user"]["id"], state)
 
     @bolt_app.action("end_time")
@@ -382,14 +384,16 @@ def register_control_panel(bolt_app, state_manager):
         team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
         value = body["actions"][0]["value"]
-        if not _parse_time(value):
+        parsed = _parse_time(value)
+        if not parsed:
             _dm_admin(client, body["user"]["id"],
                       f":x: *Invalid end time* `{value}` — must be `HH:MM:SS AM/PM` (e.g. `05:00:00 PM`)")
             return
-        state.set_random_end_time(value.strip())
-        print(f"[CONTROL PANEL] [{team_id}] Random end time set to: {value}")
-        logger.info(f"Random end time set: {value}")
-        _dm_admin(client, body["user"]["id"], f":clock1: *Random range end* set to `{value.strip()}`")
+        normalized = parsed.strftime("%I:%M:%S %p")
+        state.set_random_end_time(normalized)
+        print(f"[CONTROL PANEL] [{team_id}] Random end time set to: {normalized}")
+        logger.info(f"Random end time set: {normalized}")
+        _dm_admin(client, body["user"]["id"], f":clock1: *Random range end* set to `{normalized}`")
         _repick_random_time(client, body["user"]["id"], state)
 
     @bolt_app.action("static_entry")
@@ -398,14 +402,16 @@ def register_control_panel(bolt_app, state_manager):
         team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
         value = body["actions"][0]["value"]
-        if not _parse_time(value):
+        parsed = _parse_time(value)
+        if not parsed:
             _dm_admin(client, body["user"]["id"],
                       f":x: *Invalid static time* `{value}` — must be `HH:MM:SS AM/PM` (e.g. `09:15:00 AM`)")
             return
-        state.set_static_time(value.strip())
-        print(f"[CONTROL PANEL] [{team_id}] Static time set to: {value}")
-        logger.info(f"Static time set: {value}")
-        _dm_admin(client, body["user"]["id"], f":clock1: *Static time* set to `{value.strip()}`")
+        normalized = parsed.strftime("%I:%M:%S %p")
+        state.set_static_time(normalized)
+        print(f"[CONTROL PANEL] [{team_id}] Static time set to: {normalized}")
+        logger.info(f"Static time set: {normalized}")
+        _dm_admin(client, body["user"]["id"], f":clock1: *Static time* set to `{normalized}`")
 
     @bolt_app.action("active_days_selection")
     def handle_active_days(ack, body, client, logger):

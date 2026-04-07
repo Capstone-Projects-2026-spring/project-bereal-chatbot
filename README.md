@@ -11,7 +11,7 @@
 
 ## Keywords
 
-Section 1, chatbot application, Python, SQL, Slack Bolt, FastAPI, social connection, future of work 
+Section 1, chatbot application, Python, MongoDB, Railway, Slack Bolt, FastAPI, social connection, future of work 
 
 ## Project Abstract
 

@@ -188,7 +188,7 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                         from commands.social_connector import send_social_connector_message
                         send_social_connector_message(active_client, channel, team_id)
 
-                if current_time == "08:42:00 AM":
+                if current_time == "12:00:00 PM":
                     try:
                         custom_text = state.get_and_clear_pending_custom_prompt()
                         if custom_text:

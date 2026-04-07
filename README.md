@@ -48,6 +48,8 @@ https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4K
 You can also add the chatbot to your own workspace: 
 https://slack.com/oauth/v2/authorize?client_id=10423543431858.10430963976773&scope=app_mentions:read,channels:history,channels:read,chat:write,im:history,commands,groups:history,mpim:history&user_scope=files:write,channels:read,channels:write,chat:write  
 
+Running the chatbot locally is not necessary, since it is already deployed on Railway.
+
 Any and all critiques will be greatly appreciated. Have fun testing! 🙂
 
 ## Contact Information

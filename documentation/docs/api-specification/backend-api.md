@@ -16,36 +16,11 @@ Tools: slack_sdk, dotenv
 ---
 
 # HTTP API Contract
-<<<<<<< deploychris
 
 The external HTTP contract is maintained in the OpenAPI source file:
 
 - `documentation/static/openapi.yml.yaml`
 
-Rendered documentation is available in this section:
-
-- `docs/api-specification/openapi-spec`
-
-Contract maintenance checklist (required for each API change):
-
-- Update endpoint summaries to describe behavior.
-- Keep request/response schemas under `components/schemas` and reference them with `$ref`.
-- Document all error responses explicitly.
-- Keep `components/securitySchemes` aligned with authentication behavior.
-- Include example requests/responses for every new endpoint.
-
-------
-
-# Requirements
-=======
->>>>>>> main
-
-The external HTTP contract is maintained in the OpenAPI source file:
-
-- `documentation/static/openapi.yml.yaml`
-
-<<<<<<< deploychris
-=======
 Rendered documentation is available in this section:
 
 - `docs/api-specification/openapi-spec`
@@ -54,7 +29,6 @@ Rendered documentation is available in this section:
 
 # Requirements
 
->>>>>>> main
 ## Functional
 
 **Using Slack Token:** 

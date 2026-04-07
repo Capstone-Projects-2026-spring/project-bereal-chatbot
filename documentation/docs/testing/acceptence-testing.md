@@ -5,6 +5,10 @@ sidebar_position: 3
 
 Acceptance testing demonstrates that functional and non-functional requirements are met through manual execution and recorded observations. It is also automated by running pytest from the project root to execute tests and report pass/fail results.
 
+### Acceptance tests should be documented using this spreadsheet:
+
+[Download Acceptance QA Testing Doc.xlsx](/Acceptance%20QA%20Testing%20Doc.xlsx)
+
 ---
 
 | Type | Category | Requirement | Procedure | Outcome |
@@ -28,4 +32,6 @@ Acceptance testing demonstrates that functional and non-functional requirements 
 | NF-4 | Scalability | Remain consistent via environment-based configuration | Run deployment/startup in two environments with different env var values. Verify the bot loads environment-specific values correctly. | Environment-driven configuration works consistently across environments. |
 | NF-5 | Security | Ensure stored data is secure and minimize loss/duplication/corruption | Validate upsert-based writes for installation/prompt stats. Validate failure-path logging for DB write errors. | Writes are controlled and idempotent where designed. |
 | NF-6 | Security | Ensure events do not lose data or repeat prompts | Observe repeated cycles across day boundaries. Verify prompt posting and event logging consistency. | Event handling remains consistent without unintended duplicate prompts. |
+
+
 

@@ -7,194 +7,25 @@ Acceptance testing demonstrates that functional and non-functional requirements 
 
 ---
 
-## Functional Requirements Testing
+| Type | Category | Requirement | Procedure | Outcome |
+|------|----------|-------------|-----------|---------|
+| F-1 | Chatbot Controls | Users can create their own prompts | Attempt to create a custom prompt through available user controls in Slack. | User-generated prompts can be created and used by the bot. |
+| F-2 | Chatbot Controls | Chatbot must enforce quick-time events | Configure prompt timing mode. Verify prompt behavior around configured windows. | Prompt timing is constrained by configured/preset windows. |
+| F-3 | Chatbot Controls | Chatbot must send a message once a day that encourages team engagement | Set active channel and schedule. Observe daily prompt delivery. | One daily engagement prompt is posted to configured channel. |
+| F-4 | Chatbot Controls | Chatbot must group users based on post details | Trigger grouping workflow based on user content. | Users are grouped by post details. |
+| F-5 | Chatbot Controls | Chatbot must display a leaderboard of streak scores | Run leaderboard or streak summary flow. | Ranked streak leaderboard is returned. |
+| F-6 | Data Collection | Track how many times each user responds | Send multiple user replies after a prompt. Query analytics/statistics output. | Response counts are tracked and visible. |
+| F-7 | Data Collection | Track individual user streak scores | Simulate daily participation for one user. | User streak is updated and retrievable. |
+| F-8 | Data Collection | Track late posts | Submit responses after expected window. | Late posts are flagged and stored. |
+| F-9 | Data Collection | Track missed posts | Leave prompt unanswered during cycle. | Missed post event is tracked. |
+| F-10 | Prompts | Make picture-based prompts | Trigger prompt generation repeatedly. Verify image-type prompts are selected. | Image-oriented prompt types are produced. |
+| F-11 | Prompts | Make text-based prompts | Trigger prompt generation and inspect message content. | Text prompts are generated and posted. |
+| F-12 | Prompts | Make photo-encouraged prompts | Review generated prompt content for photo encouragement language. | Prompts encouraging photo responses are present. |
+| F-13 | Prompts | Make text-encouraged prompts | Review generated prompt content for text response language. | Prompts encouraging text responses are present. |
+| NF-1 | Scalability | Available on multiple messaging platforms | Review architecture implementation and adapter extension points. Attempt onboarding for a second platform (prototype stage). | Platform abstraction supports extension beyond Slack. |
+| NF-2 | Scalability | Handle large numbers of requests/responses | Run high-volume message simulation in staging. | Bot remains responsive and records events correctly. |
+| NF-3 | Scalability | Respond to events near-instantly | Send slash commands and message events. Measure response latency. | Responses occur within acceptable latency threshold. |
+| NF-4 | Scalability | Remain consistent via environment-based configuration | Run deployment/startup in two environments with different env var values. Verify the bot loads environment-specific values correctly. | Environment-driven configuration works consistently across environments. |
+| NF-5 | Security | Ensure stored data is secure and minimize loss/duplication/corruption | Validate upsert-based writes for installation/prompt stats. Validate failure-path logging for DB write errors. | Writes are controlled and idempotent where designed. |
+| NF-6 | Security | Ensure events do not lose data or repeat prompts | Observe repeated cycles across day boundaries. Verify prompt posting and event logging consistency. | Event handling remains consistent without unintended duplicate prompts. |
 
-### Chatbot Controls
-
-***Users can create their own prompts***
-
-	Procedure:
-	- Attempt to create a custom prompt through available user controls in Slack.
-	
-	Outcome:
-	- User-generated prompts can be created and used by the bot.
-	
-
-***Chatbot must enforce quick-time events***
-
-	Procedure:
-	- Configure prompt timing mode.
-	- Verify prompt behavior around configured windows.
-	
-	Outcome:
-	- Prompt timing is constrained by configured/preset windows.
-	
-
-***Chatbot must send a message once a day that encourages team engagement***
-
-	Procedure:
-	- Set active channel and schedule.
-	- Observe daily prompt delivery.
-	
-	Outcome:
-	- One daily engagement prompt is posted to configured channel.
-	
-
-***Chatbot must group users based on post details***
-
-	Procedure:
-	- Trigger grouping workflow based on user content.
-	
-	Outcome:
-	- Users are grouped by post details.
-	
-
-***Chatbot must display a leaderboard of streak scores***
-
-	Procedure:
-	- Run leaderboard or streak summary flow.
-	
-	Outcome:
-	- Ranked streak leaderboard is returned.
-
-### Data Collection
-
-***Track how many times each user responds***
-
-	Procedure:
-	- Send multiple user replies after a prompt.
-	- Query analytics/statistics output.
-	
-	Outcome:
-	- Response counts are tracked and visible.
-	
-
-***Track individual user streak scores***
-
-	Procedure:
-	- Simulate daily participation for one user.
-	
-	Outcome:
-	- User streak is updated and retrievable.
-	
-
-***Track late posts***
-
-	Procedure:
-	- Submit responses after expected window.
-	
-	Outcome:
-	- Late posts are flagged and stored.
-	
-
-***Track missed posts***
-
-	Procedure:
-	- Leave prompt unanswered during cycle.
-	
-	Outcome:
-	- Missed post event is tracked.
-	
-### Prompts
-
-***Make picture-based prompts***
-
-	Procedure:
-	- Trigger prompt generation repeatedly.
-	- Verify image-type prompts are selected.
-	
-	Outcome:
-	- Image-oriented prompt types are produced.
-	
-
-***Make text-based prompts***
-
-	Procedure:
-	- Trigger prompt generation and inspect message content.
-	
-	Outcome:
-	- Text prompts are generated and posted.
-	
-
-***FMake photo-encouraged prompts***
-
-	Procedure:
-	- Review generated prompt content for photo encouragement language.
-	
-	Outcome:
-	- Prompts encouraging photo responses are present.
-	
-
-***Make text-encouraged prompts***
-
-	Procedure:
-	- Review generated prompt content for text response language.
-	
-	Outcome:
-	- Prompts encouraging text responses are present.
-
----
-
-## Non-Functional Requirements Testing
-
-### Scalability
-
-***Available on multiple messaging platforms***
-
-	Procedure:
-	- Review architecture implementation and adapter extension points.
-	- Attempt onboarding for a second platform (prototype stage).
-	
-	Outcome:
-	- Platform abstraction supports extension beyond Slack.
-	
-
-***Handle large numbers of requests/responses***
-
-	Procedure:
-	- Run high-volume message simulation in staging.
-	
-	Outcome:
-	- Bot remains responsive and records events correctly.
-	
-
-***Respond to events near-instantly***
-
-	Procedure:
-	- Send slash commands and message events.
-	- Measure response latency.
-	
-	Outcome:
-	- Responses occur within acceptable latency threshold.
-	
-
-***Remain consistent via environment-based configuration***
-
-	Procedure:
-	- Run deployment/startup in two environments with different env var values.
-	- Verify the bot loads environment-specific values correctly.
-	
-	Outcome:
-	- Environment-driven configuration works consistently across environments.
-	
-### Security
-
-***Ensure stored data is secure and minimize loss/duplication/corruption***
-
-	Procedure:
-	- Validate upsert-based writes for installation/prompt stats.
-	- Validate failure-path logging for DB write errors.
-	
-	Outcome:
-	- Writes are controlled and idempotent where designed.
-	
-
-***Ensure events do not lose data or repeat prompts***
-
-	Procedure:
-	- Observe repeated cycles across day boundaries.
-	- Verify prompt posting and event logging consistency.
-	
-	Outcome:
-	- Event handling remains consistent without unintended duplicate prompts.
-	

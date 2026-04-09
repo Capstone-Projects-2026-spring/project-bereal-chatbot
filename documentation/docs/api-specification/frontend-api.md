@@ -21,6 +21,11 @@ This contract explains what the Slack-facing interface accepts, what it returns 
 
 Language: Slack UI / Slack Bolt
 Tools: Slack slash commands, Slack App Home, Block Kit components
+<<<<<<< deploychris
+=======
+
+---
+>>>>>>> main
 
 # Requirements
 
@@ -35,6 +40,11 @@ This includes:
 - App Home interactive controls and their effects
 - error messages that are meaningful to the user
 
+<<<<<<< deploychris
+=======
+---
+
+>>>>>>> main
 ## Frontend Surface Overview
 
 VibeCheck exposes the following user-facing interaction points in Slack:
@@ -45,6 +55,11 @@ VibeCheck exposes the following user-facing interaction points in Slack:
 4. `/forceprompt`
 5. App Home control panel interactions
 
+<<<<<<< deploychris
+=======
+---
+
+>>>>>>> main
 ## Slack Slash Commands
 
 | Command | Input Pattern | Primary Behavior | Success Response |
@@ -178,6 +193,21 @@ Immediately posts a prompt to the current or specified Slack channel.
 ## App Home Control Panel
 
 The App Home tab provides a persistent control panel for time configuration.
+<<<<<<< deploychris
+
+### Purpose
+Allows an administrator to configure scheduling behavior without typing slash commands.
+
+
+
+### UI Sections
+1. Operation mode selection
+2. Random time range start
+3. Random time range end
+4. Preset time selection
+5. Static manual time entry
+6. Active day checkboxes
+=======
 
 ### Purpose
 Allows an administrator to configure scheduling behavior without typing slash commands.
@@ -270,8 +300,91 @@ Lets the user choose one of the predefined preset times from a Slack static sele
 
 ### Success Feedback
 `:clock1: Preset time set to {time}`
+>>>>>>> main
+
+### Operation Modes
+- `Random Time`
+- `Preset Time Select`
+- `Static Set Time`
+
+<<<<<<< deploychris
+### Interactive Actions
+
+mode_selection
+
+Changes the scheduling mode stored in team state.
+
+Success feedback is sent by direct message:
+
+`:gear: Operation mode changed to {value}`
+
+If the selected mode is random mode, the system may immediately repick the current daily target time.
+
+---
+
+## start_time
+
+### Input Format
+`HH:MM:SS AM/PM`
+
+### Purpose
+Sets the beginning of the random time range.
+
+### Success Feedback
+`:clock1: Random range start set to {time}`
+
+### Validation Error
+`:x: Invalid start time {value} — must be HH:MM:SS AM/PM`
+
+---
+
+## end_time
+
+### Input Format
+`HH:MM:SS AM/PM`
+
+### Purpose
+Sets the end of the random time range.
+
+### Success Feedback
+`:clock1: Random range end set to {time}`
+
+### Validation Error
+`:x: Invalid end time {value} — must be HH:MM:SS AM/PM`
+
+---
+
+## static_entry
+
+### Input Format
+`HH:MM:SS AM/PM`
+
+### Purpose
+Sets a manual fixed time for prompt scheduling.
+
+### Success Feedback
+`:clock1: Static time set to {time}`
+
+### Validation Error
+`:x: Invalid static time {value} — must be HH:MM:SS AM/PM`
+
+---
+
+## preset_time_selection
+
+### Purpose
+Lets the user choose one of the predefined preset times from a Slack static select menu.
+
+### Behavior
+- Maps a selected option like `time_1`, `time_2`, and so on to a real preset time value.
+- Saves both the selected preset id and resolved daily target time.
+
+### Success Feedback
+`:clock1: Preset time set to {time}`
 
 
+=======
+>>>>>>> main
 <summary>active_days_selection</summary>
 
 

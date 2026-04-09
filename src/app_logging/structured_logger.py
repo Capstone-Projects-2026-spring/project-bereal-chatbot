@@ -108,7 +108,8 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
 
         # Count this as a response to the active prompt in this channel,
         # but only for real user messages (not bot posts or subtypes).
-        if user_id and not event.get("subtype"):
+        # Exclude bot_id to skip reactions on messages from bots (including this bot)
+        if user_id and not event.get("subtype") and not event.get("bot_id"):
             tracker = get_tracker()
             if tracker and team_id:
                 tracker.record_response(channel_id, team_id)

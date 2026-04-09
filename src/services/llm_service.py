@@ -94,6 +94,7 @@ def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> 
         )
         
         emoji = response.choices[0].message.content.strip().strip(":")
+        print(f"[LLM] Got emoji reaction: {emoji}")
         
         # Validate the Slack emoji name (letters, numbers, underscores, hyphens)
         if emoji and re.match(r'^[a-z0-9_\-]+$', emoji):

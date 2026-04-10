@@ -91,7 +91,7 @@ def main():
 
     # Online message to primary workspace
     try:
-        client.chat_postMessage(channel=cfg.default_channel, text="bot online")
+        client.chat_postMessage(channel=cfg.default_channel, text="bot online!!")
     except Exception as e:
         print(f"Error posting 'bot online' message: {e}")
 

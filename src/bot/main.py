@@ -54,6 +54,7 @@ def make_authorize(cfg, mongo_uri):
             )
 
     return authorize
+from services.streak_service import register_streak_command
 
 
 def main():

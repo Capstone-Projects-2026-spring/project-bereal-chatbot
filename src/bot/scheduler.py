@@ -188,19 +188,6 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                         from commands.social_connector import send_social_connector_message
                         send_social_connector_message(active_client, channel, team_id)
 
-                if current_time == "08:42:00 AM":
-                    try:
-                        custom_text = state.get_and_clear_pending_custom_prompt()
-                        if custom_text:
-                            ts = post_custom_prompt(active_client, custom_text, channel=channel, team_id=team_id, prefix_text="PROMPT OF THE DAY:")
-                        else:
-                            topic = state.get_and_clear_pending_topic()
-                            ts = post_csv_prompt(active_client, channel=channel, team_id=team_id, prefix_text="PROMPT OF THE DAY:", topic=topic, active_tags=state.get_active_tags() or None)
-                        if ts:
-                            state.set_last_prompt_ts(ts)
-                    except Exception as e:
-                        print(f"[SCHEDULER] [{team_id}] Error posting 12 PM prompt: {e}")
-
                 target_time = _get_target_time(state)
                 if current_time.endswith(":00 AM") or current_time.endswith(":00 PM"):
                     print(f"[SCHEDULER] [{team_id}] now={current_time!r}  target={target_time!r}  mode={state.get_selected_mode()!r}")

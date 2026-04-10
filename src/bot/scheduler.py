@@ -163,7 +163,7 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                         state.set_daily_target_time(new_time)
                         print(f"[SCHEDULER] [{team_id}] New day — target time reset to: {new_time}")
                         try:
-                            active_client.chat_postMessage(channel=channel, text=f"time set for today is {new_time}")
+                            active_client.chat_postMessage(channel=channel, text=f"!time set for today is {new_time}")
                         except Exception as e:
                             print(f"[SCHEDULER] [{team_id}] Error posting daily reset: {e}")
                     state.set_user_prompt_creator_used_today(False)

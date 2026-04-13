@@ -106,7 +106,6 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
         except Exception as e:
             print(f"[LOGGER] Failed to save message to MongoDB: {e}")
 
-<<<<<<< HEAD
         # Count this as a response to the active prompt in this channel,
         # but only for real user messages (not bot posts or subtypes).
         # Exclude bot_id to skip reactions on messages from bots (including this bot)
@@ -133,14 +132,12 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
                                 print(f"[REACTION] Added emoji :{emoji}: to message in {cache.channel_name(channel_id)}")
                             except Exception as e:
                                 print(f"[REACTION] Failed to add emoji reaction ({emoji}): {e}")
-=======
+
         # check + announce streaks for real user messages
-        if user_id and not bot_id and channel_id:
+        if user_id and not event.get("bot_id") and channel_id:
             try:
                 from services.streak_service import check_and_announce_streak
                 check_and_announce_streak(user_id, cache.user_name(user_id) or user_id, client, channel_id)
             except Exception as e:
                 print(f"[streaks] {e}")
 
-    return logger
->>>>>>> 98a5848 (add streaks feature)

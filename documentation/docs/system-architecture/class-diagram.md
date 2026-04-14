@@ -45,14 +45,8 @@ direction TB
         }
     }
 
-    namespace Platform {
-        class platform_adapter {
-        }
-
+    namespace SlackIntegration {
         class slack_adapter {
-        }
-
-        class adapter_selector {
         }
     }
 
@@ -67,14 +61,12 @@ direction TB
     prompt_engine *-- response_tracker
     activity_logger *-- response_tracker
 
-    vibecheck_bot ..> platform_adapter
-    adapter_selector ..> platform_adapter
-    slack_adapter ..|> platform_adapter
+    vibecheck_bot ..> slack_adapter
     activity_logger ..> mongo_store
     response_tracker ..> mongo_store
 ```
 
-The overview shows the main pieces of VibeCheck in a way that reflects the bot's actual job. The vibecheck_bot coordinates scheduling, prompt posting, logging, and workspace control. The data layer keeps track of prompt content and engagement, while the platform layer leaves room for more than one messaging service.
+The overview shows the main pieces of VibeCheck in a way that reflects the bot's actual job. The vibecheck_bot coordinates scheduling, prompt posting, logging, and workspace control. The data layer keeps track of prompt content and engagement, and the Slack integration layer handles Slack-specific messaging and command wiring.
 
 ## __Core Component__
 
@@ -177,51 +169,39 @@ direction TB
 
 The data component focuses on how prompts and message activity are stored. The prompt_library reads the CSV prompt set, the response_tracker keeps runtime counts for asks and replies, and the activity_logger records message activity while enriching it with user and channel names.
 
-## __Multi-Platform Pattern__
+## __Slack Integration Pattern__
 
 ```mermaid
 classDiagram
 direction TB
-    namespace Platform {
-        class platform_adapter {
-            <<interface>>
-            +send_message(channel_id, text)
-            +register_message_handler(handler)
-            +register_command_handler(command, handler)
+    namespace SlackIntegration {
+        class slack_bolt_app {
+            +event(event_name, handler)
+            +command(command_name, handler)
+            +action(action_id, handler)
         }
 
         class slack_adapter {
             +send_message(channel_id, text)
             +register_message_handler(handler)
             +register_command_handler(command, handler)
-        }
-
-        class teams_adapter {
-            +send_message(channel_id, text)
-            +register_message_handler(handler)
-            +register_command_handler(command, handler)
-        }
-
-        class discord_adapter {
-            +send_message(channel_id, text)
-            +register_message_handler(handler)
-            +register_command_handler(command, handler)
-        }
-
-        class adapter_selector {
-            +create(platform_name)
+            +register_action_handler(action_id, handler)
         }
 
         class vibecheck_bot {
             +start()
         }
+
+        class command_handlers {
+            +handle_findtime(...)
+            +handle_forceprompt(...)
+            +handle_status(...)
+        }
     }
 
-    slack_adapter ..|> platform_adapter
-    teams_adapter ..|> platform_adapter
-    discord_adapter ..|> platform_adapter
-    adapter_selector ..> platform_adapter
-    vibecheck_bot ..> platform_adapter
+    vibecheck_bot ..> slack_adapter
+    slack_adapter ..> slack_bolt_app
+    slack_bolt_app ..> command_handlers
 ```
 
-This is the project's multi-platform design pattern. Instead of VibeCheck being used by one SDK, the bot will use a platform_adapter interface. Currently, only the slack_adapter is used, but the same structure can be integrated to Teams or Discord later.
+This is the project's Slack-specific integration pattern. VibeCheck is intentionally coupled to Slack Bolt and Slack SDK event/command flows, with no adapter abstraction for other messaging platforms.

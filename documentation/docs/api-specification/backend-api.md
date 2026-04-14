@@ -3,131 +3,188 @@ sidebar_position: 1
 description: Backend API Design Document
 ---
 
-Backend API - Design Document - Part II API
+# Backend API - Design Document - Part II API
 =============================
 
-# Purpose
+## Purpose
 
-The purpose of the Backend API is to present how Vibecheck works with Slack's API. This Design Document gives the complete overview of the backend components implemented.
-
-Language: Python
-Tools: slack_sdk, dotenv
+This page documents the backend API as a set of resources, requests, and responses.
 
 ---
 
-# HTTP API Contract
+## Scope
 
-The external HTTP contract is maintained in the OpenAPI source file:
+VibeCheck has one backend-facing interface; a Slack Bolt runtime that powers the bot.
+
+
+Formal HTTP contract is maintained in:
 
 - `documentation/static/openapi.yml.yaml`
 
-Rendered documentation is available in this section:
+The rendered version appears in:
 
 - `docs/api-specification/openapi-spec`
 
 ---
 
-# Requirements
+## API Style
 
-## Functional
-
-**Using Slack Token:** 
-- Using Dotenv, the system is able to recieve and send messages with Slack, allowing the program to interact with Slack.
-- Token is set through .env (which has to be created by the user itself because of token security)
-
- **Start/End Notification:**
-- Will probably be removed from final product
-- Allow users to know when product is usable through Slack
-
-**Random Time Library:**
-- Switch cases of preset times that is picked randomly.
-- Uses "hh:mm:ss" time format
-
-**Chatbot Controls:**    
-- Function to add prompts that is isolated to a specific Slack server
-- Admin controls to set time and frequencies of chatbot sending prompts (once a day or many times)
-- Leaderboard kept to show users how frequent they interact with Vibecheck
-
-**Data Collection:** 
-    
-- For leaderboards and streaks, frequencies of response to Vibecheck is collected
-
-**Prompts:** 
-    
-- Vibecheck sends text-based prompts that is to be responded by users and are encouraged to post text/pictures.
+- Protocol: HTTPS/JSON
+- Format: REST-style resource endpoints
+- Authentication: bearer token for protected endpoints
+- Primary resources: prompts, submissions, admin actions, metrics
 
 ---
 
-## Nonfunctional
+## Resource Overview
 
-**Scalability:**
-    
-- Encouraged to work with different platforms such as Discord,, Slack, SMS, etc...
-- Handle many requests and responses
-- Collect information and responses for leaderboard system instantly
-- Remain consistent (.env) to scale with many other platforms
-
-**Security:** 
-    
-- Ensure that users know what data we are collecting
-- Make sure that authentication key is not leaked
+| Resource | Description | Access Pattern |
+| --- | --- | --- |
+| Health | service availability and version metadata | `GET /health` |
+| Prompt | active prompt and prompt delivery data | `GET /v1/prompts/today` |
+| Submission | user response to a prompt | `POST /v1/submissions` |
+| Admin Prompt Dispatch | manual prompt send operation | `POST /v1/admin/prompts/force-send` |
+| Prompt Metrics | prompt usage counts and response counts | `GET /v1/metrics/prompts` |
 
 ---
 
-# Classes
+## Endpoint Summary
 
-### getenv("SLACK_TOKEN) 
+| Method | Path | Input | Output |
+| --- | --- | --- | --- |
+| `GET` | `/health` | none | service status, version, timestamp |
+| `GET` | `/v1/prompts/today` | auth header | active prompt metadata |
+| `POST` | `/v1/submissions` | JSON request body | created submission record |
+| `POST` | `/v1/admin/prompts/force-send` | JSON request body | queued dispatch result |
+| `GET` | `/v1/metrics/prompts` | query parameters and auth header | list of prompt metrics |
 
-**Purpose:** Recieves the token from .env to allow program to connect to Slack.
+---
 
-**Pre-conditions:** Requires slack_sdk and dotenv.
+## Metrics Data
 
-**Post-conditions:** Allows program to connect and interact with Slack application.
+This is the part the critique was asking for: the API specification should clearly show what metrics data exists and how it is accessed through the REST API.
 
-**Returns:** Does not return anything.
+### Prompt Metrics Fields
 
-**Output:** Allow users to make commands and interactions with Slack client.
+The backend tracks prompt-usage metrics per workspace. Each prompt metric record contains:
 
-**Exceptions Thrown:** Catch when .env is not thrown, but can proceed to check terminal functions.
+- `teamId`: Slack workspace identifier
+- `promptId`: unique prompt identifier
+- `prompt`: prompt text
+- `tags`: associated topic tags
+- `timesAsked`: number of times the prompt has been posted
+- `timesResponded`: number of responses recorded for that prompt
+- `lastAskedAt`: timestamp of the most recent send
 
+### Metrics Access Pattern
 
-### display_current_time()
+Clients retrieve metrics through:
 
-**Purpose:** In terminal, display the corresponding time.
+```text
+GET /v1/metrics/prompts?teamId=T12345&limit=20
+```
 
-**Pre-conditions:** Uses datetime, must be imported.
+### Example Metrics Response
 
-**Post-conditions:** Current time is printed and updated.
+```json
+{
+	"teamId": "T12345",
+	"count": 2,
+	"items": [
+		{
+			"promptId": "5",
+			"prompt": "If you had to swap jobs with a friend for a day, who would it be?",
+			"tags": ["work_life"],
+			"timesAsked": 8,
+			"timesResponded": 5,
+			"lastAskedAt": "2026-04-13T18:30:00Z"
+		},
+		{
+			"promptId": "12",
+			"prompt": "Post a photo that captures your current energy.",
+			"tags": ["photo", "social"],
+			"timesAsked": 6,
+			"timesResponded": 2,
+			"lastAskedAt": "2026-04-12T18:30:00Z"
+		}
+	]
+}
+```
+---
 
-**Returns:** String of current time in "%I:%M:%S %p" format.
+## Request and Response Examples
 
-**Output:** Prints the current time that gets updated every second. Returns current time constantly as well.
+### `GET /v1/prompts/today`
 
-**Exceptions Thrown:** No exceptions.
+**Response**
 
-    
-### getenv("SLACK_TOKEN") 
+```json
+{
+	"promptId": "prm_20260330",
+	"text": "Post a quick lunch update and a photo.",
+	"channelId": "C01234567",
+	"opensAt": "2026-03-30T16:00:00Z",
+	"closesAt": "2026-03-30T16:30:00Z",
+	"status": "active"
+}
+```
 
-**Purpose:** Recieves the token from .env to allow program to connect to Slack.
+### `POST /v1/submissions`
 
-**Pre-conditions:** Requires slack_sdk and dotenv.
+**Request**
 
-**Post-conditions:** Allows program to connect and interact with Slack application.
+```json
+{
+	"userId": "U12345",
+	"channelId": "C01234567",
+	"text": "Lunch break at the student center",
+	"imageUrl": "https://cdn.example.com/images/submission1.jpg"
+}
+```
 
-**Returns:** Does not return anything.
+**Response**
 
-### preSet_time_library(random_number: int) -> str: 
-    
-**Purpose:** Contains library of different preset times.
+```json
+{
+	"submissionId": "sub_4f8128",
+	"promptId": "prm_20260330",
+	"userId": "U12345",
+	"channelId": "C01234567",
+	"text": "Lunch break at the student center",
+	"imageUrl": "https://cdn.example.com/images/submission1.jpg",
+	"createdAt": "2026-03-30T16:11:33Z",
+	"late": false
+}
+```
 
-**Parameters:** random_number (int): A number from main program is selected based on case numbers. Used for selecting a random time from library.
+### `POST /v1/admin/prompts/force-send`
 
-**Pre-conditions:** Standalone
+**Request**
 
-**Post-conditions:** A random time is chosen and returned.
+```json
+{
+	"channelId": "C01234567",
+	"promptText": "Share one photo that shows your current vibe.",
+	"postImmediately": true
+}
+```
 
-**Returns:** String of time in hh:mm:ss "(AM/PM)" format.
+**Response**
 
-**Output:** Returns string of time in hh:mm:ss "(AM/PM)" format.
+```json
+{
+	"requestId": "req_7dc2e1",
+	"status": "queued"
+}
+```
+---
 
-**Exceptions Thrown:** Checks if parameter is a integer.
+## Error Contract
+
+Protected endpoints may return:
+
+- `401 Unauthorized` when authentication is missing or invalid
+- `403 Forbidden` when the caller lacks permission for an admin endpoint
+- `400 Bad Request` when the input payload is invalid
+- `409 Conflict` when a submission duplicates an existing prompt response
+- `500 Internal Server Error` for unexpected failures

@@ -30,6 +30,8 @@ tags:
     description: User submission APIs
   - name: Admin
     description: Admin-only control operations
+  - name: Metrics
+    description: Prompt usage and response-count reporting
 paths:
   /health:
     get:
@@ -164,6 +166,65 @@ paths:
           $ref: '#/components/responses/ForbiddenError'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /v1/metrics/prompts:
+    get:
+      tags:
+        - Metrics
+      summary: Retrieve prompt metrics for a workspace
+      operationId: getPromptMetrics
+      x-implementation-status: planned
+      parameters:
+        - in: query
+          name: teamId
+          required: true
+          schema:
+            type: string
+          description: Slack workspace identifier whose metrics should be returned
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum number of prompt metric rows to return
+      responses:
+        '200':
+          description: Prompt metrics returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromptMetricsListResponse'
+              examples:
+                sample:
+                  value:
+                    teamId: T12345
+                    count: 2
+                    items:
+                      - promptId: '5'
+                        prompt: >-
+                          If you had to swap jobs with a friend for a day, who
+                          would it be?
+                        tags:
+                          - work_life
+                        timesAsked: 8
+                        timesResponded: 5
+                        lastAskedAt: '2026-04-13T18:30:00Z'
+                      - promptId: '12'
+                        prompt: Post a photo that captures your current energy.
+                        tags:
+                          - photo
+                          - social
+                        timesAsked: 6
+                        timesResponded: 2
+                        lastAskedAt: '2026-04-12T18:30:00Z'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
     bearerAuth:
@@ -279,6 +340,49 @@ components:
         postImmediately:
           type: boolean
           default: true
+    PromptMetric:
+      type: object
+      required:
+        - promptId
+        - prompt
+        - tags
+        - timesAsked
+        - timesResponded
+        - lastAskedAt
+      properties:
+        promptId:
+          type: string
+        prompt:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        timesAsked:
+          type: integer
+          minimum: 0
+        timesResponded:
+          type: integer
+          minimum: 0
+        lastAskedAt:
+          type: string
+          format: date-time
+    PromptMetricsListResponse:
+      type: object
+      required:
+        - teamId
+        - count
+        - items
+      properties:
+        teamId:
+          type: string
+        count:
+          type: integer
+          minimum: 0
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PromptMetric'
     QueuedResponse:
       type: object
       required:

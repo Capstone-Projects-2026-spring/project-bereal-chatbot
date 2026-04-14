@@ -41,12 +41,10 @@ No hardware requirements. Resources are commonly available within standard Compu
 
 ## How to Run the Project
 
-Join the Slack workspace: 
-[vibecheckbotteam.slack.com]
-https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw
+Join the Slack workspace: [VibeCheck Bot Team](https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw)
 
-You can also add the chatbot to your own workspace: 
-https://slack.com/oauth/v2/authorize?client_id=10423543431858.10430963976773&scope=app_mentions:read,channels:history,channels:read,chat:write,im:history,commands,groups:history,mpim:history&user_scope=files:write,channels:read,channels:write,chat:write  
+You can also add the chatbot to your own workspace: [VibeCheck Bot](https://slack.com/oauth/v2/authorize?client_id=10423543431858.10430963976773&scope=app_mentions:read,channels:history,channels:read,chat:write,im:history,commands,groups:history,mpim:history&user_scope=files:write,channels:read,channels:write,chat:write) 
+
 
 Running the chatbot locally is not necessary, since it is already deployed on Railway. Use the slash command "/help" in # bot-test channel to see what the bot can do and check out the docusaurus for additional details.
 

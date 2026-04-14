@@ -8,16 +8,13 @@ sidebar_position: 4
 
 ### Chatbot Controls
 - Users can create their own prompts
-- Chatbot must enforce quick-time events
 - Chatbot must send a message once a day that encourages team engagement and communication
-- Chatbot must group users based on post details
-- Chatbot must be able to display a leaderboard of steak scores from all users
+- Admins can configure scheduling mode, active days, and active channel via a control panel
+- Admins can manually force a prompt post at any time
 
 ### Data Collection
-- Chatbot must track how many times each user responds
-- Chatbot must track individual user streak scores
-- Chatbot must track late posts
-- Chatbot must track missed posts
+- Chatbot must track how many times each prompt is sent per workspace
+- Chatbot must track how many responses each prompt receives per workspace
 
 ### Prompts
 - Chatbot must make picture-based prompts
@@ -28,10 +25,9 @@ sidebar_position: 4
 ## Nonfunctional Requirements
 
 ### Scalability
-- Chatbot must be available on multiple different messaging platforms (Slack, Discord, SMS, etc.)
 - Chatbot must be able to handle large numbers of requests and responses
 - Chatbot must respond to events near-instantly
-- Chatbot must remain consistent in varying platform structures, supporting configuration based on environment variables
+- Chatbot must remain stable for Slack workspace growth, including additional channels and higher message volume
 
 ### Security
 - Ensure that data stored is secure and minimize data loss, duplication, and corruption

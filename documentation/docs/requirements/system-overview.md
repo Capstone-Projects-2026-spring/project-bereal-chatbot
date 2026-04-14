@@ -5,7 +5,7 @@ sidebar_position: 1
 # System Overview
 
 ## Abstract
-**VibeCheck** is a cross-platform BeReal-inspired chatbot that integrates with Slack at the current moment
+**VibeCheck** is a Slack-specific, BeReal-inspired chatbot designed for workspace and community channels.
 
 All user interactions are isolated to their respective chat environments. Can be implemented in communities or work-circles quietly.
 
@@ -34,3 +34,5 @@ The BeReal Chatbot aims to bridge this gap by:
 - Decrease intimidation with new employees
 
 Hopefully a timelimit of when people would have to type would encourage people to message.
+
+This project scope is intentionally Slack-only, including Slack events, slash commands, and Slack channel workflows.

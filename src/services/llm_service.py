@@ -10,31 +10,23 @@ except ImportError:
 
 # Common Slack emoji names that work reliably
 VALID_SLACK_EMOJI_NAMES = {
-    "thumbsup", "heart", "laughing", "thinking_face", "sunglasses",
-    "fire", "sparkles", "tada", "clap", "wave", "pray", "+1",
-    "smile", "smiley", "grinning", "joy", "sweat_smile",
-    "relaxed", "unamused", "face_with_rolling_eyes", "thinking_face", "angry",
-    "disappointed", "worried", "cry", "cool", "rocket", "star",
-    "boom", "bulb", "books", "brain", "computer", "keyboard",
-    "love_letter", "mailbox", "memo", "clipboard", "chart_with_upwards_trend",
-    "coffee", "pizza", "apple", "banana", "tropical_drink", "beers",
-    "beer", "wine_glass", "cocktail", "camera", "video_camera", 
-    "musical_note", "speaker", "bell", "loudspeaker", "game_die", "dart",
-    "basketball", "soccer", "football", "baseball", "tennis",
-    "golfer", "surfer", "skateboard", "swimmer", "person_climbing",
-    "person_with_ball", "person_in_lotus_position",
-    "raised_hands", "handshake", "airplane", "car", "train", "ship",
-    "mouse", "keyboard", "printer", "phone", "iphone", "telephone",
-    "alarm_clock", "hourglass", "calendar", "sunrise", "city_sunset", "rainbow",
-    "snow_cloud", "cloud", "sun_behind_cloud", "umbrella", "umbrella_on_ground",
-    "zap", "droplet", "ocean", "earth_americas",
-    "mountain", "volcano", "evergreen_tree",
-    "palm_tree", "cactus", "tulip", "rose", "sunflower", "hibiscus",
-    "cherry_blossom", "bouquet", "corn", "hot_pepper", "watermelon",
-    "strawberry", "birthday", "cake", "lollipop", "doughnut",
-    "candy", "cookie", "checkered_flag", "crown", "trophy", "purse", "gift",
-    "gem", "gear", "wrench", "crossed_swords", "shield",
-    "boxing_glove"
+    "smiley" , "laughing", "sweat_smile",
+    "rolling_on_the_floor_laughing", "joy", "slightly_smiling_face",
+    "upside_down_face", "melting_face", "wink", "heart_eyes",
+    "star-struck", "relaxed", "yum", "zany_face", "money_mouth_face",
+    "hugging_face", "thinking_face", "saluting_face","grimacing",
+    "face_exhaling", "shaking_face", "relieved", "pensive", "sleepy",
+    "face_with_thermometer", "face_with_head_bandage", "nauseated_face",
+    "cold_face", "woozy_face", "dizzy_face", "exploding_head", "face_with_cowboy_hat",
+    "partying_face", "smiling_face_with_3_hearts", "sunglasses", "nerd_face",
+    "confused", "worried", "slightly_frowning_face", "open_mouth",
+    "hushed", "astonished", "flushed", "pleading_face", "face_holding_back_tears",
+    "frowning", "fearful", "sob", "scream", "confounded", "disappointed",
+    "triumph", "angry", "rage", "face_with_symbols_over_mouth", "smiling_imp", 
+    "skull", "ghost", "alien", "space_invader", "robot_face", "smiley_cat",
+    "see_no_evil", "hear_no_evil", "speak_no_evil", "thumbsup", "thumbsdown",
+    "gift_heart", "two_hearts", "heart", "100", "eyes", "clap", "wave",
+    "heart_hands"
 }
 
 
@@ -74,8 +66,8 @@ def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> 
         system_prompt = (
             "You are an emoji expert. Given a user's response to a prompt, "
             "respond with ONLY a single Slack emoji name that captures the sentiment or content. "
-            "The name must be a valid Slack emoji name: lowercase letters, numbers, underscores, and hyphens only. "
-            "No colons, no Unicode characters, no text, no explanation. "
+            f"The name must be a valid Slack emoji name from the following list: {emoji_names_str}. "
+            "No colons, no Unicode characters, no explanation. "
             "Examples of valid responses: heart, tada, fire, slightly_smiling_face, origami"
         )
         

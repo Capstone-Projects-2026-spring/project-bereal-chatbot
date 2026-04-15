@@ -61,7 +61,7 @@ prompt_id,prompt,response_type,tags,times_asked,times_responded
 60,What's the most creative or unusual way you've ever celebrated a work milestone or achievement?,text,work_life,0,0
 61,Share a photo of your favorite snack or beverage that gets you through the workday.,image,food,0,0
 62,What's the most unique or interesting hobby you have outside of work?,text,hobbies,0,0
-63,What's the most creative or unexpected way you've ever used office technology or software?,text,work_life,0,0
+63,What's the most creative or unexpected way you've ever used a piece of software?,text,work_life,0,0
 64,Share a photo of your favorite office decoration or personal item that brings you joy.,image,personal_life,0,0
 65,What's the most unusual or surprising thing you've learned about a coworker?,text,work_life,1,0
 66,"If you could instantly become an expert in one new skill, what would it be and why?",text,hobbies,1,0

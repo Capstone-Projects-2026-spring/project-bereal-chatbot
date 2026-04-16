@@ -124,7 +124,16 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
                         emoji = get_reaction_emoji(text)
                         if emoji:
                             try:
-                                client.reactions_add(
+                                # Use the workspace-specific token so reactions work
+                                # across multiple installed workspaces.
+                                reaction_token = None
+                                if team_id:
+                                    record = installations_col.find_one({"team_id": team_id})
+                                    if record:
+                                        reaction_token = record.get("bot_token")
+                                from slack_sdk import WebClient as _WebClient
+                                reaction_client = _WebClient(token=reaction_token or cfg.token)
+                                reaction_client.reactions_add(
                                     channel=channel_id,
                                     timestamp=timestamp,
                                     name=emoji

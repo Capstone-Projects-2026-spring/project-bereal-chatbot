@@ -1,431 +1,55 @@
-openapi: 3.0.4
+openapi: 3.0.3
 info:
-  title: VibeCheck HTTP API
-  version: 0.1.0-draft
-  description: |
-    Contract-first HTTP API for VibeCheck.
-
-    Note: the current repository runtime uses Slack Socket Mode, so these HTTP routes
-    represent the planned external contract for a REST deployment profile.
-  contact:
-    name: VibeCheck Team
-    email: support@example.com
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
-
+  title: VibeCheck Backend API
+  version: 1.0.0
+  description: Auto-generated from Flask route definitions in src/bot/oauth_server.py
 servers:
-  - url: http://localhost:8000
-    description: Local development
-  - url: https://api.vibecheck.example.com
-    description: Production
-
-tags:
-  - name: Health
-    description: Service availability and diagnostics
-  - name: Prompts
-    description: Prompt retrieval and dispatch operations
-  - name: Submissions
-    description: User submission APIs
-  - name: Admin
-    description: Admin-only control operations
-  - name: Metrics
-    description: Prompt usage and response-count reporting
-
+- url: https://vibecheck.up.railway.app
+  description: Production
+- url: http://localhost:8080
+  description: Local
 paths:
-  /health:
+  /slack/install:
     get:
-      tags: [Health]
-      summary: Check service liveness and current API version
-      operationId: getHealth
-      security: []
-      x-implementation-status: planned
+      summary: Start Slack OAuth installation
+      description: Redirects user to Slack OAuth authorization URL.
       responses:
-        "200":
-          description: Service is healthy
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HealthResponse'
-              examples:
-                ok:
-                  value:
-                    status: ok
-                    service: vibecheck-backend
-                    version: 0.1.0
-                    timestamp: "2026-03-30T12:30:15Z"
-
-  /v1/prompts/today:
-    get:
-      tags: [Prompts]
-      summary: Fetch the active daily prompt and response window metadata
-      operationId: getTodayPrompt
-      x-implementation-status: planned
-      responses:
-        "200":
-          description: Active prompt returned
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PromptResponse'
-              examples:
-                sample:
-                  value:
-                    promptId: prm_20260330
-                    text: "Post a quick lunch update and a photo."
-                    channelId: C01234567
-                    opensAt: "2026-03-30T16:00:00Z"
-                    closesAt: "2026-03-30T16:30:00Z"
-                    status: active
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-  /v1/submissions:
+        '302':
+          description: Redirect to Slack OAuth authorize URL
+  /slack/events:
     post:
-      tags: [Submissions]
-      summary: Create a user submission for the active prompt window
-      operationId: createSubmission
-      x-implementation-status: planned
+      summary: Receive Slack events
+      description: Receives Slack Events API payloads and forwards them to the Bolt
+        handler.
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSubmissionRequest'
-            examples:
-              textWithImage:
-                value:
-                  userId: U12345
-                  channelId: C01234567
-                  text: "Lunch break at the student center"
-                  imageUrl: "https://cdn.example.com/images/submission1.jpg"
+              type: object
+              additionalProperties: true
       responses:
-        "201":
-          description: Submission accepted
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SubmissionResponse'
-              examples:
-                created:
-                  value:
-                    submissionId: sub_4f8128
-                    promptId: prm_20260330
-                    userId: U12345
-                    channelId: C01234567
-                    text: "Lunch break at the student center"
-                    imageUrl: "https://cdn.example.com/images/submission1.jpg"
-                    createdAt: "2026-03-30T16:11:33Z"
-                    late: false
-        "400":
-          $ref: '#/components/responses/ValidationError'
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "409":
-          description: Duplicate submission for this prompt window
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                duplicate:
-                  value:
-                    code: SUBMISSION_EXISTS
-                    message: "A submission for this prompt and user already exists"
-                    traceId: 38ce52d8b6ef4a58
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-  /v1/admin/prompts/force-send:
-    post:
-      tags: [Admin]
-      summary: Force-send a prompt to a target channel outside normal schedule
-      operationId: forceSendPrompt
-      x-implementation-status: planned
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ForcePromptRequest'
-      responses:
-        "202":
-          description: Prompt dispatch has been queued
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/QueuedResponse'
-        "400":
-          $ref: '#/components/responses/ValidationError'
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "403":
-          $ref: '#/components/responses/ForbiddenError'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-  /v1/metrics/prompts:
+        '200':
+          description: Processed by Slack Bolt handler
+        '400':
+          description: Bad request payload
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Unexpected backend error
+  /slack/oauth_redirect:
     get:
-      tags: [Metrics]
-      summary: Retrieve prompt metrics for a workspace
-      operationId: getPromptMetrics
-      x-implementation-status: planned
+      summary: Slack OAuth redirect callback
+      description: Exchanges OAuth code for access token and stores installation details.
       parameters:
-        - in: query
-          name: teamId
-          required: true
-          schema:
-            type: string
-          description: Slack workspace identifier whose metrics should be returned
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
-          description: Maximum number of prompt metric rows to return
+      - name: code
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Slack OAuth authorization code
       responses:
-        "200":
-          description: Prompt metrics returned successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PromptMetricsListResponse'
-              examples:
-                sample:
-                  value:
-                    teamId: T12345
-                    count: 2
-                    items:
-                      - promptId: "5"
-                        prompt: "If you had to swap jobs with a friend for a day, who would it be?"
-                        tags: [work_life]
-                        timesAsked: 8
-                        timesResponded: 5
-                        lastAskedAt: "2026-04-13T18:30:00Z"
-                      - promptId: "12"
-                        prompt: "Post a photo that captures your current energy."
-                        tags: [photo, social]
-                        timesAsked: 6
-                        timesResponded: 2
-                        lastAskedAt: "2026-04-12T18:30:00Z"
-        "400":
-          $ref: '#/components/responses/ValidationError'
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
-  schemas:
-    HealthResponse:
-      type: object
-      required: [status, service, version, timestamp]
-      properties:
-        status:
-          type: string
-          enum: [ok]
-        service:
-          type: string
-        version:
-          type: string
-        timestamp:
-          type: string
-          format: date-time
-
-    PromptResponse:
-      type: object
-      required: [promptId, text, channelId, opensAt, closesAt, status]
-      properties:
-        promptId:
-          type: string
-        text:
-          type: string
-        channelId:
-          type: string
-        opensAt:
-          type: string
-          format: date-time
-        closesAt:
-          type: string
-          format: date-time
-        status:
-          type: string
-          enum: [scheduled, active, closed]
-
-    CreateSubmissionRequest:
-      type: object
-      required: [userId, channelId, text]
-      properties:
-        userId:
-          type: string
-        channelId:
-          type: string
-        text:
-          type: string
-          minLength: 1
-          maxLength: 1000
-        imageUrl:
-          type: string
-          format: uri
-
-    SubmissionResponse:
-      type: object
-      required: [submissionId, promptId, userId, channelId, text, createdAt, late]
-      properties:
-        submissionId:
-          type: string
-        promptId:
-          type: string
-        userId:
-          type: string
-        channelId:
-          type: string
-        text:
-          type: string
-        imageUrl:
-          type: string
-          format: uri
-        createdAt:
-          type: string
-          format: date-time
-        late:
-          type: boolean
-
-    ForcePromptRequest:
-      type: object
-      required: [channelId, promptText]
-      properties:
-        channelId:
-          type: string
-        promptText:
-          type: string
-          minLength: 1
-        postImmediately:
-          type: boolean
-          default: true
-
-    PromptMetric:
-      type: object
-      required: [promptId, prompt, tags, timesAsked, timesResponded, lastAskedAt]
-      properties:
-        promptId:
-          type: string
-        prompt:
-          type: string
-        tags:
-          type: array
-          items:
-            type: string
-        timesAsked:
-          type: integer
-          minimum: 0
-        timesResponded:
-          type: integer
-          minimum: 0
-        lastAskedAt:
-          type: string
-          format: date-time
-
-    PromptMetricsListResponse:
-      type: object
-      required: [teamId, count, items]
-      properties:
-        teamId:
-          type: string
-        count:
-          type: integer
-          minimum: 0
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/PromptMetric'
-
-    QueuedResponse:
-      type: object
-      required: [accepted, requestId]
-      properties:
-        accepted:
-          type: boolean
-        requestId:
-          type: string
-
-    ErrorResponse:
-      type: object
-      required: [code, message]
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        details:
-          type: object
-          additionalProperties: true
-        traceId:
-          type: string
-
-  responses:
-    ValidationError:
-      description: Request payload or query parameters failed validation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            invalidText:
-              value:
-                code: VALIDATION_ERROR
-                message: "Field 'text' must not be empty"
-                traceId: 1adf7bdbbc7f42f8
-
-    UnauthorizedError:
-      description: Authentication token missing or invalid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            unauthenticated:
-              value:
-                code: UNAUTHORIZED
-                message: "Authentication required"
-                traceId: 7948faacde824218
-
-    ForbiddenError:
-      description: Authenticated caller does not have permission for this operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            forbidden:
-              value:
-                code: FORBIDDEN
-                message: "Insufficient privileges"
-                traceId: bca92290cd054ed8
-
-    InternalServerError:
-      description: Unexpected service failure
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            unknown:
-              value:
-                code: INTERNAL_ERROR
-                message: "An unexpected error occurred"
-                traceId: c52db74e364f4ea3
-
-security:
-  - bearerAuth: []
+        '200':
+          description: Installation completed
+        '400':
+          description: Missing or invalid OAuth code

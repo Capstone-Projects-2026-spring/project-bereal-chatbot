@@ -21,6 +21,8 @@ class BotState:
     _pending_topic: Optional[str] = None
     _active_tags: Set[str] = field(default_factory=set)  # empty = all tags allowed
     _last_prompt_ts: Optional[str] = None
+    _reminder_sent: bool = False
+    _reminder_enabled: bool = False
     _pending_custom_prompt: Optional[str] = None  # user-authored prompt text
     _user_prompt_creator_used_today: bool = False  # only invite one user to create a prompt
     _social_connector_used_today: bool = False  # only run social connector once per day
@@ -28,10 +30,27 @@ class BotState:
     def set_last_prompt_ts(self, ts: Optional[str]) -> None:
         with self._lock:
             self._last_prompt_ts = ts
+            self._reminder_sent = False
 
     def get_last_prompt_ts(self) -> Optional[str]:
         with self._lock:
             return self._last_prompt_ts
+
+    def get_reminder_sent(self) -> bool:
+        with self._lock:
+            return self._reminder_sent
+
+    def set_reminder_sent(self, value: bool) -> None:
+        with self._lock:
+            self._reminder_sent = value
+
+    def get_reminder_enabled(self) -> bool:
+        with self._lock:
+            return self._reminder_enabled
+
+    def set_reminder_enabled(self, value: bool) -> None:
+        with self._lock:
+            self._reminder_enabled = value
 
     def set_active_tags(self, tags: Set[str]) -> None:
         with self._lock:

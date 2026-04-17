@@ -63,7 +63,8 @@ def _build_topic_options():
 
 def _build_home_view(selected_preset=None, selected_mode=None,
                      random_start=None, random_end=None, static_time=None,
-                     active_days=None, pending_topic=None, active_tags=None) -> dict:
+                     active_days=None, pending_topic=None, active_tags=None,
+                     reminder_enabled=False) -> dict:
     mode_initial = next(
         (opt for opt in _MODE_OPTIONS if opt["value"] == selected_mode),
         None
@@ -258,9 +259,41 @@ def _build_home_view(selected_preset=None, selected_mode=None,
             ]
         },
         {"type": "divider"},
+    ]
+
+    reminder_block = {
+        "type": "actions",
+        "elements": [
+            {
+                "type": "checkboxes",
+                "action_id": "reminder_toggle",
+                "options": [
+                    {
+                        "text": {"type": "plain_text", "text": "Send DM reminders 30 min after a prompt posts"},
+                        "value": "reminder_enabled"
+                    }
+                ]
+            }
+        ]
+    }
+    if reminder_enabled:
+        reminder_block["elements"][0]["initial_options"] = [
+            {
+                "text": {"type": "plain_text", "text": "Send DM reminders 30 min after a prompt posts"},
+                "value": "reminder_enabled"
+            }
+        ]
+
+    blocks += [
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*6. Assign Prompt Creator*\nPick a user to DM them the prompt creation invite! They will have 5 minutes to submit."}
+            "text": {"type": "mrkdwn", "text": "*6. Late Response Reminders*\nDM users who haven't responded 30 minutes after a vibe check posts."}
+        },
+        reminder_block,
+        {"type": "divider"},
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*7. Assign Prompt Creator*\nPick a user to DM them the prompt creation invite! They will have 5 minutes to submit."}
         },
         {
             "type": "actions",
@@ -289,6 +322,7 @@ def _publish_home(client, user_id, state):
             active_days=state.get_active_days(),
             pending_topic=state._pending_topic,
             active_tags=state.get_active_tags(),
+            reminder_enabled=state.get_reminder_enabled(),
         )
     )
 
@@ -451,6 +485,20 @@ def register_control_panel(bolt_app, state_manager):
         logger.info(f"Tag filter set: {tag_list}")
         _publish_home(client, body["user"]["id"], state)
         _dm_admin(client, body["user"]["id"], f":label: *Topic filter* set to: {tag_list}")
+
+    @bolt_app.action("reminder_toggle")
+    def handle_reminder_toggle(ack, body, client, logger):
+        ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
+        selected = body["actions"][0].get("selected_options", [])
+        enabled = any(opt["value"] == "reminder_enabled" for opt in selected)
+        state.set_reminder_enabled(enabled)
+        status = "enabled" if enabled else "disabled"
+        print(f"[CONTROL PANEL] [{team_id}] Late response reminders {status}")
+        logger.info(f"Reminder toggle: {status}")
+        _publish_home(client, body["user"]["id"], state)
+        _dm_admin(client, body["user"]["id"], f":bell: *Late response reminders* {status}")
 
     @bolt_app.action("admin_assign_prompt_creator")
     def handle_admin_assign_prompt_creator(ack, body, client, logger):

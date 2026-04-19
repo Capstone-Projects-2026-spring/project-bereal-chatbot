@@ -61,7 +61,7 @@ def databse_Task(mongo_client, payload, respond, botID):
             userCreatedVibes += 1
     #    lines.append(f"- Vibes Sent So Far: {len(prompt_list)}")
 
-    lines.append(f"\nRandom Vibes: {randomVibes}\Forced Vibes: {forcedVibes}\User-Created Vibes: {userCreatedVibes}\n")
+    lines.append(f"\nRandom Vibes: {randomVibes}\nForced Vibes: {forcedVibes}\nUser-Created Vibes: {userCreatedVibes}\n")
     respond("\n".join(lines))
     # for message in message_array :
     #    print(f"Message:{message.get("text")}")

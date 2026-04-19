@@ -32,18 +32,11 @@ def databse_Task(mongo_client, payload, respond):
             respond("Could not find the record")
     
     collection_name = f"messages_{team_name}" if team_name else f"messages_{team_id or 'unknown'}"
-
-    if(not db):
-        respond(f"There isn't a databse called vibecheck.")
-    else:
-        respond(f"There is a databse called vibecheck.")
-
-    messages_col = db.get_collection(collection_name)
-    if not messages_col:
-        respond(f"This channel does not have any logs!")
-        return
-    else:
+    try:
+        messages_col = db.get_collection(collection_name)
         respond(f"This channel does have logs!")
+    except ConnectionError:
+        respond(f"Message Collection Not Connected Succdessfully")     
 
     respond("Checking the Vibes!!")
 

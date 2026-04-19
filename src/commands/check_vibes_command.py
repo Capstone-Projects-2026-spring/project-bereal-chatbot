@@ -34,6 +34,8 @@ def register_check_vibes_command(bolt_app, state_manager):
 
         if(not db):
             respond(f"There isn't a databse called vibecheck.")
+        else:
+            respond(f"There is a databse called vibecheck.")
 
         messages_col = db[collection_name]
         if not messages_col:

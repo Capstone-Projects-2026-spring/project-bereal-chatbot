@@ -14,6 +14,8 @@ class BotConfig:
     mongo_uri: str
     llm_reactions_enabled: bool
     llm_reactions_probability: float
+    llm_replies_enabled: bool
+    llm_replies_probability: float
 
 
 def load_config() -> BotConfig:
@@ -27,6 +29,8 @@ def load_config() -> BotConfig:
     mongo_uri = os.getenv("MONGO_URI")
     llm_reactions_enabled = os.getenv("LLM_REACTIONS_ENABLED", "true").lower() == "true"
     llm_reactions_probability = float(os.getenv("LLM_REACTIONS_PROBABILITY", "0.5"))
+    llm_replies_enabled = os.getenv("LLM_REPLIES_ENABLED", "true").lower() == "true"
+    llm_replies_probability = float(os.getenv("LLM_REPLIES_PROBABILITY", "0.2"))
 
     if not token:
         raise RuntimeError("Missing SLACK_BOT_TOKEN in .env")
@@ -41,5 +45,7 @@ def load_config() -> BotConfig:
         default_channel=default_channel,
         mongo_uri=mongo_uri,
         llm_reactions_enabled=llm_reactions_enabled,
-        llm_reactions_probability=llm_reactions_probability
+        llm_reactions_probability=llm_reactions_probability,
+        llm_replies_enabled=llm_replies_enabled,
+        llm_replies_probability=llm_replies_probability
     )

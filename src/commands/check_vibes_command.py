@@ -10,7 +10,7 @@ from services.mongo_service import get_tracker
 
 
 
-def databse_Task(mongo_client, payload, respond):
+def databse_Task(mongo_client, payload, respond, botID):
     try:
         db =  mongo_client.get_database("vibecheck")
     except ConnectionError:
@@ -37,6 +37,7 @@ def databse_Task(mongo_client, payload, respond):
     respond("Checking the Vibes!!")
     message_array = list(messages_col.find({}))
     print(len(message_array))
+    print(message_array[len(message_array) - 1])
     # while message_cursor.hasNext():
     #    curMsg = message_cursor.Next()
     #    record = json.loads(curMsg)
@@ -44,14 +45,14 @@ def databse_Task(mongo_client, payload, respond):
     # for message in message_array :
     #    print(f"Message:{message.get("text")}")
 
-def register_check_vibes_command(bolt_app, state_manager):
+def register_check_vibes_command(bolt_app, state_manager, botID):
     mongo_client = MongoClient(os.getenv("MONGO_URI"))
     # BOT_USERID = 
     @bolt_app.command("/checkvibes")
     def handle_checkvibes(ack, respond, body, client):
         ack("Checking out the vibes...")
         
-        threading.Thread(target=databse_Task, args=(mongo_client, body, respond)).start()
+        threading.Thread(target=databse_Task, args=(mongo_client, body, respond, botID)).start()
         # respond("Checking out the Vibes!!")
         # for message in messages_col.find():
         #    message.get()

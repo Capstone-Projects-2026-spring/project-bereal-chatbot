@@ -90,7 +90,7 @@ def main():
     register_pick_topic_command(bolt_app, state_manager)
     register_onboarding(bolt_app, state_manager)
     register_user_prompt_handlers(bolt_app, state_manager)
-    register_check_vibes_command(bolt_app, state_manager)
+    register_check_vibes_command(bolt_app, state_manager, auth_info['user_id'])
 
     # Online message to primary workspace
     try:

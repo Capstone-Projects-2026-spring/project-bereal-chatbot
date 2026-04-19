@@ -11,13 +11,11 @@ from services.mongo_service import get_tracker
 def databse_Task(mongo_client, payload, respond):
     try:
         db =  mongo_client.get_database("vibecheck")
-        respond(f"MongoDB Connection Successful.")
     except ConnectionError:
         respond(f"MongoDB Connection Failure.")
 
     try:
         installations_col = db.get_collection("installations")
-        respond(f"Installation Connection found.")
     except ConnectionError:
         respond(f"Installations collection not found.")
     channel = payload.get("channel_id")  # default to the channel where command was used
@@ -34,11 +32,12 @@ def databse_Task(mongo_client, payload, respond):
     collection_name = f"messages_{team_name}" if team_name else f"messages_{team_id or 'unknown'}"
     try:
         messages_col = db.get_collection(collection_name)
-        respond(f"This channel does have logs!")
     except ConnectionError:
         respond(f"Message Collection Not Connected Succdessfully")     
 
     respond("Checking the Vibes!!")
+    for message in messages_col.find():
+        respond(f"Message: " message.get("text"))
 
 def register_check_vibes_command(bolt_app, state_manager):
     mongo_client = MongoClient(os.getenv("MONGO_URI"))

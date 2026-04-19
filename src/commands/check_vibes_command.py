@@ -37,12 +37,12 @@ def databse_Task(mongo_client, payload, respond):
         respond(f"Message Collection Not Connected Succdessfully")     
 
     respond("Checking the Vibes!!")
-    message_cursor = messages_col.find({})
+    message_array = messages_col.find({}).toArray()
     # while message_cursor.hasNext():
     #    curMsg = message_cursor.Next()
     #    record = json.loads(curMsg)
     #    respond(f"Message Record: {record.get("text")}")
-    for message in messages_col.find({}) :
+    for message in message_array :
         respond(f"Message:{message.get("text")}")
 
 def register_check_vibes_command(bolt_app, state_manager):

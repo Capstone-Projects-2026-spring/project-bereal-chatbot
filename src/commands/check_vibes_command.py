@@ -1,5 +1,6 @@
 # src/commands/check_vibes_command.py
 import logging
+import json
 import threading
 import os
 
@@ -36,8 +37,11 @@ def databse_Task(mongo_client, payload, respond):
         respond(f"Message Collection Not Connected Succdessfully")     
 
     respond("Checking the Vibes!!")
-    allMessages = messages_col.find({})
-    respond(f"The size of the message collection: {len(allMessages)}")
+    message_cursor = messages_col.find({})
+    while message_cursor.hasNext():
+        curMsg = message_cursor.Next()
+        record = json.loads(curMsg)
+        respond(f"Message Record: {record.get("text")}")
     #for message in allMessages :
     #    respond(f"Message:{message.get("text")}")
 

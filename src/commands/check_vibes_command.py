@@ -28,9 +28,7 @@ def register_check_vibes_command(bolt_app, state_manager):
             else:
                 respond("Could not find the record")
         
-        respond("GOT THE VIBES OF RECORD, CHECKING COLLECTION NAME!")
         collection_name = f"messages_{team_name}" if team_name else f"messages_{team_id or 'unknown'}"
-        respond(f"Grabbing the messages of {collection_name}")
 
         if(not db):
             respond(f"There isn't a databse called vibecheck.")

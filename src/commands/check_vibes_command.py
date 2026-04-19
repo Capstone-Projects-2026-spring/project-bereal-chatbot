@@ -36,7 +36,7 @@ def databse_Task(mongo_client, payload, respond):
         respond(f"Message Collection Not Connected Succdessfully")     
 
     respond("Checking the Vibes!!")
-    allMessages = messages_col.find()
+    allMessages = messages_col.find({})
     respond(f"The size of the message collection: {len(allMessages)}")
     #for message in allMessages :
     #    respond(f"Message:{message.get("text")}")
@@ -49,7 +49,7 @@ def register_check_vibes_command(bolt_app, state_manager):
         ack("Checking out the vibes...")
         
         threading.Thread(target=databse_Task, args=(mongo_client, body, respond)).start()
-        respond("Checking out the Vibes!!")
+        # respond("Checking out the Vibes!!")
         # for message in messages_col.find():
         #    message.get()
 

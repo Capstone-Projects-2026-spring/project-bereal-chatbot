@@ -9,6 +9,7 @@ from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 from services.mongo_service import get_tracker
 
 
+
 def databse_Task(mongo_client, payload, respond):
     try:
         db =  mongo_client.get_database("vibecheck")
@@ -25,16 +26,13 @@ def databse_Task(mongo_client, payload, respond):
     if team_id:
         record = installations_col.find_one({"team_id": team_id})
         if record:
-            respond("Vibes of the records grabbed")
             team_name = record.get("team_name")
-        else:
-            respond("Could not find the record")
     
     collection_name = f"messages_{team_name}" if team_name else f"messages_{team_id or 'unknown'}"
     try:
         messages_col = db.get_collection(collection_name)
     except ConnectionError:
-        respond(f"Message Collection Not Connected Succdessfully")     
+        respond(f"Message Collection Not Connected Successfully")     
 
     respond("Checking the Vibes!!")
     message_array = list(messages_col.find({}))
@@ -48,7 +46,7 @@ def databse_Task(mongo_client, payload, respond):
 
 def register_check_vibes_command(bolt_app, state_manager):
     mongo_client = MongoClient(os.getenv("MONGO_URI"))
-
+    # BOT_USERID = 
     @bolt_app.command("/checkvibes")
     def handle_checkvibes(ack, respond, body, client):
         ack("Checking out the vibes...")

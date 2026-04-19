@@ -73,7 +73,7 @@ def main():
 
     try:
         auth_info = client.auth_test()
-        print(f"[BOOT] Bot username: @{auth_info['user']} (team: {auth_info['team']})")
+        print(f"[BOOT] Bot username: @{auth_info['user']} (team: {auth_info['team']}) (Bot UserID: {auth_info['user_id']})")
     except Exception as e:
         print(f"[BOOT] Could not fetch bot username: {e}")
     bolt_app = App(authorize=authorize, signing_secret=cfg.signing_secret, ignoring_self_events_enabled=False)

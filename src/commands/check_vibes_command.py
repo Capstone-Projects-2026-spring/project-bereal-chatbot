@@ -59,7 +59,13 @@ def databse_Task(mongo_client, payload, respond, botID):
             randomVibes += 1
         elif vibe["checkType"] == "user-created":
             userCreatedVibes += 1
-    #    lines.append(f"- Vibes Sent So Far: {len(prompt_list)}")
+
+        vibeText = vibe["text"]
+        vibeTime = vibe["time"]
+        vibeReplies = len(vibe["replies"])
+        vibeUniqueUsers = len(vibe["unique_users"])
+        vibeEngagement = vibe["engagement"]
+        lines.append(f"\nVibe Prompt: {vibeText}\n  • Time Released {vibeTime}\n • Replies: {vibeReplies}\n • # of Unique Repliers: {vibeUniqueUsers} \n •  Vibe Total Engagement: {vibeEngagement}")
 
     lines.append(f"\nRandom Vibes: {randomVibes}\nForced Vibes: {forcedVibes}\nUser-Created Vibes: {userCreatedVibes}\n")
     respond("\n".join(lines))
@@ -185,6 +191,6 @@ def organize_data(db, bot_id):
                 VibeInstance["engagement"] += engageVal
     return  vibe_prompt_list
    
-        
+    
 
         

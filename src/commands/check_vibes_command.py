@@ -10,12 +10,16 @@ from services.mongo_service import get_tracker
 
 def databse_Task(mongo_client, payload, respond):
     try:
-        mongo_client.admin.command('ping')
         db =  mongo_client.get_database("vibecheck")
         respond(f"MongoDB Connection Successful.")
     except ConnectionError:
         respond(f"MongoDB Connection Failure.")
-    installations_col = db.get_collection("installations")
+
+    try:
+        installations_col = db.get_collection("installations")
+        respond(f"Installation Connection found.")
+    except ConnectionError:
+        respond(f"Installations collection not found.")
     channel = payload.get("channel_id")  # default to the channel where command was used
     team_id = payload.get("team_id") or (payload.get("authorizations") or [{}])[0].get("team_id") or ""
     team_name = None

@@ -3,12 +3,12 @@ import logging
 import json
 import threading
 import os
+from datetime import datetime
+from datetime import date
 
 from pymongo import MongoClient
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 from services.mongo_service import get_tracker
-
-
 
 def databse_Task(mongo_client, payload, respond, botID):
     try:
@@ -36,12 +36,33 @@ def databse_Task(mongo_client, payload, respond, botID):
 
     respond("Checking the Vibes!!")
     message_array = list(messages_col.find({}))
-    print(len(message_array))
-    print(message_array[len(message_array) - 1])
-    # while message_cursor.hasNext():
-    #    curMsg = message_cursor.Next()
-    #    record = json.loads(curMsg)
-    #    respond(f"Message Record: {record.get("text")}")
+    prompt_list = organize_data(message_array, botID)
+    lines = ["*VIBES FOR THE SERVER*"]
+    lines.append(f"- Vibes Sent So Far: {len(prompt_list)}")
+    CurrentDaysVibes = []
+    curDate = date.today()
+    for vibe in prompt_list:
+        vibeDT = datetime.fromisoformat(vibe["time"])
+        
+        if (vibeDT.day == curDate.day and vibeDT.month == curDate.month and vibeDT.year == curDate.year):
+            CurrentDaysVibes.append(vibe)
+    
+    lines.append(f"VIBES FOR TODAY( {curDate})")
+    lines.append(f"- Vibes Sent So Far: {len(CurrentDaysVibes)}")
+    forcedVibes = 0
+    userCreatedVibes = 0
+    randomVibes = 0
+    for vibe in CurrentDaysVibes:
+        if vibe["checkType"] == "forced":
+            forcedVibes += 1
+        elif vibe["checkType"] == "random":
+            randomVibes += 1
+        elif vibe["checkType"] == "user-created":
+            userCreatedVibes += 1
+    #    lines.append(f"- Vibes Sent So Far: {len(prompt_list)}")
+
+    lines.append(f"\nRandom Vibes: {randomVibes}\Forced Vibes: {forcedVibes}\User-Created Vibes: {userCreatedVibes}\n")
+    respond("\n".join(lines))
     # for message in message_array :
     #    print(f"Message:{message.get("text")}")
 
@@ -57,7 +78,113 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
         # for message in messages_col.find():
         #    message.get()
 
+def organize_data(db, bot_id):
+    vibe_prompt_list = []
+    MaxVibeID = 0
+    LatestVibeInstance = None
+    for record in db:
+        isoString = record.get("ingested_at_utc")
+       
+        if not record.get("user_id"):
+            continue
+        
+        if (record.get("user_id") == bot_id):
+            check_type = None
+            if "forced vibe check" in record.get("text"):
+                check_type = "forced"
+            elif "random vibe check" in record.get("text"):
+                check_type = "random"
+            elif "user-created vibe check" in record.get("text"):
+                check_type = "user-created"
 
+            if check_type:
+                vibe_prompt_list.append({
+                    "time" : isoString, 
+                    "text" : record.get("text"), 
+                    "thread": record.get("ts"),
+                    "channel": record.get("channel_id"),
+                    "vibeID" : (MaxVibeID := MaxVibeID + 1),
+                    "checkType": check_type,
+                    "replies" : [],
+                    "unique_users": [],
+                    "engagement" : 0
+                    })
+                LatestVibeInstance = vibe_prompt_list[len(vibe_prompt_list) - 1]
+
+        else:
+            VibeInstance = None
+            Replied = False
+            if not record.get("thread_ts"):
+                # THE MESSAGE SENT DOES NOT REPLY TO A THREAD, THEREFORE IT WILL USE THE LATEST VIBE INSTANCE.
+                if LatestVibeInstance:
+                    # THERE IS A LATEST VIBE INSTACE, THEREFORE IT WILL ADD ITSELF TO THE REPLIES OF THE CHECK.
+                    # SHOULD CONTINUE ONWARDS THOUGH AND NOT RECORD REPLY IF THE MESSAGES ARE NOT IN THE CHANNEL AS THE PROMPT.
+                    VibeInstance = LatestVibeInstance
+            else:
+                # LOOP THROUGH THE AVAILBLE VIBE PROMPTS, COMPARE THE THREAD_TS of the record to the thread value.
+                RepliedVibeInstance = None
+                for vibe in vibe_prompt_list:
+                    if vibe["thread"] == record.get("thread_ts"):
+                        RepliedVibeInstance = vibe
+                        Replied = True
+                        break
+
+                # IF THERE IS A MATCH, THEN ADD MESSAGE TO REPLY AND CANCEL.
+                if RepliedVibeInstance:
+                    VibeInstance = RepliedVibeInstance
+            
+            if VibeInstance:
+                if VibeInstance["channel"] != record.get("channel_id"):
+                    print("The Vibe and the Message are not sent in the same channel")
+                    continue
+
+                engageVal = 0
+                dt = datetime.fromisoformat(isoString)
+                TimeOfVibe = datetime.fromisoformat(VibeInstance["time"])
+                secondsBetweenMessages = (dt - TimeOfVibe).total_seconds()
+                if record.get("text") != "":
+                    engageVal += 10
+
+                if record.get("subtype"):
+                    if record.get("subtype") == "file_share":
+                        engageVal += 50
+
+                if Replied == True:
+                    engageVal += 5
+
+                if secondsBetweenMessages <= 300:
+                    engageVal *= 5
+                elif secondsBetweenMessages > 300 and secondsBetweenMessages <= 480:
+                    engageVal *= 4
+                elif secondsBetweenMessages > 300 and secondsBetweenMessages <= 480:
+                    engageVal *= 3
+                elif secondsBetweenMessages > 480 and secondsBetweenMessages <= 600:
+                    engageVal *= 2
+                elif secondsBetweenMessages > 600 and secondsBetweenMessages <= 1800:
+                    engageVal *= 1
+                else:
+                    engageVal *= 0
+
+                if secondsBetweenMessages > 1800 and (dt.month != TimeOfVibe.month or dt.year != TimeOfVibe.year or dt.day != TimeOfVibe.day) and Replied == False:
+                    # IF THE MESSAGE IS MORE THAN 30 MINUTES FROM THE VIBE INSTANCE
+                    # IF THE MESSAGE IS NOT THE SAME MONTH, DAY, OR YEAR
+                    # AND THis not a replied message, we will not add this one to the replies.
+                    # MESSAGE IS TOO OLD
+                    continue
+                
+                VibeInstance["replies"].append({
+                    "time" : isoString,
+                    "timeBetweenVibe": secondsBetweenMessages,
+                    "text" : record.get("text"),
+                    "subtype" : record.get("subtype"),
+                    "engagementValue" : engageVal
+                })
+                if record.get("user_id") not in VibeInstance["unique_users"]:
+                    VibeInstance["unique_users"].append(record.get("user_id"))
+
+                VibeInstance["engagement"] += engageVal
+    return  vibe_prompt_list
+   
         
 
         

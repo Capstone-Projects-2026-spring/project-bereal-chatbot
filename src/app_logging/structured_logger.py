@@ -119,18 +119,27 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
                 if random.random() < cfg.llm_reactions_probability:
                     text = event.get("text") or ""
                     timestamp = event.get("ts")
-                    # Validate we have both text and timestamp before calling LLM
-                    if text and timestamp:
-                        emoji = get_reaction_emoji(text)
+                    # Extract image URLs from files attached to the message
+                    image_urls = [
+                        f["url_private"]
+                        for f in event.get("files", [])
+                        if f.get("mimetype", "").startswith("image/") and f.get("url_private")
+                    ]
+                    # Resolve the workspace bot token up front (needed for image download + reactions)
+                    reaction_token = None
+                    if team_id:
+                        record = installations_col.find_one({"team_id": team_id})
+                        if record:
+                            reaction_token = record.get("bot_token")
+                    # Validate we have content (text or images) and a timestamp before calling LLM
+                    if (text or image_urls) and timestamp:
+                        emoji = get_reaction_emoji(
+                            text,
+                            image_urls=image_urls,
+                            slack_token=reaction_token or cfg.token,
+                        )
                         if emoji:
                             try:
-                                # Use the workspace-specific token so reactions work
-                                # across multiple installed workspaces.
-                                reaction_token = None
-                                if team_id:
-                                    record = installations_col.find_one({"team_id": team_id})
-                                    if record:
-                                        reaction_token = record.get("bot_token")
                                 from slack_sdk import WebClient as _WebClient
                                 reaction_client = _WebClient(token=reaction_token or cfg.token)
                                 reaction_client.reactions_add(

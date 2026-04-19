@@ -10,8 +10,8 @@ from services.mongo_service import get_tracker
 
 def register_check_vibes_command(bolt_app, state_manager):
     mongo_client = MongoClient(os.getenv("MONGO_URI"))
-    db = mongo_client["vibecheck"]
-    installations_col = db["installations"]
+    db = mongo_client.get_database("vibecheck")
+    installations_col = db.get_collection("installations")
 
     @bolt_app.command("/checkvibes")
     def handle_checkvibes(ack, respond, body, client):
@@ -37,7 +37,7 @@ def register_check_vibes_command(bolt_app, state_manager):
         else:
             respond(f"There is a databse called vibecheck.")
 
-        messages_col = db[collection_name]
+        messages_col = db.get_collection(collection_name)
         if not messages_col:
             respond(f"This channel does not have any logs!")
             return

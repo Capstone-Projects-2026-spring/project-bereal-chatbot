@@ -16,7 +16,7 @@ def register_check_vibes_command(bolt_app, state_manager):
     @bolt_app.command("/checkvibes")
     def handle_checkvibes(ack, respond, body):
         ack()
-
+        respond("STARTING TO Check the Vibes!!")
         channel = body.get("channel_id")  # default to the channel where command was used
         team_id = body.get("team_id") or (body.get("authorizations") or [{}])[0].get("team_id") or ""
         

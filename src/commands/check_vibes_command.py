@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 from services.mongo_service import get_tracker
 
-def databse_Task(mongo_client, payload, respond, botID):
+def databse_Task(mongo_client, payload, respond, botID, client):
     try:
         db =  mongo_client.get_database("vibecheck")
     except ConnectionError:
@@ -34,11 +34,8 @@ def databse_Task(mongo_client, payload, respond, botID):
     except ConnectionError:
         respond(f"Message Collection Not Connected Successfully")     
 
-    respond("Checking the Vibes!!")
     message_array = list(messages_col.find({}))
     prompt_list = organize_data(message_array, botID)
-    lines = ["*VIBES FOR THE SERVER*"]
-    lines.append(f"- Vibes Sent So Far: {len(prompt_list)}")
     CurrentDaysVibes = []
     curDate = date.today()
     for vibe in prompt_list:
@@ -46,9 +43,28 @@ def databse_Task(mongo_client, payload, respond, botID):
         
         if (vibeDT.day == curDate.day and vibeDT.month == curDate.month and vibeDT.year == curDate.year):
             CurrentDaysVibes.append(vibe)
-    
-    lines.append(f"VIBES FOR TODAY( {curDate})")
-    lines.append(f"- Vibes Sent So Far: {len(CurrentDaysVibes)}")
+   
+    msg_block = []
+    msg_block.append({
+        "type": "header",
+        "text": {
+            "type": "plain_text",
+            "text": f"VIBES FOR TODAY {curDate}",
+            "emoji": True
+        },
+        "level": 1
+        }
+    )
+    msg_block.append({
+        "type": "header",
+		"text": {
+				"type": "plain_text",
+				"text": f"VIBES SENT SO FAR: {len(CurrentDaysVibes)}",
+				"emoji": True
+			},
+        "level": 4
+        }
+    )
     forcedVibes = 0
     userCreatedVibes = 0
     randomVibes = 0
@@ -65,10 +81,30 @@ def databse_Task(mongo_client, payload, respond, botID):
         vibeReplies = len(vibe["replies"])
         vibeUniqueUsers = len(vibe["unique_users"])
         vibeEngagement = vibe["engagement"]
-        lines.append(f"\nVibe Prompt: {vibeText}\n  • Time Released {vibeTime}\n • Replies: {vibeReplies}\n • # of Unique Repliers: {vibeUniqueUsers} \n •  Vibe Total Engagement: {vibeEngagement}")
+    #    lines.append(f"\nVibe Prompt: {vibeText}\n  • Time Released {vibeTime}\n • Replies: {vibeReplies}\n • # of Unique Repliers: {vibeUniqueUsers} \n •  Vibe Total Engagement: {vibeEngagement}")
 
-    lines.append(f"\nRandom Vibes: {randomVibes}\nForced Vibes: {forcedVibes}\nUser-Created Vibes: {userCreatedVibes}\n")
-    respond("\n".join(lines))
+    msg_block.append({
+        "type": "section",
+			"fields": [
+				{
+					"type": "mrkdwn",
+					"text": f"*Random Vibes:*\n{randomVibes}"
+				},
+				{
+					"type": "mrkdwn",
+					"text": f"*Forced Vibes:*\n{forcedVibes}"
+				},
+				{
+					"type": "mrkdwn",
+					"text": f"*User-created Vibes:*\n{userCreatedVibes}"
+				}
+			]
+        }
+    )
+ #   lines.append(f"\nRandom Vibes: {randomVibes}\nForced Vibes: {forcedVibes}\nUser-Created Vibes: {userCreatedVibes}\n")
+ #   respond("\n".join(lines))
+    
+    client.chat_postMessage(channel=channel, blocks=msg_block)
     # for message in message_array :
     #    print(f"Message:{message.get("text")}")
 
@@ -79,7 +115,7 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
     def handle_checkvibes(ack, respond, body, client):
         ack("Checking out the vibes...")
         
-        threading.Thread(target=databse_Task, args=(mongo_client, body, respond, botID)).start()
+        threading.Thread(target=databse_Task, args=(mongo_client, body, respond, botID, client)).start()
         # respond("Checking out the Vibes!!")
         # for message in messages_col.find():
         #    message.get()
@@ -141,7 +177,6 @@ def organize_data(db, bot_id):
             
             if VibeInstance:
                 if VibeInstance["channel"] != record.get("channel_id"):
-                    print("The Vibe and the Message are not sent in the same channel")
                     continue
 
                 engageVal = 0

@@ -39,6 +39,8 @@ def register_check_vibes_command(bolt_app, state_manager):
         if not messages_col:
             respond(f"This channel does not have any logs!")
             return
+        else:
+            respond(f"This channel does have logs!")
 
         respond("Checking the Vibes!!")
         # for message in messages_col.find():

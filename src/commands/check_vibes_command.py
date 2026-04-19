@@ -49,7 +49,7 @@ def databse_Task(mongo_client, payload, respond, botID, client):
         "type": "header",
         "text": {
             "type": "plain_text",
-            "text": f"VIBES FOR TODAY {curDate}",
+            "text": f"VIBES FOR TODAY ({curDate})",
             "emoji": True
         },
         "level": 1
@@ -68,6 +68,7 @@ def databse_Task(mongo_client, payload, respond, botID, client):
     forcedVibes = 0
     userCreatedVibes = 0
     randomVibes = 0
+    curVibeID = 0
     for vibe in CurrentDaysVibes:
         if vibe["checkType"] == "forced":
             forcedVibes += 1
@@ -75,12 +76,29 @@ def databse_Task(mongo_client, payload, respond, botID, client):
             randomVibes += 1
         elif vibe["checkType"] == "user-created":
             userCreatedVibes += 1
-
+        curVibeID += 1
         vibeText = vibe["text"]
         vibeTime = vibe["time"]
         vibeReplies = len(vibe["replies"])
         vibeUniqueUsers = len(vibe["unique_users"])
         vibeEngagement = vibe["engagement"]
+        msg_block.append({
+            "type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": f"Vibe #{curVibeID}"
+			},
+			"accessory": {
+				"type": "button",
+				"text": {
+					"type": "plain_text",
+					"text": "More Info",
+					"emoji": True
+				},
+				"value": f"{vibeText}",
+				"action_id": "checkvibes_moreInfo"
+			}
+        })
     #    lines.append(f"\nVibe Prompt: {vibeText}\n  • Time Released {vibeTime}\n • Replies: {vibeReplies}\n • # of Unique Repliers: {vibeUniqueUsers} \n •  Vibe Total Engagement: {vibeEngagement}")
 
     msg_block.append({
@@ -119,6 +137,15 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
         # respond("Checking out the Vibes!!")
         # for message in messages_col.find():
         #    message.get()
+
+    @bolt_app.action("checkvibes_moreInfo")
+    def handle_action_more_info(ack, body, action, logger):
+        ack()
+        action_value = action.get("value")
+
+        user_id = body["user"]["id"]
+        channel_id = body["channel"]["id"]
+        print(f"Clicked Button: {action_value}")
 
 def organize_data(db, bot_id):
     vibe_prompt_list = []

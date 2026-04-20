@@ -11,7 +11,7 @@ from pymongo import MongoClient
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 from services.mongo_service import get_tracker
 
-def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
+def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specificVibe):
     try:
         db =  mongo_client.get_database("vibecheck")
     except ConnectionError:
@@ -58,9 +58,9 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         dateInfo = f""
     else:
         if ((datetime.today() - timedelta(days=1)) == curDate):
-            "VIBES FOR YESTERDAY"
+            headerText = "VIBES FOR YESTERDAY"
         else:
-            "VIBES FOR THE DAY OF"
+            headerText = "VIBES FOR THE DAY OF"
     msg_block.append({
         "type": "header",
         "text": {
@@ -71,16 +71,24 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         "level": 1
         }
     )
-    msg_block.append({
-        "type": "header",
-		"text": {
-				"type": "plain_text",
-				"text": f"VIBES SENT SO FAR: {len(CurrentDaysVibes)}",
-				"emoji": True
-			},
-        "level": 4
-        }
-    )
+    if not specificVibe:
+        msg_block.append({
+            "type": "header",
+            "text": {
+                    "type": "plain_text",
+                    "text": f"VIBES SENT SO FAR: {len(CurrentDaysVibes)}",
+                    "emoji": True
+                },
+            "level": 4
+            }
+        )
+
+        msg_block.append(
+            {
+			    "type": "markdown",
+			    "text": f"## KEY: VIBES\n do /checkvibes [(today) or (yesterday) or (all) or (mm-dd-yyyy)] #[Number Vibe you wish to see more information on]"
+		    },
+        )
    
     forcedVibes = 0
     userCreatedVibes = 0
@@ -90,13 +98,9 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
     chartEngagementData = []
     chartRepliesData = []
     chartUniqueUsersData = []
-    msg_block.append(
-            {
-			"type": "markdown",
-			"text": f"## KEY: VIBES\n do /checkvibes (mm-dd-yyyy) #[Number Vibe you wish to see more information on]"
-		},
-    )
+    
     vibeLines = []
+    vibeInstanceSpecific = None
     for vibe in CurrentDaysVibes:
         if vibe["checkType"] == "forced":
             forcedVibes += 1
@@ -105,122 +109,162 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         elif vibe["checkType"] == "user-created":
             userCreatedVibes += 1
         curVibeID += 1
+        if specificVibe:
+            _,_,results = specificVibe.partition("#")
+            try:
+                searchVibeID = int(results)
+                if searchVibeID:
+                    if curVibeID == searchVibeID:
+                        vibeInstanceSpecific = []
+
+            except ValueError:
+                respond("Vibe ID search invalid. Sending The Total Vibes.")
+           
+
         vibeText = vibe["text"]
         vibeTime = vibe["time"]
         vibeReplies = len(vibe["replies"])
         vibeUniqueUsers = len(vibe["unique_users"])
         vibeEngagement = vibe["engagement"]
-        chartLabels.append(f"Vibe #{curVibeID}")
-        chartEngagementData.append(vibeEngagement)
-        chartRepliesData.append(vibeReplies)
-        chartUniqueUsersData.append(vibeUniqueUsers)
-        _, _, vibeTextInitialSplit = vibeText.partition("&gt;")
-        vibePrompt, vibeMatch, vibeType = vibeTextInitialSplit.partition("```")
-        vibeLines.append(f"\nVibe #{curVibeID}\n{vibePrompt}\n{vibeMatch}{vibeType}\n")
+
+        if vibeInstanceSpecific:
+            vibeInstanceSpecific = vibe
+        else:
+            chartLabels.append(f"Vibe #{curVibeID}")
+            chartEngagementData.append(vibeEngagement)
+            chartRepliesData.append(vibeReplies)
+            chartUniqueUsersData.append(vibeUniqueUsers)
+            _, _, vibeTextInitialSplit = vibeText.partition("&gt;")
+            vibePrompt, vibeMatch, vibeType = vibeTextInitialSplit.partition("```")
+            vibeLines.append(f"\nVibe #{curVibeID}\n{vibePrompt}\n{vibeMatch}{vibeType}\n")
     
   # CANNOT DO THE MESSAGE BLOCK KEYS, BECAUSE THERE IS A LIMIT TO HOW MANY MESSAGE BLOCKS THERE CAN BE AND HOW LOGN THE MESSAGE BLOCKS CAN BE.
-    chartEngagementConfig = {
-        "type": "bar",
-        "data": {
-            "labels": chartLabels,
-            "datasets": [{
-                "label": "Engagement Points",
-                "data": chartEngagementData
-            }]
+    if not vibeInstanceSpecific:
+        chartEngagementConfig = {
+            "type": "bar",
+            "data": {
+                "labels": chartLabels,
+                "datasets": [{
+                    "label": "Engagement Points",
+                    "data": chartEngagementData
+                }]
+            }
         }
-    }
 
-    chartEngagementParams = {
-        'chart' : json.dumps(chartEngagementConfig),
-        'width' : 1200,
-        'height' : 400,
-        'backgroundColor': 'white',
-    }
-
-    msg_block.append(
-        {
-        "type": "image",
-        "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartEngagementParams),
-        "alt_text": "Engagement Chart, based on how fast users reply and the qualities of the replies."
+        chartEngagementParams = {
+            'chart' : json.dumps(chartEngagementConfig),
+            'width' : 1200,
+            'height' : 400,
+            'backgroundColor': 'white',
         }
-    )
 
-    chartRepliesConfig = {
-        "type": "bar",
-        "data": {
-            "labels": chartLabels,
-            "datasets": [{
-                "label": "Replies",
-                "data": chartRepliesData
-            }]
+        msg_block.append(
+            {
+            "type": "image",
+            "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartEngagementParams),
+            "alt_text": "Engagement Chart, based on how fast users reply and the qualities of the replies."
+            }
+        )
+
+        chartRepliesConfig = {
+            "type": "bar",
+            "data": {
+                "labels": chartLabels,
+                "datasets": [{
+                    "label": "Replies",
+                    "data": chartRepliesData
+                }]
+            }
         }
-    }
 
-    chartRepliesParams = {
-        'chart' : json.dumps(chartRepliesConfig),
-        'width' : 1200,
-        'height' : 400,
-        'backgroundColor': 'white',
-    }
-
-    msg_block.append(
-        {
-        "type": "image",
-        "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartRepliesParams),
-        "alt_text": "Replies Chart, based on how many users replied."
+        chartRepliesParams = {
+            'chart' : json.dumps(chartRepliesConfig),
+            'width' : 1200,
+            'height' : 400,
+            'backgroundColor': 'white',
         }
-    )
 
-    chartUniqueUsersConfig = {
-        "type": "bar",
-        "data": {
-            "labels": chartLabels,
-            "datasets": [{
-                "label": "Unique Users",
-                "data": chartUniqueUsersData
-            }]
+        msg_block.append(
+            {
+            "type": "image",
+            "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartRepliesParams),
+            "alt_text": "Replies Chart, based on how many users replied."
+            }
+        )
+
+        chartUniqueUsersConfig = {
+            "type": "bar",
+            "data": {
+                "labels": chartLabels,
+                "datasets": [{
+                    "label": "Unique Users",
+                    "data": chartUniqueUsersData
+                }]
+            }
         }
-    }
 
-    chartUniqueUsersParams = {
-        'chart' : json.dumps(chartUniqueUsersConfig),
-        'width' : 1200,
-        'height' : 400,
-        'backgroundColor': 'white',
-    }
-
-    msg_block.append(
-        {
-        "type": "image",
-        "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartUniqueUsersParams),
-        "alt_text": "Unique Users Chart, based on how many unique users replied."
+        chartUniqueUsersParams = {
+            'chart' : json.dumps(chartUniqueUsersConfig),
+            'width' : 1200,
+            'height' : 400,
+            'backgroundColor': 'white',
         }
-    )
+
+        msg_block.append(
+            {
+            "type": "image",
+            "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartUniqueUsersParams),
+            "alt_text": "Unique Users Chart, based on how many unique users replied."
+            }
+        )
+            
+        #    lines.append(f"\nVibe Prompt: {vibeText}\n  • Time Released {vibeTime}\n • Replies: {vibeReplies}\n • # of Unique Repliers: {vibeUniqueUsers} \n •  Vibe Total Engagement: {vibeEngagement}")
+
+        msg_block.append({
+            "type": "section",
+                "fields": [
+                    {
+                        "type": "mrkdwn",
+                        "text": f"*Random Vibes:*\n{randomVibes}"
+                    },
+                    {
+                        "type": "mrkdwn",
+                        "text": f"*Forced Vibes:*\n{forcedVibes}"
+                    },
+                    {
+                        "type": "mrkdwn",
+                        "text": f"*User-created Vibes:*\n{userCreatedVibes}"
+                    }
+                ]
+            }
+        )
         
-    #    lines.append(f"\nVibe Prompt: {vibeText}\n  • Time Released {vibeTime}\n • Replies: {vibeReplies}\n • # of Unique Repliers: {vibeUniqueUsers} \n •  Vibe Total Engagement: {vibeEngagement}")
+    else:
+        msg_block.append({
+            "type": "header",
+            "text": {
+                    "type": "plain_text",
+                    "text": f"SPECIFIC VIBE {specificVibe}",
+                    "emoji": True
+                },
+            "level": 4
+            }
+        )
+        _, _, vibeTextInitialSplit = vibeText.partition("&gt;")
+        vibePrompt, vibeMatch, vibeType = vibeTextInitialSplit.partition("```")
+        msg_block.append({
+            "type": "header",
+            "text": {
+                    "type": "markdown",
+                    "text": f"\n## Vibe Prompt:\n{vibePrompt}\n{vibeMatch}{vibeType}\n",
+                },
+            }
+        )
 
-    msg_block.append({
-        "type": "section",
-			"fields": [
-				{
-					"type": "mrkdwn",
-					"text": f"*Random Vibes:*\n{randomVibes}"
-				},
-				{
-					"type": "mrkdwn",
-					"text": f"*Forced Vibes:*\n{forcedVibes}"
-				},
-				{
-					"type": "mrkdwn",
-					"text": f"*User-created Vibes:*\n{userCreatedVibes}"
-				}
-			]
-        }
-    )
  #   lines.append(f"\nRandom Vibes: {randomVibes}\nForced Vibes: {forcedVibes}\nUser-Created Vibes: {userCreatedVibes}\n")
  #   respond("\n".join(lines))
-    
     client.chat_postMessage(channel=channel, blocks=msg_block)
+    
     # for message in message_array :
     #    print(f"Message:{message.get("text")}")
 
@@ -246,7 +290,6 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
                     dayVal = (date.today() - timedelta(days=1))
             elif pl.startswith("#"):
                 specific_vibe = pl
-                print(pl)
             else:
                 try:
                     dayVal = datetime.strptime(pl, "%m-%d-%Y").date()
@@ -257,7 +300,7 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
                     respond("Error has occured while processing date.")
                     break
                     
-        threading.Thread(target=databse_Task, args=(mongo_client, body, respond, botID, client, dayVal)).start()
+        threading.Thread(target=databse_Task, args=(mongo_client, body, respond, botID, client, dayVal, specific_vibe)).start()
         # respond("Checking out the Vibes!!")
         # for message in messages_col.find():
         #    message.get()
@@ -283,7 +326,7 @@ def organize_data(db, bot_id):
         
         if (record.get("user_id") == bot_id):
             check_type = None
-            if "VIBES SENT SO FAR" not in record.get("text"):
+            if "VIBES SENT SO FAR" not in record.get("text") and "SPECIFIC VIBE" not in record.get("text"):
                 if "forced vibe check" in record.get("text"):
                     check_type = "forced"
                 elif "random vibe check" in record.get("text"):

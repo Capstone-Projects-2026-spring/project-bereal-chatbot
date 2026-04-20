@@ -21,6 +21,7 @@ from commands.control_panel_commands import register_control_panel
 from commands.prompt_stats_command import register_prompt_stats_command
 from commands.pick_topic_command import register_pick_topic_command
 from commands.onboarding import register_onboarding
+from commands.social_connector import register_social_connector_command
 from commands.user_prompt_command import register_user_prompt_handlers
 from commands.check_vibes_command import register_check_vibes_command
 from commands.mentor_mentee_command import register_mentor_mentee_command
@@ -90,6 +91,7 @@ def main():
     register_prompt_stats_command(bolt_app)
     register_pick_topic_command(bolt_app, state_manager)
     register_onboarding(bolt_app, state_manager)
+    register_social_connector_command(bolt_app)
     register_user_prompt_handlers(bolt_app, state_manager)
     register_check_vibes_command(bolt_app, state_manager, auth_info['user_id'])
     register_mentor_mentee_command(bolt_app, state_manager)

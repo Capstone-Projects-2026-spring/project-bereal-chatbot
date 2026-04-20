@@ -14,31 +14,29 @@ def find_matching_pair(team_id: str) -> tuple[Optional[str], Optional[str], list
     from services.mongo_service import get_all_user_interests
 
     all_users = get_all_user_interests(team_id)
-    users_with_tags = [u for u in all_users if u.get("tags")]
+    users_with_tags = [user for user in all_users if user.get("tags")]
 
     if len(users_with_tags) < 2:
         return None, None, []
 
     matching_pairs = []
-    for i in range(len(users_with_tags)):
-        for j in range(i + 1, len(users_with_tags)):
-            u1 = users_with_tags[i]
-            u2 = users_with_tags[j]
-            shared = list(set(u1["tags"]) & set(u2["tags"]))
-            if shared:
-                matching_pairs.append((u1["user_id"], u2["user_id"], shared))
+    for first_index in range(len(users_with_tags)):
+        for second_index in range(first_index + 1, len(users_with_tags)):
+            first_user = users_with_tags[first_index]
+            second_user = users_with_tags[second_index]
+            shared_tags = sorted(set(first_user["tags"]) & set(second_user["tags"]))
+            if shared_tags:
+                matching_pairs.append((first_user["user_id"], second_user["user_id"], shared_tags))
 
     if not matching_pairs:
         return None, None, []
 
-    user1_id, user2_id, shared_tags = random.choice(matching_pairs)
-    return user1_id, user2_id, shared_tags
+    return random.choice(matching_pairs)
 
 
 def send_social_connector_message(client, channel: str, team_id: str) -> None:
     """
-    Find two users with shared interest tags and post a Groq-generated
-    @mention message pairing them in the channel.
+    Find two users with shared interest tags and post a soft introduction in the channel.
     """
     from services.llm_service import get_social_connector_message
 
@@ -51,5 +49,5 @@ def send_social_connector_message(client, channel: str, team_id: str) -> None:
     try:
         client.chat_postMessage(channel=channel, text=message)
         logger.info("[SOCIAL] Posted connector message for %s and %s", user1_id, user2_id)
-    except Exception as e:
-        logger.error("[SOCIAL] Failed to post connector message: %s", e)
+    except Exception as error:
+        logger.error("[SOCIAL] Failed to post connector message: %s", error)

@@ -46,7 +46,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
                 CurrentDaysVibes.append(vibe)
    
     if len(CurrentDaysVibes) == 0 and dayValue:
-        client.chat_postMessage(channel=channel, text="No Vibes Checks have been sent today... :(")
+        client.chat_postMessage(channel=channel, text="No Vibes Checks have been sent that day... :(")
         return
 
     msg_block = []
@@ -88,6 +88,8 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
     curVibeID = 0
     chartLabels = []
     chartEngagementData = []
+    chartRepliesData = []
+    chartUniqueUsersData = []
     for vibe in CurrentDaysVibes:
         if vibe["checkType"] == "forced":
             forcedVibes += 1
@@ -103,8 +105,10 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         vibeEngagement = vibe["engagement"]
         chartLabels.append(f"Vibe #{curVibeID}")
         chartEngagementData.append(vibeEngagement)
+        chartRepliesData.append(len(vibeReplies))
+        chartUniqueUsersData.append(len(vibeUniqueUsers))
     
-    chartConfig = {
+    chartEngagementConfig = {
         "type": "bar",
         "data": {
             "labels": chartLabels,
@@ -115,8 +119,8 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         }
     }
 
-    chartParams = {
-        'chart' : json.dumps(chartConfig),
+    chartEngagementParams = {
+        'chart' : json.dumps(chartEngagementConfig),
         'width' : 1200,
         'height' : 400,
         'backgroundColor': 'white',
@@ -125,8 +129,60 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
     msg_block.append(
         {
         "type": "image",
-        "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartParams),
-        "alt_text": "delicious tacos"
+        "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartEngagementParams),
+        "alt_text": "Engagement Chart, based on how fast users reply and the qualities of the replies."
+        }
+    )
+
+    chartRepliesConfig = {
+        "type": "bar",
+        "data": {
+            "labels": chartLabels,
+            "datasets": [{
+                "label": "Replies",
+                "data": chartRepliesData
+            }]
+        }
+    }
+
+    chartRepliesParams = {
+        'chart' : json.dumps(chartRepliesConfig),
+        'width' : 1200,
+        'height' : 400,
+        'backgroundColor': 'white',
+    }
+
+    msg_block.append(
+        {
+        "type": "image",
+        "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartRepliesParams),
+        "alt_text": "Replies Chart, based on how many users replied."
+        }
+    )
+
+    chartUniqueUsersConfig = {
+        "type": "bar",
+        "data": {
+            "labels": chartLabels,
+            "datasets": [{
+                "label": "Unique Users",
+                "data": chartUniqueUsersData
+            }]
+        }
+    }
+
+    chartUniqueUsersParams = {
+        'chart' : json.dumps(chartUniqueUsersConfig),
+        'width' : 1200,
+        'height' : 400,
+        'backgroundColor': 'white',
+    }
+
+    msg_block.append(
+        {
+        "type": "image",
+        "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartUniqueUsersParams),
+        "alt_text": "Unique Users Chart, based on how many unique users replied."
         }
     )
         

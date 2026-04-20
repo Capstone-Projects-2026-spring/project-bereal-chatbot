@@ -28,11 +28,14 @@ class BotState:
     _social_connector_used_today: bool = False  # only run social connector once per day
     _mentor_checkin_week: Optional[int] = None  # ISO week number of last mentor check-in sent
     _prompt_response_type: str = "image"  # "image", "text", or "any"
+    _last_prompt_channel: Optional[str] = None  # channel where the last prompt was posted
 
-    def set_last_prompt_ts(self, ts: Optional[str]) -> None:
+    def set_last_prompt_ts(self, ts: Optional[str], channel: Optional[str] = None) -> None:
         with self._lock:
             self._last_prompt_ts = ts
             self._reminder_sent = False
+            if channel:
+                self._last_prompt_channel = channel
 
     def get_last_prompt_ts(self) -> Optional[str]:
         with self._lock:
@@ -192,6 +195,14 @@ class BotState:
     def get_prompt_response_type(self) -> str:
         with self._lock:
             return self._prompt_response_type
+
+    def set_last_prompt_channel(self, channel: Optional[str]) -> None:
+        with self._lock:
+            self._last_prompt_channel = channel
+
+    def get_last_prompt_channel(self) -> Optional[str]:
+        with self._lock:
+            return self._last_prompt_channel
 
 
 def get_team_id(body: dict) -> Optional[str]:

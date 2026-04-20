@@ -359,8 +359,8 @@ def get_social_connector_message(user1_id: str, user2_id: str, shared_tags: List
     """
     tags_str = ", ".join(shared_tags) if shared_tags else "common interests"
     fallback = (
-        f"Hey <@{user1_id}> and <@{user2_id}>, I noticed you're both interested in {tags_str} :eyes:."
-        f"That seems like a pretty good reason to say hi to each other :wave:"
+        f"Hey <@{user1_id}> and <@{user2_id}>, I noticed you're both interested in {tags_str} :eyes:. "
+        f" That seems like a pretty good reason to say hi to each other! :wave:"
     )
 
     if Groq is None:

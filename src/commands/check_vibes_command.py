@@ -5,7 +5,7 @@ import threading
 import os
 from datetime import datetime
 from datetime import date
-from quickchart import QuickChart
+from urllib.parse import urlencode
 
 from pymongo import MongoClient
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
@@ -66,10 +66,7 @@ def databse_Task(mongo_client, payload, respond, botID, client):
         "level": 4
         }
     )
-    qc = QuickChart()
-    qc.width = 800
-    qc.height = 400
-    qc.version = '2.9.4'
+   
     forcedVibes = 0
     userCreatedVibes = 0
     randomVibes = 0
@@ -108,7 +105,7 @@ def databse_Task(mongo_client, payload, respond, botID, client):
 		#		"action_id": "checkvibes_moreInfo"
 		#	}
         # })
-        qc.config = {
+        chartConfig = {
             "type": "bar",
             "data": {
                 "labels": chartLabels,
@@ -118,10 +115,18 @@ def databse_Task(mongo_client, payload, respond, botID, client):
                 }]
             }
         }
+
+        chartParams = {
+            'chart' : json.dumps(chartConfig),
+            'width' : 800,
+            'height' : 400,
+            'backgroundColor': 'white',
+        }
+
         msg_block.append({
             {
 			"type": "image",
-			"image_url": qc.get_url(),
+			"image_url": 'https://quickchart.io/chart?%s' % urlencode(chartParams),
 			"alt_text": "delicious tacos"
 		    }
         })

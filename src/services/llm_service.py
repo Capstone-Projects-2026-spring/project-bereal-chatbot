@@ -357,9 +357,10 @@ def get_social_connector_message(user1_id: str, user2_id: str, shared_tags: List
     Uses Groq to generate a friendly channel message pairing two users with shared interests.
     Falls back to a default message if the API call fails or is disabled.
     """
+    tags_str = ", ".join(shared_tags) if shared_tags else "common interests"
     fallback = (
-        f"Hey <@{user1_id}> and <@{user2_id}>, you two might have a lot in common — "
-        f"try getting to know each other more! :wave:"
+        f"Hey <@{user1_id}> and <@{user2_id}>, I noticed you're both interested in {tags_str} :eyes:"
+        f"That seems like a pretty good reason to say hi to each other :wave:"
     )
 
     if Groq is None:
@@ -369,8 +370,6 @@ def get_social_connector_message(user1_id: str, user2_id: str, shared_tags: List
     if not api_key:
         return fallback
 
-    tags_str = ", ".join(shared_tags)
-
     try:
         client = Groq(api_key=api_key)
 
@@ -378,12 +377,13 @@ def get_social_connector_message(user1_id: str, user2_id: str, shared_tags: List
             "You are a friendly Slack bot that helps teammates connect. "
             "Generate a single short, warm message pairing two Slack users based on shared interests. "
             "Use Slack user mention format exactly as provided: <@USER_ID>. "
-            "Keep it to 1-2 sentences. Be casual and encouraging. End with a relevant Slack emoji."
+            "Keep it to 1-2 sentences. Be casual and encouraging. End with a relevant Slack emoji. "
+            "You must explicitly mention at least one of the shared interest topics in the message."
         )
 
         user_msg = (
             f"Generate a connection message for <@{user1_id}> and <@{user2_id}> "
-            f"who both like: {tags_str}."
+            f"who both like: {tags_str}. Mention the shared topic directly so they know what they have in common."
         )
 
         response = client.chat.completions.create(

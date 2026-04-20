@@ -115,7 +115,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
                 searchVibeID = int(results)
                 if searchVibeID:
                     if curVibeID == searchVibeID:
-                        vibeInstanceSpecific = []
+                        vibeInstanceSpecific = vibe
                         respond("Specific Vibe Found")
 
             except ValueError:

@@ -123,13 +123,13 @@ def databse_Task(mongo_client, payload, respond, botID, client):
             'backgroundColor': 'white',
         }
 
-        msg_block.append({
+        msg_block.append(
             {
 			"type": "image",
 			"image_url": 'https://quickchart.io/chart?%s' % urlencode(chartParams),
 			"alt_text": "delicious tacos"
 		    }
-        })
+        )
         
     #    lines.append(f"\nVibe Prompt: {vibeText}\n  • Time Released {vibeTime}\n • Replies: {vibeReplies}\n • # of Unique Repliers: {vibeUniqueUsers} \n •  Vibe Total Engagement: {vibeEngagement}")
 

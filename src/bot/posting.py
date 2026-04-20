@@ -12,12 +12,14 @@ def display_current_time() -> str:
     return now.strftime("%I:%M:%S %p")
 
 
-def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Optional[str] = None, topic: Optional[str] = None, active_tags: Optional[set] = None, footnote_text: Optional[str] = None) -> None:
+def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Optional[str] = None, topic: Optional[str] = None, active_tags: Optional[set] = None, footnote_text: Optional[str] = None, response_type: Optional[str] = "image") -> None:
+    # "any" means no filter — pass None to the prompt service
+    rt = None if response_type == "any" else response_type
 
     if topic:
-        prompt_id, prompt_text, tags = get_random_prompt_by_topic(topic, response_type="image")
+        prompt_id, prompt_text, tags = get_random_prompt_by_topic(topic, response_type=rt)
     else:
-        prompt_id, prompt_text, tags = get_random_prompt_text(response_type="image", active_tags=active_tags)
+        prompt_id, prompt_text, tags = get_random_prompt_text(response_type=rt, active_tags=active_tags)
 
     mark_prompt_asked(prompt_id)
 
@@ -25,9 +27,16 @@ def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Option
     if tracker:
         tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel, team_id)
 
-    msg = f">{prompt_text}\n\n:camera: *Reply with a photo — don't think, just post!*"
+    if rt == "image":
+        cta = "\n\n:camera: *Reply with a photo — don't think, just post!*"
+    elif rt == "text":
+        cta = "\n\n:speech_balloon: *Share your answer below!*"
+    else:
+        cta = ""
+
+    msg = f">{prompt_text}{cta}"
     if prefix_text:
-        msg = f"### **{prefix_text.upper()}**\n\n>{prompt_text}\n\n:camera: *Reply with a photo — don't think, just post!*"
+        msg = f"### **{prefix_text.upper()}**\n\n>{prompt_text}{cta}"
 
     if footnote_text:
         msg += f"\n\n\n```{footnote_text}```"

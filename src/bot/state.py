@@ -27,6 +27,7 @@ class BotState:
     _user_prompt_creator_used_today: bool = False  # only invite one user to create a prompt
     _social_connector_used_today: bool = False  # only run social connector once per day
     _mentor_checkin_week: Optional[int] = None  # ISO week number of last mentor check-in sent
+    _prompt_response_type: str = "image"  # "image", "text", or "any"
 
     def set_last_prompt_ts(self, ts: Optional[str]) -> None:
         with self._lock:
@@ -183,6 +184,14 @@ class BotState:
     def get_mentor_checkin_week(self) -> Optional[int]:
         with self._lock:
             return self._mentor_checkin_week
+
+    def set_prompt_response_type(self, value: str) -> None:
+        with self._lock:
+            self._prompt_response_type = value
+
+    def get_prompt_response_type(self) -> str:
+        with self._lock:
+            return self._prompt_response_type
 
 
 def get_team_id(body: dict) -> Optional[str]:

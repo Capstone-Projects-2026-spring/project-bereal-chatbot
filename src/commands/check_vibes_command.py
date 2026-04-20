@@ -116,6 +116,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
                 if searchVibeID:
                     if curVibeID == searchVibeID:
                         vibeInstanceSpecific = []
+                        respond("Specific Vibe Found")
 
             except ValueError:
                 respond("Vibe ID search invalid. Sending The Total Vibes.")
@@ -129,6 +130,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
 
         if vibeInstanceSpecific:
             vibeInstanceSpecific = vibe
+            respond("Assigned Specifc Vibe")
         else:
             chartLabels.append(f"Vibe #{curVibeID}")
             chartEngagementData.append(vibeEngagement)
@@ -238,7 +240,6 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
                 ]
             }
         )
-        
     else:
         msg_block.append({
             "type": "header",

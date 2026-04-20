@@ -7,16 +7,20 @@ logger = logging.getLogger(__name__)
 
 _HELP_TEXT = (
     "*Mentor-Mentee Program* :handshake:\n\n"
-    "• `/mentor signup mentor` — join as a mentor\n"
-    "• `/mentor signup mentee` — join as a mentee\n"
+    "• `/mentor signup mentor` — join as a mentor (opens a profile form)\n"
+    "• `/mentor signup mentee` — join as a mentee (opens a profile form)\n"
     "• `/mentor status` — see your current pairing\n"
     "• `/mentor leave` — leave the program\n"
-    "• `/mentor match` — _(admin)_ run matching now\n"
+    "• `/mentor admin` — _(admin)_ view all profiles & manually pair users\n"
+    "• `/mentor match` — _(admin)_ auto-match all unmatched users by interests\n"
 )
 
 
 def register_mentor_mentee_command(bolt_app, state_manager):
 
+    # ------------------------------------------------------------------ #
+    #  Slash command router                                                #
+    # ------------------------------------------------------------------ #
     @bolt_app.command("/mentor")
     def handle_mentor_command(ack, body, respond, client):
         ack()
@@ -29,7 +33,15 @@ def register_mentor_mentee_command(bolt_app, state_manager):
             if len(parts) < 2 or parts[1] not in ("mentor", "mentee"):
                 respond("Usage: `/mentor signup mentor` or `/mentor signup mentee`")
                 return
-            _handle_signup(user_id, team_id, parts[1], respond)
+            from services.mentor_service import get_registration
+            existing = get_registration(team_id, user_id)
+            if existing:
+                respond(
+                    f":x: You're already signed up as a *{existing['role']}*. "
+                    f"Use `/mentor leave` first if you'd like to change roles."
+                )
+                return
+            _open_signup_modal(client, body, parts[1], team_id)
 
         elif text == "status":
             _handle_status(user_id, team_id, respond)
@@ -37,37 +49,316 @@ def register_mentor_mentee_command(bolt_app, state_manager):
         elif text == "leave":
             _handle_leave(user_id, team_id, respond)
 
+        elif text == "admin":
+            _open_admin_modal(client, body, team_id)
+
         elif text == "match":
             _handle_match(client, team_id, respond)
 
         else:
             respond(_HELP_TEXT)
 
+    # ------------------------------------------------------------------ #
+    #  Signup modal submission                                             #
+    # ------------------------------------------------------------------ #
+    @bolt_app.view("mentor_signup_modal")
+    def handle_signup_modal(ack, body, client):
+        ack()
+        metadata = body["view"].get("private_metadata", "|")
+        team_id, role = (metadata.split("|", 1) + [""])[:2]
+        user_id = body["user"]["id"]
+        values = body["view"]["state"]["values"]
 
-def _handle_signup(user_id: str, team_id: str, role: str, respond) -> None:
-    from services.mentor_service import get_registration, upsert_registration
-    from services.mongo_service import get_user_interests
+        job_title = (values.get("job_title_block", {})
+                     .get("job_title_input", {}).get("value") or "").strip()
+        years_experience = (values.get("experience_block", {})
+                            .get("experience_input", {}).get("value") or "").strip()
+        bio = (values.get("bio_block", {})
+               .get("bio_input", {}).get("value") or "").strip()
 
-    existing = get_registration(team_id, user_id)
-    if existing:
-        respond(
-            f":x: You're already signed up as a *{existing['role']}*. "
-            f"Use `/mentor leave` first if you'd like to change roles."
+        from services.mentor_service import upsert_registration
+        from services.mongo_service import get_user_interests
+        interests = get_user_interests(team_id, user_id)
+        upsert_registration(team_id, user_id, role, interests, job_title, years_experience, bio)
+
+        partner_label = "mentee" if role == "mentor" else "mentor"
+        try:
+            client.chat_postMessage(
+                channel=user_id,
+                text=(
+                    f":white_check_mark: You're signed up as a *{role}*!\n\n"
+                    f"*Your profile:*\n"
+                    f"• Role: {job_title}\n"
+                    f"• Experience: {years_experience}\n"
+                    f"• About you: _{bio}_\n\n"
+                    f"An admin will review profiles and connect you with a {partner_label}. "
+                    f"Use `/mentor status` to check anytime."
+                )
+            )
+        except Exception as e:
+            logger.error("[MENTOR] Failed to DM signup confirmation to %s: %s", user_id, e)
+
+        logger.info("[MENTOR] User %s signed up as %s in team %s", user_id, role, team_id)
+
+    # ------------------------------------------------------------------ #
+    #  Admin panel modal submission (manual pair)                          #
+    # ------------------------------------------------------------------ #
+    @bolt_app.view("mentor_admin_modal")
+    def handle_admin_modal(ack, body, client):
+        ack()
+        team_id = body["view"].get("private_metadata", "")
+        values = body["view"]["state"]["values"]
+
+        mentor_id = (values.get("pair_mentor_block", {})
+                     .get("pair_mentor_select", {}).get("selected_user"))
+        mentee_id = (values.get("pair_mentee_block", {})
+                     .get("pair_mentee_select", {}).get("selected_user"))
+
+        admin_id = body["user"]["id"]
+
+        if not mentor_id or not mentee_id:
+            # Admin closed without selecting — nothing to do
+            return
+
+        from services.mentor_service import get_registration, _get_col, _save_pair
+        mentor_reg = get_registration(team_id, mentor_id)
+        mentee_reg = get_registration(team_id, mentee_id)
+
+        if not mentor_reg or mentor_reg["role"] != "mentor":
+            try:
+                client.chat_postMessage(
+                    channel=admin_id,
+                    text=f":x: <@{mentor_id}> is not registered as a mentor in this program."
+                )
+            except Exception:
+                pass
+            return
+
+        if not mentee_reg or mentee_reg["role"] != "mentee":
+            try:
+                client.chat_postMessage(
+                    channel=admin_id,
+                    text=f":x: <@{mentee_id}> is not registered as a mentee in this program."
+                )
+            except Exception:
+                pass
+            return
+
+        col = _get_col(team_id)
+        _save_pair(col, mentor_id, mentee_id)
+        shared_tags = list(
+            set(mentor_reg.get("interests", [])) & set(mentee_reg.get("interests", []))
         )
-        return
+        _notify_new_pair(client, mentor_id, mentee_id, shared_tags, team_id)
 
-    interests = get_user_interests(team_id, user_id)
-    upsert_registration(team_id, user_id, role, interests)
+        try:
+            client.chat_postMessage(
+                channel=admin_id,
+                text=(
+                    f":tada: Paired <@{mentor_id}> (mentor) with <@{mentee_id}> (mentee)! "
+                    f"Their group chat has been created."
+                )
+            )
+        except Exception as e:
+            logger.error("[MENTOR] Failed to confirm pair to admin %s: %s", admin_id, e)
 
-    partner_label = "mentee" if role == "mentor" else "mentor"
-    respond(
-        f":white_check_mark: You've signed up as a *{role}*!\n\n"
-        f"You'll be paired with a {partner_label} at the next matching round (every Monday). "
-        f"Use `/mentor status` to check your pairing anytime."
+        logger.info("[MENTOR] Admin %s paired %s + %s in team %s", admin_id, mentor_id, mentee_id, team_id)
+
+
+# ------------------------------------------------------------------ #
+#  Helper: open signup modal                                           #
+# ------------------------------------------------------------------ #
+def _open_signup_modal(client, body: dict, role: str, team_id: str) -> None:
+    role_label = "Mentor" if role == "mentor" else "Mentee"
+    bio_placeholder = (
+        "What experience do you bring? What topics or skills can you help with?"
+        if role == "mentor"
+        else "What are you hoping to learn? What kind of guidance are you looking for?"
     )
-    logger.info("[MENTOR] User %s signed up as %s in team %s", user_id, role, team_id)
+
+    try:
+        client.views_open(
+            trigger_id=body["trigger_id"],
+            view={
+                "type": "modal",
+                "callback_id": "mentor_signup_modal",
+                "private_metadata": f"{team_id}|{role}",
+                "title": {"type": "plain_text", "text": f"Sign Up as {role_label}"},
+                "submit": {"type": "plain_text", "text": "Sign Up"},
+                "close": {"type": "plain_text", "text": "Cancel"},
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": (
+                                f"Fill out your profile below. Admins use this to match you with "
+                                f"the right {'mentee' if role == 'mentor' else 'mentor'}."
+                            ),
+                        },
+                    },
+                    {
+                        "type": "input",
+                        "block_id": "job_title_block",
+                        "label": {"type": "plain_text", "text": "Job Title / Role"},
+                        "element": {
+                            "type": "plain_text_input",
+                            "action_id": "job_title_input",
+                            "placeholder": {"type": "plain_text", "text": "e.g. Software Engineer, Product Designer, Data Analyst"},
+                        },
+                    },
+                    {
+                        "type": "input",
+                        "block_id": "experience_block",
+                        "label": {"type": "plain_text", "text": "Time in this role"},
+                        "element": {
+                            "type": "plain_text_input",
+                            "action_id": "experience_input",
+                            "placeholder": {"type": "plain_text", "text": "e.g. 5 years, Less than 1 year, 6 months"},
+                        },
+                    },
+                    {
+                        "type": "input",
+                        "block_id": "bio_block",
+                        "label": {"type": "plain_text", "text": "About you"},
+                        "element": {
+                            "type": "plain_text_input",
+                            "action_id": "bio_input",
+                            "multiline": True,
+                            "placeholder": {"type": "plain_text", "text": bio_placeholder},
+                        },
+                    },
+                ],
+            },
+        )
+    except Exception as e:
+        logger.error("[MENTOR] Failed to open signup modal for %s: %s", body.get("user_id"), e)
 
 
+# ------------------------------------------------------------------ #
+#  Helper: open admin panel modal                                      #
+# ------------------------------------------------------------------ #
+def _open_admin_modal(client, body: dict, team_id: str) -> None:
+    from services.mentor_service import get_all_registrations
+
+    all_regs = get_all_registrations(team_id)
+    mentors = [r for r in all_regs if r["role"] == "mentor"]
+    mentees = [r for r in all_regs if r["role"] == "mentee"]
+
+    blocks = [
+        {
+            "type": "header",
+            "text": {"type": "plain_text", "text": "Mentor-Mentee Program — Admin View"},
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (
+                    f"*{len(mentors)} mentor(s)* and *{len(mentees)} mentee(s)* registered.\n"
+                    f"Select a mentor and mentee below to pair them — this creates a group chat."
+                ),
+            },
+        },
+        {"type": "divider"},
+    ]
+
+    # --- Mentors ---
+    blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": ":bust_in_silhouette: *Mentors*"}})
+    if not mentors:
+        blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": "_No mentors signed up yet._"}})
+    else:
+        for m in mentors:
+            status = f":handshake: Paired with <@{m['matched_with']}>" if m.get("matched_with") else ":hourglass_flowing_sand: Unmatched"
+            interests = ", ".join(m.get("interests", [])) or "none set"
+            bio = (m.get("bio") or "").strip()
+            bio_line = f"\n>_{bio}_" if bio else ""
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": (
+                        f"*<@{m['user_id']}>*  |  {m.get('job_title', 'N/A')}  |  {m.get('years_experience', 'N/A')}{bio_line}\n"
+                        f"Interests: {interests}   {status}"
+                    ),
+                },
+            })
+
+    blocks.append({"type": "divider"})
+
+    # --- Mentees ---
+    blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": ":bust_in_silhouette: *Mentees*"}})
+    if not mentees:
+        blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": "_No mentees signed up yet._"}})
+    else:
+        for m in mentees:
+            status = f":handshake: Paired with <@{m['matched_with']}>" if m.get("matched_with") else ":hourglass_flowing_sand: Unmatched"
+            interests = ", ".join(m.get("interests", [])) or "none set"
+            bio = (m.get("bio") or "").strip()
+            bio_line = f"\n>_{bio}_" if bio else ""
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": (
+                        f"*<@{m['user_id']}>*  |  {m.get('job_title', 'N/A')}  |  {m.get('years_experience', 'N/A')}{bio_line}\n"
+                        f"Interests: {interests}   {status}"
+                    ),
+                },
+            })
+
+    blocks.append({"type": "divider"})
+
+    # --- Pair selector ---
+    blocks += [
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*Manually Pair Two Users*\nSelect a mentor and a mentee, then click Save."},
+        },
+        {
+            "type": "input",
+            "block_id": "pair_mentor_block",
+            "optional": True,
+            "label": {"type": "plain_text", "text": "Select Mentor"},
+            "element": {
+                "type": "users_select",
+                "action_id": "pair_mentor_select",
+                "placeholder": {"type": "plain_text", "text": "Choose a mentor..."},
+            },
+        },
+        {
+            "type": "input",
+            "block_id": "pair_mentee_block",
+            "optional": True,
+            "label": {"type": "plain_text", "text": "Select Mentee"},
+            "element": {
+                "type": "users_select",
+                "action_id": "pair_mentee_select",
+                "placeholder": {"type": "plain_text", "text": "Choose a mentee..."},
+            },
+        },
+    ]
+
+    try:
+        client.views_open(
+            trigger_id=body["trigger_id"],
+            view={
+                "type": "modal",
+                "callback_id": "mentor_admin_modal",
+                "private_metadata": team_id,
+                "title": {"type": "plain_text", "text": "Mentor Admin Panel"},
+                "submit": {"type": "plain_text", "text": "Pair & Create Chat"},
+                "close": {"type": "plain_text", "text": "Close"},
+                "blocks": blocks,
+            },
+        )
+    except Exception as e:
+        logger.error("[MENTOR] Failed to open admin modal: %s", e)
+
+
+# ------------------------------------------------------------------ #
+#  Helper: status                                                      #
+# ------------------------------------------------------------------ #
 def _handle_status(user_id: str, team_id: str, respond) -> None:
     from services.mentor_service import get_registration
 
@@ -87,15 +378,20 @@ def _handle_status(user_id: str, team_id: str, respond) -> None:
         date_note = f" (since {date_str})" if date_str else ""
         respond(
             f":handshake: You are a *{role}*, paired with <@{matched_with}> "
-            f"as your {partner_label}{date_note}."
+            f"as your {partner_label}{date_note}.\n\n"
+            f"*Your profile:* {reg.get('job_title', '')} · {reg.get('years_experience', '')}"
         )
     else:
         respond(
-            f":hourglass_flowing_sand: You're signed up as a *{role}* and waiting to be matched. "
-            f"Matching runs every Monday morning."
+            f":hourglass_flowing_sand: You're signed up as a *{role}* and waiting to be matched.\n\n"
+            f"*Your profile:* {reg.get('job_title', '')} · {reg.get('years_experience', '')}\n"
+            f"_{reg.get('bio', '')}_"
         )
 
 
+# ------------------------------------------------------------------ #
+#  Helper: leave                                                       #
+# ------------------------------------------------------------------ #
 def _handle_leave(user_id: str, team_id: str, respond) -> None:
     from services.mentor_service import get_registration, remove_registration, clear_pair
 
@@ -111,11 +407,14 @@ def _handle_leave(user_id: str, team_id: str, respond) -> None:
     remove_registration(team_id, user_id)
     respond(
         ":wave: You've been removed from the mentor-mentee program. "
-        "Your pairing has been cleared and your partner has been returned to the unmatched pool."
+        "Your pairing has been cleared and your partner returned to the unmatched pool."
     )
     logger.info("[MENTOR] User %s left the program in team %s", user_id, team_id)
 
 
+# ------------------------------------------------------------------ #
+#  Helper: auto-match                                                  #
+# ------------------------------------------------------------------ #
 def _handle_match(client, team_id: str, respond) -> None:
     from services.mentor_service import get_all_unmatched, run_matching
 
@@ -130,26 +429,46 @@ def _handle_match(client, team_id: str, respond) -> None:
         return
 
     for mentor_id, mentee_id, shared_tags in pairs:
-        _notify_new_pair(client, mentor_id, mentee_id, shared_tags)
+        _notify_new_pair(client, mentor_id, mentee_id, shared_tags, team_id)
 
-    respond(f":tada: Matched {len(pairs)} pair(s)! Both users in each pair have been DM'd.")
-    logger.info("[MENTOR] Matched %d pairs for team %s", len(pairs), team_id)
-
-
-def _notify_new_pair(client, mentor_id: str, mentee_id: str, shared_tags: list) -> None:
-    """DM both users to introduce them to each other."""
-    from services.llm_service import get_mentor_intro_message
-
-    mentor_msg, mentee_msg = get_mentor_intro_message(mentor_id, mentee_id, shared_tags)
-    for user_id, msg in [(mentor_id, mentor_msg), (mentee_id, mentee_msg)]:
-        try:
-            client.chat_postMessage(channel=user_id, text=msg)
-        except Exception as e:
-            logger.error("[MENTOR] Failed to DM %s: %s", user_id, e)
+    respond(f":tada: Matched {len(pairs)} pair(s)! Each pair has been given a group chat.")
+    logger.info("[MENTOR] Auto-matched %d pairs for team %s", len(pairs), team_id)
 
 
+# ------------------------------------------------------------------ #
+#  Helper: notify pair (group DM)                                      #
+# ------------------------------------------------------------------ #
+def _notify_new_pair(client, mentor_id: str, mentee_id: str, shared_tags: list, team_id: str) -> None:
+    """Open a group DM for the pair and post an intro message."""
+    from services.llm_service import get_mentor_group_intro_message
+    from services.mentor_service import _get_col
+
+    # Create the group DM
+    channel_id = None
+    try:
+        result = client.conversations_open(users=f"{mentor_id},{mentee_id}")
+        channel_id = result["channel"]["id"]
+        col = _get_col(team_id)
+        col.update_one({"user_id": mentor_id}, {"$set": {"group_dm_channel": channel_id}})
+        col.update_one({"user_id": mentee_id}, {"$set": {"group_dm_channel": channel_id}})
+    except Exception as e:
+        logger.error("[MENTOR] Failed to create group DM for %s + %s: %s", mentor_id, mentee_id, e)
+
+    intro_msg = get_mentor_group_intro_message(mentor_id, mentee_id, shared_tags)
+    target = channel_id or mentor_id
+    try:
+        client.chat_postMessage(channel=target, text=intro_msg)
+        if not channel_id:
+            client.chat_postMessage(channel=mentee_id, text=intro_msg)
+    except Exception as e:
+        logger.error("[MENTOR] Failed to post intro message: %s", e)
+
+
+# ------------------------------------------------------------------ #
+#  Weekly check-in (called by scheduler)                               #
+# ------------------------------------------------------------------ #
 def send_weekly_checkin(client, team_id: str) -> None:
-    """DM each mentor-mentee pair a weekly conversation starter."""
+    """Send a weekly check-in prompt to each active mentor-mentee pair's group chat."""
     from services.mentor_service import get_all_pairs
     from services.prompt_service import get_random_prompt_text
 
@@ -157,17 +476,19 @@ def send_weekly_checkin(client, team_id: str) -> None:
     if not pairs:
         return
 
-    for mentor_id, mentee_id in pairs:
+    for mentor_id, mentee_id, group_dm_channel in pairs:
         _, prompt_text, _ = get_random_prompt_text()
         msg = (
             f":wave: *Weekly Mentor-Mentee Check-in!*\n\n"
-            f"Here's a conversation starter for you and your partner this week:\n\n"
+            f"<@{mentor_id}> and <@{mentee_id}> — here's a conversation starter for this week:\n\n"
             f"_{prompt_text}_"
         )
-        for user_id in (mentor_id, mentee_id):
-            try:
-                client.chat_postMessage(channel=user_id, text=msg)
-            except Exception as e:
-                logger.error("[MENTOR] Failed to send weekly check-in to %s: %s", user_id, e)
+        target = group_dm_channel or mentor_id
+        try:
+            client.chat_postMessage(channel=target, text=msg)
+            if not group_dm_channel:
+                client.chat_postMessage(channel=mentee_id, text=msg)
+        except Exception as e:
+            logger.error("[MENTOR] Failed to send weekly check-in for pair %s+%s: %s", mentor_id, mentee_id, e)
 
     logger.info("[MENTOR] Sent weekly check-ins for %d pair(s) in team %s", len(pairs), team_id)

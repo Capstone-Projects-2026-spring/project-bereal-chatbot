@@ -295,6 +295,63 @@ def get_mentor_intro_message(mentor_id: str, mentee_id: str, shared_tags: List[s
         return mentor_fallback, mentee_fallback
 
 
+def get_mentor_group_intro_message(mentor_id: str, mentee_id: str, shared_tags: List[str]) -> str:
+    """
+    Generate a single intro message for a mentor-mentee group DM.
+    Addresses both users and highlights their shared interests.
+    Falls back to a default message if the API is unavailable.
+    """
+    tags_note = f" You both share an interest in: {', '.join(shared_tags)}." if shared_tags else ""
+    fallback = (
+        f":handshake: *You've been matched!*\n\n"
+        f"<@{mentor_id}> will be mentoring <@{mentee_id}>.{tags_note}\n\n"
+        f"This is your shared space — use it to connect, ask questions, and share advice. "
+        f"<@{mentor_id}>, feel free to kick things off with an intro!"
+    )
+
+    if Groq is None:
+        return fallback
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return fallback
+
+    tags_str = ", ".join(shared_tags) if shared_tags else "general professional topics"
+
+    try:
+        client = Groq(api_key=api_key)
+        response = client.chat.completions.create(
+            model="mixtral-8x7b-32768",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a friendly Slack bot running a workplace mentor-mentee program. "
+                        "Write a single warm welcome message for a new mentor-mentee group chat. "
+                        "Address both people using their Slack mentions exactly as provided. "
+                        "Keep it to 3-4 sentences. Be casual, encouraging, and human. "
+                        "End with a nudge for the mentor to say hello first."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Write a welcome message for a group chat between mentor <@{mentor_id}> "
+                        f"and mentee <@{mentee_id}>. Their shared interests: {tags_str}."
+                    ),
+                },
+            ],
+            temperature=0.8,
+            max_tokens=150,
+        )
+        msg = response.choices[0].message.content.strip()
+        return msg if msg else fallback
+
+    except Exception as e:
+        print(f"[LLM] Error generating mentor group intro message: {e}")
+        return fallback
+
+
 def get_social_connector_message(user1_id: str, user2_id: str, shared_tags: List[str]) -> str:
     """
     Uses Groq to generate a friendly channel message pairing two users with shared interests.

@@ -91,7 +91,7 @@ def _pick_random_channel_user(client, channel: str) -> str | None:
 
 
 
-_REMINDER_DELAY_SECONDS = 30 * 60  # 30 minutes
+_REMINDER_DELAY_SECONDS = 30  # 30 seconds (testing)
 
 
 def _send_reminders(client, channel: str, prompt_ts: str) -> None:

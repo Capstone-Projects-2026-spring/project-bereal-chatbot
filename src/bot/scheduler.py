@@ -97,6 +97,11 @@ _REMINDER_DELAY_SECONDS = 30  # 30 seconds (testing)
 def _send_reminders(client, channel: str, prompt_ts: str) -> None:
     """DM every channel member who hasn't responded 30 minutes after the vibe check prompt."""
     try:
+        bot_user_id = client.auth_test()["user_id"]
+    except Exception:
+        bot_user_id = None
+
+    try:
         members = client.conversations_members(channel=channel)["members"]
     except Exception as e:
         print(f"[REMINDER] Could not fetch channel members: {e}")
@@ -124,6 +129,8 @@ def _send_reminders(client, channel: str, prompt_ts: str) -> None:
 
     for user_id in members:
         if user_id in responded:
+            continue
+        if bot_user_id and user_id == bot_user_id:
             continue
         try:
             info = client.users_info(user=user_id)

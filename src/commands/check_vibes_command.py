@@ -115,7 +115,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
 
     chartParams = {
         'chart' : json.dumps(chartConfig),
-        'width' : 800,
+        'width' : 1200,
         'height' : 400,
         'backgroundColor': 'white',
     }

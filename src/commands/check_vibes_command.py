@@ -105,8 +105,8 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         vibeEngagement = vibe["engagement"]
         chartLabels.append(f"Vibe #{curVibeID}")
         chartEngagementData.append(vibeEngagement)
-        chartRepliesData.append(len(vibeReplies))
-        chartUniqueUsersData.append(len(vibeUniqueUsers))
+        chartRepliesData.append(vibeReplies)
+        chartUniqueUsersData.append(vibeUniqueUsers)
     
     chartEngagementConfig = {
         "type": "bar",

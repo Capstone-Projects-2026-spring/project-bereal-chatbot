@@ -480,25 +480,42 @@ def _notify_new_pair(client, mentor_id: str, mentee_id: str, shared_tags: list, 
         except Exception as e:
             logger.error("[MENTOR] Failed to DM %s: %s", uid, e)
 
-    # Also try to create a group DM — may not work without mpim:write permission
+    # Create a group DM with the bot + mentor + mentee
     channel_id = None
     try:
-        result = client.conversations_open(users=f"{mentor_id},{mentee_id}")
+        bot_user_id = client.auth_test()["user_id"]
+        result = client.conversations_open(users=f"{bot_user_id},{mentor_id},{mentee_id}")
         channel_id = result["channel"]["id"]
         col = _get_col(team_id)
         col.update_one({"user_id": mentor_id}, {"$set": {"group_dm_channel": channel_id}})
         col.update_one({"user_id": mentee_id}, {"$set": {"group_dm_channel": channel_id}})
+        logger.info("[MENTOR] Group DM created: %s", channel_id)
+
+        # Welcome message
         client.chat_postMessage(
             channel=channel_id,
             text=(
-                f":wave: Hey <@{mentor_id}> and <@{mentee_id}>! "
-                f"This is your shared space — use it to connect, ask questions, and share advice."
+                f":handshake: *Welcome to your mentor-mentee space!*\n\n"
+                f"<@{mentor_id}> (mentor) and <@{mentee_id}> (mentee) — "
+                f"this is your private group to connect, ask questions, and share advice."
                 f"{tags_line}"
             )
         )
-        logger.info("[MENTOR] Group DM created: %s", channel_id)
+
+        # Vibe check prompt to kick things off
+        from services.prompt_service import get_random_prompt_text
+        _, prompt_text, _ = get_random_prompt_text(response_type="image")
+        client.chat_postMessage(
+            channel=channel_id,
+            text=(
+                f":camera: *To get things started — here's your first vibe check:*\n\n"
+                f">{prompt_text}\n\n"
+                f"_Reply with a photo!_"
+            )
+        )
+
     except Exception as e:
-        logger.warning("[MENTOR] Could not create group DM (this is OK — individual DMs were sent): %s", e)
+        logger.warning("[MENTOR] Could not create group DM: %s", e)
 
 
 # ------------------------------------------------------------------ #

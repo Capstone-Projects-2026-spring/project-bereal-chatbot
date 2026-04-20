@@ -439,11 +439,48 @@ def _handle_match(client, team_id: str, respond) -> None:
 #  Helper: notify pair (group DM)                                      #
 # ------------------------------------------------------------------ #
 def _notify_new_pair(client, mentor_id: str, mentee_id: str, shared_tags: list, team_id: str) -> None:
-    """Open a group DM for the pair and post an intro message."""
-    from services.llm_service import get_mentor_group_intro_message
-    from services.mentor_service import _get_col
+    """DM each person their partner's full profile, then try to open a group DM."""
+    from services.mentor_service import get_registration, _get_col
 
-    # Create the group DM
+    mentor_reg = get_registration(team_id, mentor_id) or {}
+    mentee_reg = get_registration(team_id, mentee_id) or {}
+
+    tags_line = f"\n:label: *Shared interests:* {', '.join(shared_tags)}" if shared_tags else ""
+
+    def _profile_block(reg: dict) -> str:
+        lines = []
+        if reg.get("job_title"):
+            lines.append(f"• *Role:* {reg['job_title']}")
+        if reg.get("years_experience"):
+            lines.append(f"• *Experience:* {reg['years_experience']}")
+        if reg.get("bio"):
+            lines.append(f"• *About:* _{reg['bio']}_")
+        return "\n".join(lines) if lines else "_No profile details provided._"
+
+    mentor_msg = (
+        f":handshake: *You've been matched as a mentor!*\n\n"
+        f"Your mentee is <@{mentee_id}>.\n\n"
+        f"*Their profile:*\n{_profile_block(mentee_reg)}"
+        f"{tags_line}\n\n"
+        f"Reach out and introduce yourself — a quick message goes a long way!"
+    )
+
+    mentee_msg = (
+        f":handshake: *You've been matched with a mentor!*\n\n"
+        f"Your mentor is <@{mentor_id}>.\n\n"
+        f"*Their profile:*\n{_profile_block(mentor_reg)}"
+        f"{tags_line}\n\n"
+        f"Don't be shy — feel free to reach out and say hello!"
+    )
+
+    for uid, msg in [(mentor_id, mentor_msg), (mentee_id, mentee_msg)]:
+        try:
+            client.chat_postMessage(channel=uid, text=msg)
+            logger.info("[MENTOR] Sent pairing DM to %s", uid)
+        except Exception as e:
+            logger.error("[MENTOR] Failed to DM %s: %s", uid, e)
+
+    # Also try to create a group DM — may not work without mpim:write permission
     channel_id = None
     try:
         result = client.conversations_open(users=f"{mentor_id},{mentee_id}")
@@ -451,17 +488,17 @@ def _notify_new_pair(client, mentor_id: str, mentee_id: str, shared_tags: list, 
         col = _get_col(team_id)
         col.update_one({"user_id": mentor_id}, {"$set": {"group_dm_channel": channel_id}})
         col.update_one({"user_id": mentee_id}, {"$set": {"group_dm_channel": channel_id}})
+        client.chat_postMessage(
+            channel=channel_id,
+            text=(
+                f":wave: Hey <@{mentor_id}> and <@{mentee_id}>! "
+                f"This is your shared space — use it to connect, ask questions, and share advice."
+                f"{tags_line}"
+            )
+        )
+        logger.info("[MENTOR] Group DM created: %s", channel_id)
     except Exception as e:
-        logger.error("[MENTOR] Failed to create group DM for %s + %s: %s", mentor_id, mentee_id, e)
-
-    intro_msg = get_mentor_group_intro_message(mentor_id, mentee_id, shared_tags)
-    target = channel_id or mentor_id
-    try:
-        client.chat_postMessage(channel=target, text=intro_msg)
-        if not channel_id:
-            client.chat_postMessage(channel=mentee_id, text=intro_msg)
-    except Exception as e:
-        logger.error("[MENTOR] Failed to post intro message: %s", e)
+        logger.warning("[MENTOR] Could not create group DM (this is OK — individual DMs were sent): %s", e)
 
 
 # ------------------------------------------------------------------ #

@@ -118,7 +118,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         msg_block.append(
             {
 			"type": "markdown",
-			"text": f"Vibe #{curVibeID}\n{vibePrompt}\n{vibeMatch}{vibeType}"
+			"text": f"\nVibe #{curVibeID}\n{vibePrompt}\n{vibeMatch}{vibeType}\n"
 		},
         )
     
@@ -282,12 +282,13 @@ def organize_data(db, bot_id):
         
         if (record.get("user_id") == bot_id):
             check_type = None
-            if "forced vibe check" in record.get("text"):
-                check_type = "forced"
-            elif "random vibe check" in record.get("text"):
-                check_type = "random"
-            elif "user-created vibe check" in record.get("text"):
-                check_type = "user-created"
+            if "VIBES SENT SO FAR" not in record.get("text"):
+                if "forced vibe check" in record.get("text"):
+                    check_type = "forced"
+                elif "random vibe check" in record.get("text"):
+                    check_type = "random"
+                elif "user-created vibe check" in record.get("text"):
+                    check_type = "user-created"
 
             if check_type:
                 vibe_prompt_list.append({

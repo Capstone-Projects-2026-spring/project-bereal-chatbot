@@ -1,6 +1,9 @@
+import base64
 import os
 import re
-from typing import Optional, List
+from typing import Any, List, Optional
+
+import requests
 
 try:
     from groq import Groq
@@ -22,7 +25,7 @@ VALID_SLACK_EMOJI_NAMES = {
     "confused", "worried", "slightly_frowning_face", "open_mouth",
     "hushed", "astonished", "flushed", "pleading_face", "face_holding_back_tears",
     "frowning", "fearful", "sob", "scream", "confounded", "disappointed",
-    "triumph", "angry", "rage", "face_with_symbols_over_mouth", "smiling_imp", 
+    "triumph", "angry", "rage", "face_with_symbols_on_mouth", "smiling_imp",
     "skull", "ghost", "alien", "space_invader", "robot_face", "smiley_cat",
     "see_no_evil", "hear_no_evil", "speak_no_evil", "thumbsup", "thumbsdown",
     "gift_heart", "two_hearts", "heart", "100", "eyes", "clap", "wave",
@@ -30,14 +33,21 @@ VALID_SLACK_EMOJI_NAMES = {
 }
 
 
-def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> Optional[str]:
+def get_reaction_emoji(
+    message_text: str,
+    prompt_text: Optional[str] = None,
+    image_urls: Optional[List[str]] = None,
+    slack_token: Optional[str] = None,
+) -> Optional[str]:
     """
     Uses Groq's free LLM API to pick a relevant Slack emoji reaction.
-    
+
     Args:
         message_text: The user's response message
         prompt_text: Optional original prompt they were responding to
-        
+        image_urls: Optional list of Slack private image URLs attached to the message
+        slack_token: Bot token used to download private Slack images
+
     Returns:
         A valid Slack emoji name (like "thumbsup"), or None if the API call fails or is disabled
     """
@@ -45,8 +55,8 @@ def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> 
     if os.getenv("LLM_REACTIONS_ENABLED", "true").lower() != "true":
         return None
     
-    # Skip empty messages
-    if not message_text or not message_text.strip():
+    # Skip empty messages (unless images are provided)
+    if (not message_text or not message_text.strip()) and not image_urls:
         return None
     
     # Check if Groq is installed
@@ -71,15 +81,41 @@ def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> 
             "Examples of valid responses: heart, tada, fire, slightly_smiling_face, origami"
         )
         
-        user_msg = f"User response: {message_text}"
+        text_parts: List[str] = []
+        if message_text and message_text.strip():
+            text_parts.append(f"User response: {message_text}")
         if prompt_text:
-            user_msg += f"\n\nOriginal prompt: {prompt_text}"
-        
+            text_parts.append(f"Original prompt: {prompt_text}")
+        if image_urls and not text_parts:
+            text_parts.append("User posted an image. React with an appropriate emoji.")
+
+        # Build message content — use vision format when images are present
+        user_content: Any
+        encoded_images = []
+        if image_urls:
+            for url in image_urls:
+                try:
+                    headers = {"Authorization": f"Bearer {slack_token}"} if slack_token else {}
+                    resp = requests.get(url, headers=headers, timeout=10)
+                    resp.raise_for_status()
+                    mime = resp.headers.get("Content-Type", "image/jpeg").split(";")[0].strip()
+                    b64 = base64.b64encode(resp.content).decode()
+                    encoded_images.append(f"data:{mime};base64,{b64}")
+                except Exception as img_err:
+                    print(f"[LLM] Could not download image for vision: {img_err}")
+
+        if encoded_images:
+            user_content = [{"type": "text", "text": " ".join(text_parts)}]
+            for data_url in encoded_images:
+                user_content.append({"type": "image_url", "image_url": {"url": data_url}})
+        else:
+            user_content = " ".join(text_parts)
+
         response = client.chat.completions.create(
             model="meta-llama/llama-4-scout-17b-16e-instruct",  # Free model, very fast
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_msg}
+                {"role": "user", "content": user_content}
             ],
             temperature=0.7,
             max_tokens=20
@@ -96,6 +132,91 @@ def get_reaction_emoji(message_text: str, prompt_text: Optional[str] = None) -> 
         
     except Exception as e:
         print(f"[LLM] Error getting emoji reaction: {e}")
+        return None
+
+
+def get_reply_message(
+    message_text: str,
+    image_urls: Optional[List[str]] = None,
+    slack_token: Optional[str] = None,
+) -> Optional[str]:
+    """
+    Uses Groq's LLM API to generate a short, casual reply to a user's message.
+
+    Args:
+        message_text: The user's message text
+        image_urls: Optional list of Slack private image URLs attached to the message
+        slack_token: Bot token used to download private Slack images
+
+    Returns:
+        A short reply string, or None if the API call fails or is disabled
+    """
+    if (not message_text or not message_text.strip()) and not image_urls:
+        return None
+
+    if Groq is None:
+        print("[LLM] Groq not installed. Install with: pip install groq")
+        return None
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        print("[LLM] GROQ_API_KEY not set in .env file")
+        return None
+
+    try:
+        client = Groq(api_key=api_key)
+
+        system_prompt = (
+            "You are a friendly Slack bot that occasionally chimes in on conversations. "
+            "Generate a very short, casual reply (1-2 sentences max) to the user's message. "
+            "Be warm, witty, and conversational. Use a Slack emoji at the end if it fits naturally. "
+            "Do NOT be overly enthusiastic or robotic. Match the energy of the message."
+        )
+
+        text_parts: List[str] = []
+        if message_text and message_text.strip():
+            text_parts.append(message_text)
+        if image_urls and not text_parts:
+            text_parts.append("The user posted an image. Write a short, casual comment about it.")
+
+        # Build message content — use vision format when images are present
+        user_content: Any
+        encoded_images = []
+        if image_urls:
+            for url in image_urls:
+                try:
+                    headers = {"Authorization": f"Bearer {slack_token}"} if slack_token else {}
+                    resp = requests.get(url, headers=headers, timeout=10)
+                    resp.raise_for_status()
+                    mime = resp.headers.get("Content-Type", "image/jpeg").split(";")[0].strip()
+                    b64 = base64.b64encode(resp.content).decode()
+                    encoded_images.append(f"data:{mime};base64,{b64}")
+                except Exception as img_err:
+                    print(f"[LLM] Could not download image for reply: {img_err}")
+
+        if encoded_images:
+            user_content = [{"type": "text", "text": " ".join(text_parts)}]
+            for data_url in encoded_images:
+                user_content.append({"type": "image_url", "image_url": {"url": data_url}})
+        else:
+            user_content = " ".join(text_parts)
+
+        response = client.chat.completions.create(
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content}
+            ],
+            temperature=0.8,
+            max_tokens=100
+        )
+
+        reply = response.choices[0].message.content.strip()
+        print(f"[LLM] Got reply message: {reply}")
+        return reply if reply else None
+
+    except Exception as e:
+        print(f"[LLM] Error getting reply message: {e}")
         return None
 
 

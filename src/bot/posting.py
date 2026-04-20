@@ -15,9 +15,9 @@ def display_current_time() -> str:
 def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Optional[str] = None, topic: Optional[str] = None, active_tags: Optional[set] = None, footnote_text: Optional[str] = None) -> None:
 
     if topic:
-        prompt_id, prompt_text, tags = get_random_prompt_by_topic(topic)
+        prompt_id, prompt_text, tags = get_random_prompt_by_topic(topic, response_type="image")
     else:
-        prompt_id, prompt_text, tags = get_random_prompt_text(active_tags=active_tags)
+        prompt_id, prompt_text, tags = get_random_prompt_text(response_type="image", active_tags=active_tags)
 
     mark_prompt_asked(prompt_id)
 
@@ -25,9 +25,9 @@ def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Option
     if tracker:
         tracker.record_prompt_sent(prompt_id, prompt_text, tags, channel, team_id)
 
-    msg = f">{prompt_text}"
+    msg = f">{prompt_text}\n\n:camera: *Reply with a photo — don't think, just post!*"
     if prefix_text:
-        msg = f"### **{prefix_text.upper()}**\n\n>{prompt_text}"
+        msg = f"### **{prefix_text.upper()}**\n\n>{prompt_text}\n\n:camera: *Reply with a photo — don't think, just post!*"
 
     if footnote_text:
         msg += f"\n\n\n```{footnote_text}```"
@@ -54,18 +54,18 @@ def post_custom_prompt(client, prompt_text: str, channel: str, team_id: str = ""
 def randomize_message_block(message):
     num = random.randint(1,10)
     headerMSGs = [
-        ":bangbang: NEW VIBE CHECK :bangbang:",
-        ":bangbang: VIBE CHECK :bangbang:",
-        ":bangbang: VIBE CHECK! :bangbang:",
-        ":bangbang: VIBE CHECK ALERT :bangbang:",
-        ":interrobang: NEW VIBE CHECK :interrobang:",
-        ":interrobang: VIBE CHECK :interrobang:",
-        ":interrobang: VIBE CHECK! :interrobang:",
-        ":interrobang: VIBE CHECK ALERT :interrobang:",
-        ":exclamation: NEW VIBE CHECK :exclamation:",
-        ":exclamation: VIBE CHECK :exclamation:",
-        ":exclamation: VIBE CHECK! :exclamation:",
-        ":exclamation: VIBE CHECK ALERT :exclamation:",
+        ":camera: VIBE CHECK :camera:",
+        ":camera_with_flash: VIBE CHECK :camera_with_flash:",
+        ":camera: POST YOUR SHOT :camera:",
+        ":camera_with_flash: POST YOUR SHOT :camera_with_flash:",
+        ":camera: IT'S VIBE CHECK TIME :camera:",
+        ":camera_with_flash: IT'S VIBE CHECK TIME :camera_with_flash:",
+        ":camera: DROP YOUR PHOTO :camera:",
+        ":camera_with_flash: DROP YOUR PHOTO :camera_with_flash:",
+        ":camera: SHOW YOUR VIBE :camera:",
+        ":camera_with_flash: SHOW YOUR VIBE :camera_with_flash:",
+        ":camera: CAPTURE THE MOMENT :camera:",
+        ":camera_with_flash: CAPTURE THE MOMENT :camera_with_flash:",
     ]
 
     image_lists = [

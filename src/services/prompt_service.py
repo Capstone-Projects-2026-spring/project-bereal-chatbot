@@ -97,9 +97,11 @@ def get_random_prompt_text(response_type: Optional[str] = None, active_tags: Opt
     """
     Returns (prompt_id, prompt_text, tags).
     If active_tags is a non-empty set, only prompts whose tags overlap with it are considered.
+    If response_type is set, only prompts of that type are considered.
     """
     df = load_prompts_df()
     tags_col = _get_col(df, ["tags", "tag"])
+    type_col = _get_col(df, ["response_type", "type"])
 
     if active_tags and tags_col:
         mask = df[tags_col].astype(str).apply(
@@ -108,6 +110,11 @@ def get_random_prompt_text(response_type: Optional[str] = None, active_tags: Opt
         filtered = df[mask]
         if filtered.empty:
             filtered = df  # fall back to all prompts if filter matches nothing
+        # Also filter by response_type if specified
+        if response_type and type_col:
+            type_mask = filtered[type_col].astype(str).str.lower() == response_type.lower()
+            if type_mask.any():
+                filtered = filtered[type_mask]
         row = filtered.sample(n=1).iloc[0].to_dict()
         id_col = _get_col(filtered, ["prompt_id", "id"])
         text_col = _get_col(filtered, ["prompt_text", "text", "prompt"])
@@ -142,13 +149,14 @@ def get_available_topics() -> list[str]:
     return sorted(topics)
 
 
-def get_random_prompt_by_topic(topic: str) -> Tuple[str, str, str]:
+def get_random_prompt_by_topic(topic: str, response_type: Optional[str] = None) -> Tuple[str, str, str]:
     """
     Returns (prompt_id, prompt_text, tags) for a random prompt matching the given topic tag.
     Falls back to a fully random prompt if no match is found.
     """
     df = load_prompts_df()
     tags_col = _get_col(df, ["tags", "tag"])
+    type_col = _get_col(df, ["response_type", "type"])
 
     if tags_col is not None:
         mask = df[tags_col].astype(str).apply(
@@ -159,7 +167,13 @@ def get_random_prompt_by_topic(topic: str) -> Tuple[str, str, str]:
         filtered = pd.DataFrame()
 
     if filtered.empty:
-        return get_random_prompt_text()
+        return get_random_prompt_text(response_type=response_type)
+
+    # Also filter by response_type if specified
+    if response_type and type_col:
+        type_mask = filtered[type_col].astype(str).str.lower() == response_type.lower()
+        if type_mask.any():
+            filtered = filtered[type_mask]
 
     id_col = _get_col(filtered, ["prompt_id", "id"])
     text_col = _get_col(filtered, ["prompt_text", "text", "prompt"])

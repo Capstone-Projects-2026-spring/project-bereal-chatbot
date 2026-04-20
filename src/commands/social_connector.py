@@ -56,7 +56,7 @@ def send_social_connector_message(client, channel: str, team_id: str) -> bool:
     """
     Find two users with shared interest tags and post a soft introduction in the channel.
     """
-    from services.llm_service import get_social_connector_message
+    from services.llm_service import get_social_connector_icebreaker, get_social_connector_message
 
     user1_id, user2_id, shared_tags = find_matching_pair(team_id)
     if not user1_id or not user2_id:
@@ -64,8 +64,10 @@ def send_social_connector_message(client, channel: str, team_id: str) -> bool:
         return False
 
     message = get_social_connector_message(user1_id, user2_id, shared_tags)
+    icebreaker = get_social_connector_icebreaker(shared_tags)
     try:
         client.chat_postMessage(channel=channel, text=message)
+        client.chat_postMessage(channel=channel, text=icebreaker)
         logger.info("[SOCIAL] Posted connector message for %s and %s", user1_id, user2_id)
         return True
     except Exception as error:

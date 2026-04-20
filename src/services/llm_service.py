@@ -402,3 +402,62 @@ def get_social_connector_message(user1_id: str, user2_id: str, shared_tags: List
     except Exception as e:
         print(f"[LLM] Error getting social connector message: {e}")
         return fallback
+
+
+def get_social_connector_icebreaker(shared_tags: List[str]) -> str:
+    """
+    Uses Groq to generate a short icebreaker question based on the users' shared interest.
+    Falls back to a deterministic prompt if the API call fails or is disabled.
+    """
+    primary_tag = shared_tags[0] if shared_tags else "general interests"
+    fallback_map = {
+        "food": "Icebreaker: what's a favorite food you both love?",
+        "sports": "Icebreaker: what's a sport or team you could talk about for hours?",
+        "hobbies": "Icebreaker: what's a hobby you never get tired of talking about?",
+        "personal_life": "Icebreaker: what's something from your day-to-day life you've been enjoying lately?",
+        "tv_movies": "Icebreaker: what's a show or movie you'd instantly recommend right now?",
+        "work_life": "Icebreaker: what's one part of work you genuinely enjoy?",
+        "would_you_rather": "Icebreaker: what's your favorite would-you-rather question?",
+    }
+    fallback = fallback_map.get(primary_tag, f"Icebreaker: what's one thing you both enjoy about {primary_tag}?")
+
+    if Groq is None:
+        return fallback
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return fallback
+
+    tags_str = ", ".join(shared_tags) if shared_tags else "general interests"
+
+    try:
+        client = Groq(api_key=api_key)
+
+        system_prompt = (
+            "You are a friendly Slack bot that helps teammates connect. "
+            "Generate exactly one short icebreaker question based on the users' shared interest. "
+            "Keep it to one sentence. Make it casual, specific, and easy to answer. "
+            "Do not mention AI, do not add intro text, and do not use more than one question mark."
+        )
+
+        user_msg = (
+            f"Write one icebreaker question for two teammates who both like: {tags_str}. "
+            "The question must directly mention that shared interest."
+        )
+
+        response = client.chat.completions.create(
+            model="mixtral-8x7b-32768",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_msg},
+            ],
+            temperature=0.8,
+            max_tokens=60,
+        )
+
+        msg = response.choices[0].message.content.strip()
+        return msg if msg else fallback
+
+    except Exception as e:
+        print(f"[LLM] Error getting social connector icebreaker: {e}")
+        return fallback

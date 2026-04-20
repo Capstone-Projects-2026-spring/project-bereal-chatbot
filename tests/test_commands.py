@@ -242,11 +242,14 @@ def test_social_connector_posts_soft_intro_message():
     client = Mock()
 
     with patch("commands.social_connector.find_matching_pair", return_value=("U1", "U2", ["food"])), \
-         patch("services.llm_service.get_social_connector_message", return_value="hey I saw you both mentioned food"):
+         patch("services.llm_service.get_social_connector_message", return_value="hey I saw you both mentioned food"), \
+         patch("services.llm_service.get_social_connector_icebreaker", return_value="what's a favorite food you both love?"):
         posted = send_social_connector_message(client, channel="C123", team_id="T123")
 
     assert posted is True
-    client.chat_postMessage.assert_called_once_with(channel="C123", text="hey I saw you both mentioned food")
+    assert client.chat_postMessage.call_count == 2
+    assert client.chat_postMessage.call_args_list[0].kwargs == {"channel": "C123", "text": "hey I saw you both mentioned food"}
+    assert client.chat_postMessage.call_args_list[1].kwargs == {"channel": "C123", "text": "what's a favorite food you both love?"}
 
 
 def test_social_connector_command_posts_in_current_channel(app):

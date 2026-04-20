@@ -118,12 +118,12 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         vibePrompt, vibeMatch, vibeType = vibeTextInitialSplit.partition("```")
         vibeLines.append(f"\nVibe #{curVibeID}\n{vibePrompt}\n{vibeMatch}{vibeType}\n")
     
-        msg_block.append(
-            {
-                "type": "markdown",
-                "text": "\n".join(vibeLines)
-		    }
-        )
+    msg_block.append(
+        {
+            "type": "markdown",
+            "text": "\n".join(vibeLines)
+        }
+    )
 
     chartEngagementConfig = {
         "type": "bar",

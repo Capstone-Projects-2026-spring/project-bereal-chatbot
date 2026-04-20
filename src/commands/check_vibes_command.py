@@ -128,10 +128,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
         vibeUniqueUsers = len(vibe["unique_users"])
         vibeEngagement = vibe["engagement"]
 
-        if vibeInstanceSpecific:
-            vibeInstanceSpecific = vibe
-            respond("Assigned Specifc Vibe")
-        else:
+        if not vibeInstanceSpecific:
             chartLabels.append(f"Vibe #{curVibeID}")
             chartEngagementData.append(vibeEngagement)
             chartRepliesData.append(vibeReplies)
@@ -254,11 +251,8 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
         _, _, vibeTextInitialSplit = vibeText.partition("&gt;")
         vibePrompt, vibeMatch, vibeType = vibeTextInitialSplit.partition("```")
         msg_block.append({
-            "type": "header",
-            "text": {
-                    "type": "markdown",
-                    "text": f"\n## Vibe Prompt:\n{vibePrompt}\n{vibeMatch}{vibeType}\n",
-                },
+            "type": "markdown",
+            "text": f"\n## Vibe Prompt:\n{vibePrompt}\n{vibeMatch}{vibeType}\n",
             }
         )
 

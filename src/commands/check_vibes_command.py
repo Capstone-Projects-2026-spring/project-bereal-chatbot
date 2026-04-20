@@ -51,9 +51,11 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
 
     msg_block = []
     headerText = "VIBES FOR TODAY"
+    dateInfo = f"({curDate})"
     if not dayValue:
         headerText = "VIBES FOR CHANNEL"
         CurrentDaysVibes = prompt_list
+        dateInfo = f""
     else:
         if ((datetime.today() - timedelta(days=1)) == curDate):
             "VIBES FOR YESTERDAY"
@@ -63,7 +65,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         "type": "header",
         "text": {
             "type": "plain_text",
-            "text": f"{headerText} ({curDate})",
+            "text": f"{headerText} {dateInfo}",
             "emoji": True
         },
         "level": 1
@@ -107,7 +109,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         "data": {
             "labels": chartLabels,
             "datasets": [{
-                "label": "Engagement",
+                "label": "Engagement Points",
                 "data": chartEngagementData
             }]
         }
@@ -176,7 +178,7 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
                     dayVal = (date.today() - timedelta(days=1))
             else:
                 try:
-                    dayVal = datetime.strptime(pl, "%m-%d-%Y")
+                    dayVal = datetime.strptime(pl, "%m-%d-%Y").date()
                 except ValueError:
                     respond("Attempted to process date entered: Month or Day is out of range. Ending process.")
                     break

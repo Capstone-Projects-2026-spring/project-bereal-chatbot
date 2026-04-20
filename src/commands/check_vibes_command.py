@@ -90,6 +90,12 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
     chartEngagementData = []
     chartRepliesData = []
     chartUniqueUsersData = []
+    msg_block.append(
+            {
+			"type": "markdown",
+			"text": f"## KEY: VIBES\n"
+		},
+    )
     for vibe in CurrentDaysVibes:
         if vibe["checkType"] == "forced":
             forcedVibes += 1
@@ -107,6 +113,14 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         chartEngagementData.append(vibeEngagement)
         chartRepliesData.append(vibeReplies)
         chartUniqueUsersData.append(vibeUniqueUsers)
+        _, _, vibeTextInitialSplit = vibeText.partition("&gt;")
+        vibePrompt, vibeMatch, vibeType = vibeTextInitialSplit.partition("```")
+        msg_block.append(
+            {
+			"type": "markdown",
+			"text": f"Vibe #{curVibeID}\n{vibePrompt}\n{vibeMatch}{vibeType}"
+		},
+        )
     
     chartEngagementConfig = {
         "type": "bar",

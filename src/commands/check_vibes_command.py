@@ -93,7 +93,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
     msg_block.append(
             {
 			"type": "markdown",
-			"text": f"## KEY: VIBES\n"
+			"text": f"## KEY: VIBES\n do /checkvibes (mm-dd-yyyy) #[Number Vibe you wish to see more information on]"
 		},
     )
     vibeLines = []
@@ -118,13 +118,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         vibePrompt, vibeMatch, vibeType = vibeTextInitialSplit.partition("```")
         vibeLines.append(f"\nVibe #{curVibeID}\n{vibePrompt}\n{vibeMatch}{vibeType}\n")
     
-    msg_block.append(
-        {
-            "type": "markdown",
-            "text": "\n".join(vibeLines)
-        }
-    )
-
+  # CANNOT DO THE MESSAGE BLOCK KEYS, BECAUSE THERE IS A LIMIT TO HOW MANY MESSAGE BLOCKS THERE CAN BE AND HOW LOGN THE MESSAGE BLOCKS CAN BE.
     chartEngagementConfig = {
         "type": "bar",
         "data": {
@@ -242,6 +236,7 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
         # - "text" or "image"
         # - "#channel"
         dayVal = date.today()
+        specific_vibe = None
         for p in parts:
             pl = p.lower()
             if pl in ("today", "yesterday", "all"):
@@ -249,6 +244,9 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
                     dayVal = None
                 elif pl == "yesterday":
                     dayVal = (date.today() - timedelta(days=1))
+            elif pl.startswith("#"):
+                specific_vibe = pl
+                print(pl)
             else:
                 try:
                     dayVal = datetime.strptime(pl, "%m-%d-%Y").date()

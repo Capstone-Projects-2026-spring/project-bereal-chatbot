@@ -39,11 +39,11 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
     prompt_list = organize_data(message_array, botID)
     CurrentDaysVibes = []
     curDate = dayValue
-    for vibe in prompt_list:
-        vibeDT = datetime.fromisoformat(vibe["time"])
-        
-        if (vibeDT.day == curDate.day and vibeDT.month == curDate.month and vibeDT.year == curDate.year):
-            CurrentDaysVibes.append(vibe)
+    if dayValue:
+        for vibe in prompt_list:
+            vibeDT = datetime.fromisoformat(vibe["time"])
+            if (vibeDT.day == curDate.day and vibeDT.month == curDate.month and vibeDT.year == curDate.year):
+                CurrentDaysVibes.append(vibe)
    
     if len(CurrentDaysVibes) == 0 and dayValue:
         client.chat_postMessage(channel=channel, text="No Vibes Checks have been sent today... :(")

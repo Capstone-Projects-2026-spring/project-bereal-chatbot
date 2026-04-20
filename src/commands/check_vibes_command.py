@@ -46,7 +46,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
                 CurrentDaysVibes.append(vibe)
    
     if len(CurrentDaysVibes) == 0 and dayValue:
-        client.chat_postMessage(channel=channel, text="No Vibes Checks have been sent that day... :(")
+        respond("No Vibes Checks have been sent that day... :(")
         return
 
     msg_block = []

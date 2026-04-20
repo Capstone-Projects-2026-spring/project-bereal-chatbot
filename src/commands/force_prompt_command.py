@@ -78,7 +78,8 @@ def register_force_prompt_command(bolt_app, state_manager=None):
                 active_tags=active_tags,
             )
             if ts and state_manager and team_id:
-                state_manager.get_state(team_id).set_last_prompt_ts(ts)
+                state_manager.get_state(team_id).set_last_prompt_ts(ts, channel=channel)
+                print(f"[FORCEPROMPT] [{team_id}] Prompt ts={ts} saved to state, channel={channel}")
             respond(f"✅ Posted a prompt to {channel}.")
         except Exception as e:
             logging.exception("Error in /forceprompt")

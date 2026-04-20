@@ -241,17 +241,20 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                                 response_type=state.get_prompt_response_type(),
                             )
                         if ts:
-                            state.set_last_prompt_ts(ts)
+                            state.set_last_prompt_ts(ts, channel=channel)
                         print(f"\n[SCHEDULER] [{team_id}] Time hit: {target_time}")
                     except Exception as e:
                         print(f"[SCHEDULER] [{team_id}] Error posting time hit prompt: {e}")
 
                 prompt_ts = state.get_last_prompt_ts()
-                if prompt_ts and state.get_reminder_enabled() and not state.get_reminder_sent():
+                if prompt_ts and not state.get_reminder_sent():
                     elapsed = time.time() - float(prompt_ts)
-                    if elapsed >= _REMINDER_DELAY_SECONDS:
-                        print(f"[REMINDER] [{team_id}] 30 min elapsed — sending reminder DMs")
-                        _send_reminders(active_client, channel, prompt_ts)
+                    if not state.get_reminder_enabled():
+                        print(f"[REMINDER] [{team_id}] Reminders disabled — skipping (elapsed={elapsed:.0f}s)")
+                    elif elapsed >= _REMINDER_DELAY_SECONDS:
+                        prompt_channel = state.get_last_prompt_channel() or channel
+                        print(f"[REMINDER] [{team_id}] {elapsed:.0f}s elapsed — sending reminder DMs to channel {prompt_channel}")
+                        _send_reminders(active_client, prompt_channel, prompt_ts)
                         state.set_reminder_sent(True)
 
             time.sleep(1)

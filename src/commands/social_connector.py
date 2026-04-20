@@ -18,9 +18,7 @@ def register_social_connector_command(bolt_app):
             return
 
         posted = send_social_connector_message(client, channel, team_id)
-        if posted:
-            respond("Posted a social connector intro in this channel.")
-        else:
+        if not posted:
             respond("No matching pair found yet. Have a few people set their tags with `/picktags` and try again.")
 
 

@@ -270,4 +270,25 @@ def test_social_connector_command_posts_in_current_channel(app):
 
     ack.assert_called_once()
     send_social.assert_called_once_with(client, "C123", "T123")
-    respond.assert_called_once_with("Posted a social connector intro in this channel.")
+    respond.assert_not_called()
+
+
+def test_social_connector_command_responds_when_no_match_found(app):
+    register_social_connector_command(app)
+    handler = app.get_command("/connect")
+
+    ack = Mock()
+    respond = Mock()
+    client = Mock()
+
+    with patch("commands.social_connector.send_social_connector_message", return_value=False) as send_social:
+        handler(
+            ack=ack,
+            respond=respond,
+            body={"channel_id": "C123", "team_id": "T123"},
+            client=client,
+        )
+
+    ack.assert_called_once()
+    send_social.assert_called_once_with(client, "C123", "T123")
+    respond.assert_called_once_with("No matching pair found yet. Have a few people set their tags with `/picktags` and try again.")

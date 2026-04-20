@@ -182,7 +182,6 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
                                 reply_client.chat_postMessage(
                                     channel=channel_id,
                                     text=reply_text,
-                                    thread_ts=timestamp,
                                 )
                                 print(f"[REPLY] Sent reply in {cache.channel_name(channel_id)}")
                             except Exception as e:

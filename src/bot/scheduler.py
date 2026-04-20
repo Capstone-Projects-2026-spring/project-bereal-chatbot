@@ -102,12 +102,25 @@ def _send_reminders(client, channel: str, prompt_ts: str) -> None:
         print(f"[REMINDER] Could not fetch channel members: {e}")
         return
 
+    responded = set()
+
+    # Check thread replies to the prompt message (users who replied in-thread)
+    try:
+        replies = client.conversations_replies(channel=channel, ts=prompt_ts)
+        for m in replies.get("messages", []):
+            if "user" in m and m.get("ts") != prompt_ts:
+                responded.add(m["user"])
+    except Exception as e:
+        print(f"[REMINDER] Could not fetch thread replies: {e}")
+
+    # Also check main channel messages (users who posted directly in the channel)
     try:
         history = client.conversations_history(channel=channel, oldest=prompt_ts, limit=200)
-        responded = {m["user"] for m in history.get("messages", []) if "user" in m}
+        for m in history.get("messages", []):
+            if "user" in m:
+                responded.add(m["user"])
     except Exception as e:
         print(f"[REMINDER] Could not fetch channel history: {e}")
-        return
 
     for user_id in members:
         if user_id in responded:

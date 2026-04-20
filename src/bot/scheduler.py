@@ -121,7 +121,7 @@ def _send_reminders(client, channel: str, prompt_ts: str) -> None:
         try:
             client.chat_postMessage(
                 channel=user_id,
-                text="Hey! You missed the vibe check. It's not too late to share how you're doing! :wave:",
+                text="Hey! You're late to VibeCheck :camera: Drop a photo in the channel — it's not too late! :wave:",
             )
             print(f"[REMINDER] Sent reminder DM to {user_id}")
         except Exception as e:

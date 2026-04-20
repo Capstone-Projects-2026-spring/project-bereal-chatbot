@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock, patch
 from commands.force_prompt_command import register_force_prompt_command
 from commands.onboarding import register_onboarding
-from commands.social_connector import find_matching_pair, send_social_connector_message
+from commands.social_connector import find_matching_pair, register_social_connector_command, send_social_connector_message
 from commands.set_channel_command import register_set_channel_command
 from bot.state import create_state, StateManager
 
@@ -243,6 +243,28 @@ def test_social_connector_posts_soft_intro_message():
 
     with patch("commands.social_connector.find_matching_pair", return_value=("U1", "U2", ["food"])), \
          patch("services.llm_service.get_social_connector_message", return_value="hey I saw you both mentioned food"):
-        send_social_connector_message(client, channel="C123", team_id="T123")
+        posted = send_social_connector_message(client, channel="C123", team_id="T123")
 
+    assert posted is True
     client.chat_postMessage.assert_called_once_with(channel="C123", text="hey I saw you both mentioned food")
+
+
+def test_social_connector_command_posts_in_current_channel(app):
+    register_social_connector_command(app)
+    handler = app.get_command("/connect")
+
+    ack = Mock()
+    respond = Mock()
+    client = Mock()
+
+    with patch("commands.social_connector.send_social_connector_message", return_value=True) as send_social:
+        handler(
+            ack=ack,
+            respond=respond,
+            body={"channel_id": "C123", "team_id": "T123"},
+            client=client,
+        )
+
+    ack.assert_called_once()
+    send_social.assert_called_once_with(client, "C123", "T123")
+    respond.assert_called_once_with("Posted a social connector intro in this channel.")

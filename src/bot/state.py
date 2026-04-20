@@ -26,6 +26,7 @@ class BotState:
     _pending_custom_prompt: Optional[str] = None  # user-authored prompt text
     _user_prompt_creator_used_today: bool = False  # only invite one user to create a prompt
     _social_connector_used_today: bool = False  # only run social connector once per day
+    _mentor_checkin_week: Optional[int] = None  # ISO week number of last mentor check-in sent
 
     def set_last_prompt_ts(self, ts: Optional[str]) -> None:
         with self._lock:
@@ -174,6 +175,14 @@ class BotState:
     def get_social_connector_used_today(self) -> bool:
         with self._lock:
             return self._social_connector_used_today
+
+    def set_mentor_checkin_week(self, week: Optional[int]) -> None:
+        with self._lock:
+            self._mentor_checkin_week = week
+
+    def get_mentor_checkin_week(self) -> Optional[int]:
+        with self._lock:
+            return self._mentor_checkin_week
 
 
 def get_team_id(body: dict) -> Optional[str]:

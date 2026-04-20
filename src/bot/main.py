@@ -23,6 +23,7 @@ from commands.pick_topic_command import register_pick_topic_command
 from commands.onboarding import register_onboarding
 from commands.user_prompt_command import register_user_prompt_handlers
 from commands.check_vibes_command import register_check_vibes_command
+from commands.mentor_mentee_command import register_mentor_mentee_command
 from app_logging.structured_logger import install_structured_message_logging
 from services.mongo_service import init_tracker, init_user_interests
 from services.prompt_service import load_prompts_df
@@ -91,6 +92,7 @@ def main():
     register_onboarding(bolt_app, state_manager)
     register_user_prompt_handlers(bolt_app, state_manager)
     register_check_vibes_command(bolt_app, state_manager, auth_info['user_id'])
+    register_mentor_mentee_command(bolt_app, state_manager)
 
     # Online message to primary workspace
     try:

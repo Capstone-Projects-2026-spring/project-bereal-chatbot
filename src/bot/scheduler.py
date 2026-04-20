@@ -13,6 +13,7 @@ _USER_PROMPT_INVITE_TIME = "09:15:00 AM"  # time to DM the randomly selected use
 _USER_PROMPT_INVITE_PROBABILITY = 0.3    # 30% chance each day
 _SOCIAL_CONNECTOR_TIME = "02:00:00 PM"   # time to post social connector message
 _SOCIAL_CONNECTOR_PROBABILITY = 0.5      # 50% chance each day
+_MENTOR_CHECKIN_TIME = "09:00:00 AM"     # time to send weekly mentor-mentee check-in (Mondays only)
 
 
 
@@ -186,6 +187,18 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                     if random.random() < _SOCIAL_CONNECTOR_PROBABILITY:
                         from commands.social_connector import send_social_connector_message
                         send_social_connector_message(active_client, channel, team_id)
+
+                # Mentor-mentee weekly check-in: every Monday at 9:00 AM, once per ISO week
+                if current_time == _MENTOR_CHECKIN_TIME and datetime.now().weekday() == 0:
+                    current_week = datetime.now().isocalendar()[1]
+                    if state.get_mentor_checkin_week() != current_week:
+                        state.set_mentor_checkin_week(current_week)
+                        try:
+                            from commands.mentor_mentee_command import send_weekly_checkin
+                            send_weekly_checkin(active_client, team_id)
+                            print(f"[SCHEDULER] [{team_id}] Sent mentor-mentee weekly check-in (week {current_week})")
+                        except Exception as e:
+                            print(f"[SCHEDULER] [{team_id}] Error sending mentor check-in: {e}")
 
                 target_time = _get_target_time(state)
                 if current_time.endswith(":00 AM") or current_time.endswith(":00 PM"):

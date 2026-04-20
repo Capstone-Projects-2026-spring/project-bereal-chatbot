@@ -45,16 +45,25 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
         if (vibeDT.day == curDate.day and vibeDT.month == curDate.month and vibeDT.year == curDate.year):
             CurrentDaysVibes.append(vibe)
    
-    if len(CurrentDaysVibes) == 0:
+    if len(CurrentDaysVibes) == 0 and dayValue:
         client.chat_postMessage(channel=channel, text="No Vibes Checks have been sent today... :(")
         return
 
     msg_block = []
+    headerText = "VIBES FOR TODAY"
+    if not dayValue:
+        headerText = "VIBES FOR CHANNEL"
+        CurrentDaysVibes = prompt_list
+    else:
+        if ((datetime.today() - timedelta(days=1)) == curDate):
+            "VIBES FOR YESTERDAY"
+        else:
+            "VIBES FOR THE DAY OF"
     msg_block.append({
         "type": "header",
         "text": {
             "type": "plain_text",
-            "text": f"VIBES FOR TODAY ({curDate})",
+            "text": f"{headerText} ({curDate})",
             "emoji": True
         },
         "level": 1

@@ -30,7 +30,7 @@ def load_config() -> BotConfig:
     llm_reactions_enabled = os.getenv("LLM_REACTIONS_ENABLED", "true").lower() == "true"
     llm_reactions_probability = float(os.getenv("LLM_REACTIONS_PROBABILITY", "0.5"))
     llm_replies_enabled = os.getenv("LLM_REPLIES_ENABLED", "true").lower() == "true"
-    llm_replies_probability = float(os.getenv("LLM_REPLIES_PROBABILITY", "0.2"))
+    llm_replies_probability = float(os.getenv("LLM_REPLIES_PROBABILITY", "0.5"))
 
     if not token:
         raise RuntimeError("Missing SLACK_BOT_TOKEN in .env")

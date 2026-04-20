@@ -4,14 +4,14 @@ import json
 import threading
 import os
 from datetime import datetime
-from datetime import date
+from datetime import date, timedelta
 from urllib.parse import urlencode
 
 from pymongo import MongoClient
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
 from services.mongo_service import get_tracker
 
-def databse_Task(mongo_client, payload, respond, botID, client):
+def databse_Task(mongo_client, payload, respond, botID, client, dayValue):
     try:
         db =  mongo_client.get_database("vibecheck")
     except ConnectionError:
@@ -38,13 +38,17 @@ def databse_Task(mongo_client, payload, respond, botID, client):
     message_array = list(messages_col.find({}))
     prompt_list = organize_data(message_array, botID)
     CurrentDaysVibes = []
-    curDate = date.today()
+    curDate = dayValue
     for vibe in prompt_list:
         vibeDT = datetime.fromisoformat(vibe["time"])
         
         if (vibeDT.day == curDate.day and vibeDT.month == curDate.month and vibeDT.year == curDate.year):
             CurrentDaysVibes.append(vibe)
    
+    if len(CurrentDaysVibes) == 0:
+        client.chat_postMessage(channel=channel, text="No Vibes Checks have been sent today... :(")
+        return
+
     msg_block = []
     msg_block.append({
         "type": "header",
@@ -148,8 +152,30 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
     @bolt_app.command("/checkvibes")
     def handle_checkvibes(ack, respond, body, client):
         ack("Checking out the vibes...")
-        
-        threading.Thread(target=databse_Task, args=(mongo_client, body, respond, botID, client)).start()
+        user_input = (body.get("text") or "").strip()
+        parts = user_input.split()
+        # Parse args in any order:
+        # - "text" or "image"
+        # - "#channel"
+        dayVal = date.today()
+        for p in parts:
+            pl = p.lower()
+            if pl in ("today", "yesterday", "all"):
+                if pl == "all":
+                    dayVal = None
+                elif pl == "yesterday":
+                    dayVal = (date.today() - timedelta(days=1))
+            else:
+                try:
+                    dayVal = datetime.strptime(pl, "%m-%d-%Y")
+                except ValueError:
+                    respond("Attempted to process date entered: Month or Day is out of range. Ending process.")
+                    break
+                except:
+                    respond("Error has occured while processing date.")
+                    break
+                    
+        threading.Thread(target=databse_Task, args=(mongo_client, body, respond, botID, client, dayVal)).start()
         # respond("Checking out the Vibes!!")
         # for message in messages_col.find():
         #    message.get()

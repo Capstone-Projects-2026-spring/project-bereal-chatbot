@@ -72,7 +72,7 @@ def databse_Task(mongo_client, payload, respond, botID, client):
     randomVibes = 0
     curVibeID = 0
     chartLabels = []
-    chartData = []
+    chartEngagementData = []
     for vibe in CurrentDaysVibes:
         if vibe["checkType"] == "forced":
             forcedVibes += 1
@@ -87,49 +87,33 @@ def databse_Task(mongo_client, payload, respond, botID, client):
         vibeUniqueUsers = len(vibe["unique_users"])
         vibeEngagement = vibe["engagement"]
         chartLabels.append(f"Vibe #{curVibeID}")
-        chartData.append(vibeEngagement)
-        # msg_block.append({
-        #    "type": "section",
-		#	"text": {
-		#		"type": "mrkdwn",
-		#		"text": f"Vibe #{curVibeID} - {vibe["checkType"]}"
-		#	},
-		#	"accessory": {
-		#		"type": "button",
-		#		"text": {
-		#			"type": "plain_text",
-		#			"text": "More Info",
-		#			"emoji": True
-		#		},
-		#		"value": f"{vibeText}",
-		#		"action_id": "checkvibes_moreInfo"
-		#	}
-        # })
-        chartConfig = {
-            "type": "bar",
-            "data": {
-                "labels": chartLabels,
-                "datasets": [{
-                    "label": "Engagement",
-                    "data": chartData
-                }]
-            }
+        chartEngagementData.append(vibeEngagement)
+    
+    chartConfig = {
+        "type": "bar",
+        "data": {
+            "labels": chartLabels,
+            "datasets": [{
+                "label": "Engagement",
+                "data": chartEngagementData
+            }]
         }
+    }
 
-        chartParams = {
-            'chart' : json.dumps(chartConfig),
-            'width' : 800,
-            'height' : 400,
-            'backgroundColor': 'white',
+    chartParams = {
+        'chart' : json.dumps(chartConfig),
+        'width' : 800,
+        'height' : 400,
+        'backgroundColor': 'white',
+    }
+
+    msg_block.append(
+        {
+        "type": "image",
+        "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartParams),
+        "alt_text": "delicious tacos"
         }
-
-        msg_block.append(
-            {
-			"type": "image",
-			"image_url": 'https://quickchart.io/chart?%s' % urlencode(chartParams),
-			"alt_text": "delicious tacos"
-		    }
-        )
+    )
         
     #    lines.append(f"\nVibe Prompt: {vibeText}\n  • Time Released {vibeTime}\n • Replies: {vibeReplies}\n • # of Unique Repliers: {vibeUniqueUsers} \n •  Vibe Total Engagement: {vibeEngagement}")
 

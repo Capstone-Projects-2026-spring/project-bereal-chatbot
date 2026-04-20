@@ -48,6 +48,12 @@ _DAY_OPTIONS = [
     for d in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 ]
 
+_RESPONSE_TYPE_OPTIONS = [
+    {"text": {"type": "plain_text", "text": "Photo only (BeReal style)", "emoji": True}, "value": "image"},
+    {"text": {"type": "plain_text", "text": "Text only", "emoji": True}, "value": "text"},
+    {"text": {"type": "plain_text", "text": "Any (photo or text)", "emoji": True}, "value": "any"},
+]
+
 
 def _build_tag_options():
     topics = get_available_topics()
@@ -64,7 +70,7 @@ def _build_topic_options():
 def _build_home_view(selected_preset=None, selected_mode=None,
                      random_start=None, random_end=None, static_time=None,
                      active_days=None, pending_topic=None, active_tags=None,
-                     reminder_enabled=False) -> dict:
+                     reminder_enabled=False, prompt_response_type="image") -> dict:
     mode_initial = next(
         (opt for opt in _MODE_OPTIONS if opt["value"] == selected_mode),
         None
@@ -284,6 +290,11 @@ def _build_home_view(selected_preset=None, selected_mode=None,
             }
         ]
 
+    response_type_initial = next(
+        (opt for opt in _RESPONSE_TYPE_OPTIONS if opt["value"] == prompt_response_type),
+        _RESPONSE_TYPE_OPTIONS[0]
+    )
+
     blocks += [
         {
             "type": "section",
@@ -293,7 +304,23 @@ def _build_home_view(selected_preset=None, selected_mode=None,
         {"type": "divider"},
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*7. Assign Prompt Creator*\nPick a user to DM them the prompt creation invite! They will have 5 minutes to submit."}
+            "text": {"type": "mrkdwn", "text": "*7. Prompt Type*\nChoose whether prompts ask for a photo, a text response, or either."}
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "radio_buttons",
+                    "action_id": "response_type_selection",
+                    "initial_option": response_type_initial,
+                    "options": _RESPONSE_TYPE_OPTIONS,
+                }
+            ]
+        },
+        {"type": "divider"},
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*8. Assign Prompt Creator*\nPick a user to DM them the prompt creation invite! They will have 5 minutes to submit."}
         },
         {
             "type": "actions",
@@ -323,6 +350,7 @@ def _publish_home(client, user_id, state):
             pending_topic=state._pending_topic,
             active_tags=state.get_active_tags(),
             reminder_enabled=state.get_reminder_enabled(),
+            prompt_response_type=state.get_prompt_response_type(),
         )
     )
 
@@ -499,6 +527,20 @@ def register_control_panel(bolt_app, state_manager):
         logger.info(f"Reminder toggle: {status}")
         _publish_home(client, body["user"]["id"], state)
         _dm_admin(client, body["user"]["id"], f":bell: *Late response reminders* {status}")
+
+    @bolt_app.action("response_type_selection")
+    def handle_response_type_selection(ack, body, client, logger):
+        ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
+        value = body["actions"][0]["selected_option"]["value"]
+        state.set_prompt_response_type(value)
+        labels = {"image": "Photo only", "text": "Text only", "any": "Any (photo or text)"}
+        label = labels.get(value, value)
+        print(f"[CONTROL PANEL] [{team_id}] Prompt response type set to: {value}")
+        logger.info(f"Prompt response type set: {value}")
+        _publish_home(client, body["user"]["id"], state)
+        _dm_admin(client, body["user"]["id"], f":camera: *Prompt type* set to: *{label}*")
 
     @bolt_app.action("admin_assign_prompt_creator")
     def handle_admin_assign_prompt_creator(ack, body, client, logger):

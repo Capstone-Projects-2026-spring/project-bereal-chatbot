@@ -224,7 +224,8 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                                 prefix_text=f"Prompt of the day:",
                                 topic=topic,
                                 active_tags=state.get_active_tags() or None,
-                                footnote_text=f"random vibe check | time hit {target_time}"
+                                footnote_text=f"random vibe check | time hit {target_time}",
+                                response_type=state.get_prompt_response_type(),
                             )
                         if ts:
                             state.set_last_prompt_ts(ts)

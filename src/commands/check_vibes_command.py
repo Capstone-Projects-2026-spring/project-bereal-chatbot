@@ -5,6 +5,7 @@ import threading
 import os
 from datetime import datetime
 from datetime import date
+from quickchart import QuickChart
 
 from pymongo import MongoClient
 from services.prompt_service import get_random_prompt_text, mark_prompt_asked
@@ -65,10 +66,16 @@ def databse_Task(mongo_client, payload, respond, botID, client):
         "level": 4
         }
     )
+    qc = QuickChart()
+    qc.width = 800
+    qc.height = 400
+    qc.version = '2.9.4'
     forcedVibes = 0
     userCreatedVibes = 0
     randomVibes = 0
     curVibeID = 0
+    chartLabels = []
+    chartData = []
     for vibe in CurrentDaysVibes:
         if vibe["checkType"] == "forced":
             forcedVibes += 1
@@ -82,23 +89,43 @@ def databse_Task(mongo_client, payload, respond, botID, client):
         vibeReplies = len(vibe["replies"])
         vibeUniqueUsers = len(vibe["unique_users"])
         vibeEngagement = vibe["engagement"]
+        chartLabels.append(f"Vibe #{curVibeID}")
+        chartData.append(vibeEngagement)
+        # msg_block.append({
+        #    "type": "section",
+		#	"text": {
+		#		"type": "mrkdwn",
+		#		"text": f"Vibe #{curVibeID} - {vibe["checkType"]}"
+		#	},
+		#	"accessory": {
+		#		"type": "button",
+		#		"text": {
+		#			"type": "plain_text",
+		#			"text": "More Info",
+		#			"emoji": True
+		#		},
+		#		"value": f"{vibeText}",
+		#		"action_id": "checkvibes_moreInfo"
+		#	}
+        # })
+        qc.config = {
+            "type": "bar",
+            "data": {
+                "labels": chartLabels,
+                "datasets": [{
+                    "label": "Engagement",
+                    "data": chartData
+                }]
+            }
+        }
         msg_block.append({
-            "type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": f"Vibe #{curVibeID}"
-			},
-			"accessory": {
-				"type": "button",
-				"text": {
-					"type": "plain_text",
-					"text": "More Info",
-					"emoji": True
-				},
-				"value": f"{vibeText}",
-				"action_id": "checkvibes_moreInfo"
-			}
+            {
+			"type": "image",
+			"image_url": qc.get_url(),
+			"alt_text": "delicious tacos"
+		    }
         })
+        
     #    lines.append(f"\nVibe Prompt: {vibeText}\n  • Time Released {vibeTime}\n • Replies: {vibeReplies}\n • # of Unique Repliers: {vibeUniqueUsers} \n •  Vibe Total Engagement: {vibeEngagement}")
 
     msg_block.append({

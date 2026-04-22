@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-description: Frontend API Design Docuement
+title: Frontend API 
 ---
 
 Frontend API - Design Document - Part II API

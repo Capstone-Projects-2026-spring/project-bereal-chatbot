@@ -57,7 +57,12 @@
     <span class="k">except</span> <span class="ne">ConnectionError</span><span class="p">:</span>
         <span class="n">respond</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Installations collection not found.&quot;</span><span class="p">)</span>
     <span class="n">channel</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;channel_id&quot;</span><span class="p">)</span>  <span class="c1"># default to the channel where command was used</span>
-    <span class="n">team_id</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;team_id&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;authorizations&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;team_id&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">team_id</span> <span class="o">=</span> <span class="p">(</span> 
+        <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;team_id&quot;</span><span class="p">)</span> 
+        <span class="ow">or</span> <span class="p">(</span><span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;authorizations&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;team_id&quot;</span><span class="p">)</span> 
+        <span class="ow">or</span> <span class="kc">None</span>
+    <span class="p">)</span>
+   
     <span class="n">team_name</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">team_id</span><span class="p">:</span>
         <span class="n">record</span> <span class="o">=</span> <span class="n">installations_col</span><span class="o">.</span><span class="n">find_one</span><span class="p">({</span><span class="s2">&quot;team_id&quot;</span><span class="p">:</span> <span class="n">team_id</span><span class="p">})</span>

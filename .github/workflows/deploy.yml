@@ -57,10 +57,13 @@ jobs:
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
       - name: Generate OpenAPI Spec From Code
         run: python generate_openapi.py
+
+      - name: Generate Sphinx Internal Contracts Docs
+        run: python documentation/scripts/build_internal_contracts_docs.py
 
       - name: Generate Dependencies Page
         if: github.repository_owner == 'applebaumian'

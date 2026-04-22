@@ -48,6 +48,68 @@ You can also add the chatbot to your own workspace: [VibeCheck Bot](https://work
 
 Running the chatbot locally is not necessary, since it is already deployed on Railway. Use the slash command "/help" in # bot-test channel to see what the bot can do and check out the docusaurus for additional details.
 
+If you still want to run the chatbot locally, here are the following instructions:
+
+1. Prerequisites
+
+    - Python 3.10+
+    - Access to a Slack workspace where you can configure an app
+    - A MongoDB connection string
+    - Optional: `GROQ_API_KEY` for LLM-powered reactions/features
+
+2. Clone the repo and open it
+
+    `git clone https://github.com/capstone-projects-2026-spring/project-bereal-chatbot.git`
+
+    `cd project-bereal-chatbot`
+
+3. Create and activate a virtual environment
+
+    Windows (PowerShell):
+    `python -m venv .venv`
+    `.\.venv\Scripts\Activate.ps1`
+
+    macOS/Linux:
+    `python3 -m venv .venv`
+    `source .venv/bin/activate`
+
+4. Install dependencies
+
+    `python -m pip install -r requirements-dev.txt`
+
+5. Create a `.env` file in the project root with at least:
+
+    `SLACK_BOT_TOKEN=your_xoxb_token`
+    `SLACK_SIGNING_SECRET=your_signing_secret`
+    `MONGO_URI=your_mongodb_connection_string`
+
+    Optional values:
+    `DEFAULT_CHANNEL=#bot-test`
+    `PORT=8080`
+    `GROQ_API_KEY=your_groq_api_key`
+    `LLM_REACTIONS_ENABLED=true`
+    `LLM_REACTIONS_PROBABILITY=0.5`
+
+6. Start the bot
+
+    `python run.py`
+
+7. Expose your local server to Slack (required for local event callbacks)
+
+    Use a tunnel such as ngrok or Cloudflare Tunnel and map it to your local bot port (default 8080).
+
+8. Configure your Slack app URLs
+
+    Set Request URL for Event Subscriptions to:
+    `https://<your-public-url>/slack/events`
+
+    If using OAuth install flow, also configure:
+    `https://<your-public-url>/slack/oauth_redirect`
+
+9. Verify in Slack
+
+    Run `/help` in your test channel. If the bot responds, your local setup is working.
+
 Any and all critiques will be greatly appreciated. Have fun testing! 🙂
 
 ## Contact Information

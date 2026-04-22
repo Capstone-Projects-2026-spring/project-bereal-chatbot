@@ -22,15 +22,20 @@ class BotState:
     _active_tags: Set[str] = field(default_factory=set)  # empty = all tags allowed
     _last_prompt_ts: Optional[str] = None
     _reminder_sent: bool = False
-    _reminder_delay_minutes: int = 10
+    _reminder_enabled: bool = False
     _pending_custom_prompt: Optional[str] = None  # user-authored prompt text
     _user_prompt_creator_used_today: bool = False  # only invite one user to create a prompt
     _social_connector_used_today: bool = False  # only run social connector once per day
+    _mentor_checkin_week: Optional[int] = None  # ISO week number of last mentor check-in sent
+    _prompt_response_type: str = "image"  # "image", "text", or "any"
+    _last_prompt_channel: Optional[str] = None  # channel where the last prompt was posted
 
-    def set_last_prompt_ts(self, ts: Optional[str]) -> None:
+    def set_last_prompt_ts(self, ts: Optional[str], channel: Optional[str] = None) -> None:
         with self._lock:
             self._last_prompt_ts = ts
             self._reminder_sent = False
+            if channel:
+                self._last_prompt_channel = channel
 
     def get_last_prompt_ts(self) -> Optional[str]:
         with self._lock:
@@ -44,13 +49,13 @@ class BotState:
         with self._lock:
             self._reminder_sent = value
 
-    def get_reminder_delay_minutes(self) -> int:
+    def get_reminder_enabled(self) -> bool:
         with self._lock:
-            return self._reminder_delay_minutes
+            return self._reminder_enabled
 
-    def set_reminder_delay_minutes(self, value: int) -> None:
+    def set_reminder_enabled(self, value: bool) -> None:
         with self._lock:
-            self._reminder_delay_minutes = value
+            self._reminder_enabled = value
 
     def set_active_tags(self, tags: Set[str]) -> None:
         with self._lock:
@@ -174,6 +179,30 @@ class BotState:
     def get_social_connector_used_today(self) -> bool:
         with self._lock:
             return self._social_connector_used_today
+
+    def set_mentor_checkin_week(self, week: Optional[int]) -> None:
+        with self._lock:
+            self._mentor_checkin_week = week
+
+    def get_mentor_checkin_week(self) -> Optional[int]:
+        with self._lock:
+            return self._mentor_checkin_week
+
+    def set_prompt_response_type(self, value: str) -> None:
+        with self._lock:
+            self._prompt_response_type = value
+
+    def get_prompt_response_type(self) -> str:
+        with self._lock:
+            return self._prompt_response_type
+
+    def set_last_prompt_channel(self, channel: Optional[str]) -> None:
+        with self._lock:
+            self._last_prompt_channel = channel
+
+    def get_last_prompt_channel(self) -> Optional[str]:
+        with self._lock:
+            return self._last_prompt_channel
 
 
 def get_team_id(body: dict) -> Optional[str]:

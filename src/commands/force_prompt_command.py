@@ -9,6 +9,7 @@ from services.mongo_service import get_tracker
 def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=None, prefix_text=None, footnote_text=None, active_tags=None):
     """
     Pull a random prompt from the prompt service and post it to Slack.
+    Returns the message timestamp (ts) so callers can track it for reminders.
     """
     prompt_id, prompt_text, tags = get_random_prompt_text(response_type=response_type, active_tags=active_tags)
     mark_prompt_asked(prompt_id)
@@ -20,17 +21,15 @@ def _post_random_prompt(client, channel="#bot-test", team_id="", response_type=N
     message = f">{prompt_text}"
     if prefix_text:
         message = f"### **{prefix_text.upper()}**\n\n>{prompt_text}"
-        
+
     if footnote_text:
         message += f"\n\n\n```{footnote_text}```"
-   
-    msg_block = randomize_message_block(message)
-    
-    
-    client.chat_postMessage(channel=channel, blocks=msg_block, text=message)
 
-   # client.chat_postMessage(channel=channel, text=message)
+    msg_block = randomize_message_block(message)
+
+    resp = client.chat_postMessage(channel=channel, blocks=msg_block, text=message)
     logging.info(f"Force prompt posted prompt_id={prompt_id} to {channel}")
+    return resp.get("ts")
 
 
 def register_force_prompt_command(bolt_app, state_manager=None):
@@ -69,7 +68,7 @@ def register_force_prompt_command(bolt_app, state_manager=None):
                 channel = p
 
         try:
-            _post_random_prompt(
+            ts = _post_random_prompt(
                 client=client,
                 channel=channel,
                 team_id=team_id,
@@ -78,6 +77,9 @@ def register_force_prompt_command(bolt_app, state_manager=None):
                 footnote_text="forced vibe check",
                 active_tags=active_tags,
             )
+            if ts and state_manager and team_id:
+                state_manager.get_state(team_id).set_last_prompt_ts(ts, channel=channel)
+                print(f"[FORCEPROMPT] [{team_id}] Prompt ts={ts} saved to state, channel={channel}")
             respond(f"✅ Posted a prompt to {channel}.")
         except Exception as e:
             logging.exception("Error in /forceprompt")

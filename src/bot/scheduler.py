@@ -13,6 +13,7 @@ _USER_PROMPT_INVITE_TIME = "09:15:00 AM"  # time to DM the randomly selected use
 _USER_PROMPT_INVITE_PROBABILITY = 0.3    # 30% chance each day
 _SOCIAL_CONNECTOR_TIME = "02:00:00 PM"   # time to post social connector message
 _SOCIAL_CONNECTOR_PROBABILITY = 0.5      # 50% chance each day
+_MENTOR_CHECKIN_TIME = "09:00:00 AM"     # time to send weekly mentor-mentee check-in (Mondays only)
 
 
 
@@ -89,39 +90,60 @@ def _pick_random_channel_user(client, channel: str) -> str | None:
         return None
 
 
+
+_REMINDER_DELAY_SECONDS = 30  # 30 seconds (testing)
+
+
 def _send_reminders(client, channel: str, prompt_ts: str) -> None:
-    """DM every channel member who hasn't posted since the vibe check prompt."""
-    print(f"[REMINDER] Starting reminder send — channel={channel} prompt_ts={prompt_ts}")
+    """DM every channel member who hasn't responded 30 minutes after the vibe check prompt."""
+    try:
+        bot_user_id = client.auth_test()["user_id"]
+    except Exception:
+        bot_user_id = None
+
     try:
         members = client.conversations_members(channel=channel)["members"]
-        print(f"[REMINDER] Found {len(members)} channel members")
     except Exception as e:
         print(f"[REMINDER] Could not fetch channel members: {e}")
         return
 
+    responded = set()
+
+    # Check thread replies to the prompt message (users who replied in-thread)
+    try:
+        replies = client.conversations_replies(channel=channel, ts=prompt_ts)
+        for m in replies.get("messages", []):
+            if "user" in m and m.get("ts") != prompt_ts:
+                responded.add(m["user"])
+    except Exception as e:
+        print(f"[REMINDER] Could not fetch thread replies: {e}")
+
+    # Also check main channel messages (users who posted directly in the channel)
     try:
         history = client.conversations_history(channel=channel, oldest=prompt_ts, limit=200)
-        responded = {m["user"] for m in history.get("messages", []) if "user" in m}
-        print(f"[REMINDER] {len(responded)} users already responded")
+        for m in history.get("messages", []):
+            if "user" in m:
+                responded.add(m["user"])
     except Exception as e:
         print(f"[REMINDER] Could not fetch channel history: {e}")
-        return
 
     for user_id in members:
         if user_id in responded:
-            print(f"[REMINDER] Skipping {user_id} — already responded")
+            continue
+        if bot_user_id and user_id == bot_user_id:
             continue
         try:
             info = client.users_info(user=user_id)
             if info["user"].get("is_bot") or info["user"].get("id") == "USLACKBOT":
-                print(f"[REMINDER] Skipping {user_id} — is bot")
                 continue
         except Exception:
             pass
         try:
+            dm = client.conversations_open(users=user_id)
+            dm_channel = dm["channel"]["id"]
             client.chat_postMessage(
-                channel=user_id,
-                text="Hey! You missed the vibe check. It's not too late to share how you're doing! :wave:",
+                channel=dm_channel,
+                text="Hey! You're late to VibeCheck :camera: Drop a photo in the channel — it's not too late! :wave:",
             )
             print(f"[REMINDER] Sent reminder DM to {user_id}")
         except Exception as e:
@@ -163,7 +185,7 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                         state.set_daily_target_time(new_time)
                         print(f"[SCHEDULER] [{team_id}] New day — target time reset to: {new_time}")
                         try:
-                            active_client.chat_postMessage(channel=channel, text=f"time set for today is {new_time}")
+                            active_client.chat_postMessage(channel=channel, text=f"!time set for today is {new_time}")
                         except Exception as e:
                             print(f"[SCHEDULER] [{team_id}] Error posting daily reset: {e}")
                     state.set_user_prompt_creator_used_today(False)
@@ -188,18 +210,17 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                         from commands.social_connector import send_social_connector_message
                         send_social_connector_message(active_client, channel, team_id)
 
-                if current_time == "12:00:00 PM":
-                    try:
-                        custom_text = state.get_and_clear_pending_custom_prompt()
-                        if custom_text:
-                            ts = post_custom_prompt(active_client, custom_text, channel=channel, team_id=team_id, prefix_text="PROMPT OF THE DAY:")
-                        else:
-                            topic = state.get_and_clear_pending_topic()
-                            ts = post_csv_prompt(active_client, channel=channel, team_id=team_id, prefix_text="PROMPT OF THE DAY:", topic=topic, active_tags=state.get_active_tags() or None)
-                        if ts:
-                            state.set_last_prompt_ts(ts)
-                    except Exception as e:
-                        print(f"[SCHEDULER] [{team_id}] Error posting 12 PM prompt: {e}")
+                # Mentor-mentee weekly check-in: every Monday at 9:00 AM, once per ISO week
+                if current_time == _MENTOR_CHECKIN_TIME and datetime.now().weekday() == 0:
+                    current_week = datetime.now().isocalendar()[1]
+                    if state.get_mentor_checkin_week() != current_week:
+                        state.set_mentor_checkin_week(current_week)
+                        try:
+                            from commands.mentor_mentee_command import send_weekly_checkin
+                            send_weekly_checkin(active_client, team_id)
+                            print(f"[SCHEDULER] [{team_id}] Sent mentor-mentee weekly check-in (week {current_week})")
+                        except Exception as e:
+                            print(f"[SCHEDULER] [{team_id}] Error sending mentor check-in: {e}")
 
                 target_time = _get_target_time(state)
                 if current_time.endswith(":00 AM") or current_time.endswith(":00 PM"):
@@ -225,28 +246,25 @@ def run_time_checker(state_manager, fallback_client, default_channel: str) -> No
                                 prefix_text=f"Prompt of the day:",
                                 topic=topic,
                                 active_tags=state.get_active_tags() or None,
-                                footnote_text=f"random vibe check | time hit {target_time}"
+                                footnote_text=f"random vibe check | time hit {target_time}",
+                                response_type=state.get_prompt_response_type(),
                             )
                         if ts:
-                            state.set_last_prompt_ts(ts)
+                            state.set_last_prompt_ts(ts, channel=channel)
                         print(f"\n[SCHEDULER] [{team_id}] Time hit: {target_time}")
                     except Exception as e:
                         print(f"[SCHEDULER] [{team_id}] Error posting time hit prompt: {e}")
 
                 prompt_ts = state.get_last_prompt_ts()
-                if not prompt_ts:
-                    pass  # no prompt posted yet
-                elif state.get_reminder_sent():
-                    pass  # already reminded
-                else:
-                    delay_seconds = state.get_reminder_delay_minutes() * 60
+                if prompt_ts and not state.get_reminder_sent():
                     elapsed = time.time() - float(prompt_ts)
-                    if elapsed >= delay_seconds:
-                        print(f"[REMINDER] [{team_id}] {state.get_reminder_delay_minutes()} min elapsed — sending reminder DMs")
-                        _send_reminders(active_client, channel, prompt_ts)
+                    if not state.get_reminder_enabled():
+                        print(f"[REMINDER] [{team_id}] Reminders disabled — skipping (elapsed={elapsed:.0f}s)")
+                    elif elapsed >= _REMINDER_DELAY_SECONDS:
+                        prompt_channel = state.get_last_prompt_channel() or channel
+                        print(f"[REMINDER] [{team_id}] {elapsed:.0f}s elapsed — sending reminder DMs to channel {prompt_channel}")
+                        _send_reminders(active_client, prompt_channel, prompt_ts)
                         state.set_reminder_sent(True)
-                    elif int(elapsed) % 15 == 0 and int(elapsed) > 0:
-                        print(f"[REMINDER] [{team_id}] waiting... {int(elapsed)}s elapsed of {delay_seconds}s needed")
 
             time.sleep(1)
 

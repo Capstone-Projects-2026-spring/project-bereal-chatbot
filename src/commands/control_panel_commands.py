@@ -48,6 +48,12 @@ _DAY_OPTIONS = [
     for d in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 ]
 
+_RESPONSE_TYPE_OPTIONS = [
+    {"text": {"type": "plain_text", "text": "Photo only (BeReal style)", "emoji": True}, "value": "image"},
+    {"text": {"type": "plain_text", "text": "Text only", "emoji": True}, "value": "text"},
+    {"text": {"type": "plain_text", "text": "Any (photo or text)", "emoji": True}, "value": "any"},
+]
+
 
 def _build_tag_options():
     topics = get_available_topics()
@@ -64,7 +70,7 @@ def _build_topic_options():
 def _build_home_view(selected_preset=None, selected_mode=None,
                      random_start=None, random_end=None, static_time=None,
                      active_days=None, pending_topic=None, active_tags=None,
-                     reminder_delay_minutes=10) -> dict:
+                     reminder_enabled=False, prompt_response_type="image") -> dict:
     mode_initial = next(
         (opt for opt in _MODE_OPTIONS if opt["value"] == selected_mode),
         None
@@ -259,29 +265,62 @@ def _build_home_view(selected_preset=None, selected_mode=None,
             ]
         },
         {"type": "divider"},
+    ]
+
+    reminder_block = {
+        "type": "actions",
+        "elements": [
+            {
+                "type": "checkboxes",
+                "action_id": "reminder_toggle",
+                "options": [
+                    {
+                        "text": {"type": "plain_text", "text": "Send DM reminders 30 min after a prompt posts"},
+                        "value": "reminder_enabled"
+                    }
+                ]
+            }
+        ]
+    }
+    if reminder_enabled:
+        reminder_block["elements"][0]["initial_options"] = [
+            {
+                "text": {"type": "plain_text", "text": "Send DM reminders 30 min after a prompt posts"},
+                "value": "reminder_enabled"
+            }
+        ]
+
+    response_type_initial = next(
+        (opt for opt in _RESPONSE_TYPE_OPTIONS if opt["value"] == prompt_response_type),
+        _RESPONSE_TYPE_OPTIONS[0]
+    )
+
+    blocks += [
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": f"*6. Reminder Delay*\nSend DM reminders this many minutes after a prompt posts. Currently: *{reminder_delay_minutes} min*"}
+            "text": {"type": "mrkdwn", "text": "*6. Late Response Reminders*\nDM users who haven't responded 30 minutes after a vibe check posts."}
+        },
+        reminder_block,
+        {"type": "divider"},
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*7. Prompt Type*\nChoose whether prompts ask for a photo, a text response, or either."}
         },
         {
             "type": "actions",
             "elements": [
                 {
-                    "type": "static_select",
-                    "placeholder": {"type": "plain_text", "text": "Select delay..."},
-                    "initial_option": {"text": {"type": "plain_text", "text": f"{reminder_delay_minutes} minutes"}, "value": str(reminder_delay_minutes)},
-                    "options": [
-                        {"text": {"type": "plain_text", "text": f"{m} minutes"}, "value": str(m)}
-                        for m in [1, 2, 5, 10, 15, 20, 30, 45, 60]
-                    ],
-                    "action_id": "reminder_delay_selection"
+                    "type": "radio_buttons",
+                    "action_id": "response_type_selection",
+                    "initial_option": response_type_initial,
+                    "options": _RESPONSE_TYPE_OPTIONS,
                 }
             ]
         },
         {"type": "divider"},
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*7. Assign Prompt Creator*\nPick a user to DM them the prompt creation invite! They will have 5 minutes to submit."}
+            "text": {"type": "mrkdwn", "text": "*8. Assign Prompt Creator*\nPick a user to DM them the prompt creation invite! They will have 5 minutes to submit."}
         },
         {
             "type": "actions",
@@ -310,7 +349,8 @@ def _publish_home(client, user_id, state):
             active_days=state.get_active_days(),
             pending_topic=state._pending_topic,
             active_tags=state.get_active_tags(),
-            reminder_delay_minutes=state.get_reminder_delay_minutes(),
+            reminder_enabled=state.get_reminder_enabled(),
+            prompt_response_type=state.get_prompt_response_type(),
         )
     )
 
@@ -474,17 +514,33 @@ def register_control_panel(bolt_app, state_manager):
         _publish_home(client, body["user"]["id"], state)
         _dm_admin(client, body["user"]["id"], f":label: *Topic filter* set to: {tag_list}")
 
-    @bolt_app.action("reminder_delay_selection")
-    def handle_reminder_delay_selection(ack, body, client, logger):
+    @bolt_app.action("reminder_toggle")
+    def handle_reminder_toggle(ack, body, client, logger):
         ack()
         team_id = get_team_id(body)
         state = state_manager.get_state(team_id)
-        value = int(body["actions"][0]["selected_option"]["value"])
-        state.set_reminder_delay_minutes(value)
-        print(f"[CONTROL PANEL] [{team_id}] Reminder delay set to: {value} min")
-        logger.info(f"Reminder delay set: {value} min")
+        selected = body["actions"][0].get("selected_options", [])
+        enabled = any(opt["value"] == "reminder_enabled" for opt in selected)
+        state.set_reminder_enabled(enabled)
+        status = "enabled" if enabled else "disabled"
+        print(f"[CONTROL PANEL] [{team_id}] Late response reminders {status}")
+        logger.info(f"Reminder toggle: {status}")
         _publish_home(client, body["user"]["id"], state)
-        _dm_admin(client, body["user"]["id"], f":bell: *Reminder delay* set to `{value} minutes`")
+        _dm_admin(client, body["user"]["id"], f":bell: *Late response reminders* {status}")
+
+    @bolt_app.action("response_type_selection")
+    def handle_response_type_selection(ack, body, client, logger):
+        ack()
+        team_id = get_team_id(body)
+        state = state_manager.get_state(team_id)
+        value = body["actions"][0]["selected_option"]["value"]
+        state.set_prompt_response_type(value)
+        labels = {"image": "Photo only", "text": "Text only", "any": "Any (photo or text)"}
+        label = labels.get(value, value)
+        print(f"[CONTROL PANEL] [{team_id}] Prompt response type set to: {value}")
+        logger.info(f"Prompt response type set: {value}")
+        _publish_home(client, body["user"]["id"], state)
+        _dm_admin(client, body["user"]["id"], f":camera: *Prompt type* set to: *{label}*")
 
     @bolt_app.action("admin_assign_prompt_creator")
     def handle_admin_assign_prompt_creator(ack, body, client, logger):

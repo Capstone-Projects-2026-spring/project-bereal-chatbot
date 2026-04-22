@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 from pymongo import MongoClient
 from services.mongo_service import get_tracker
-from services.llm_service import get_reaction_emoji
+from services.llm_service import get_reaction_emoji, get_reply_message
 
 
 class SlackNameCache:
@@ -108,7 +108,9 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
 
         # Count this as a response to the active prompt in this channel,
         # but only for real user messages (not bot posts or subtypes).
-        if user_id and not event.get("subtype"):
+        # Exclude bot_id to skip reactions on messages from bots (including this bot)
+        # Allow "file_share" subtype so image posts still get reactions/replies.
+        if user_id and (not event.get("subtype") or event.get("subtype") == "file_share") and not event.get("bot_id"):
             tracker = get_tracker()
             if tracker and team_id:
                 tracker.record_response(channel_id, team_id)
@@ -118,12 +120,30 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
                 if random.random() < cfg.llm_reactions_probability:
                     text = event.get("text") or ""
                     timestamp = event.get("ts")
-                    # Validate we have both text and timestamp before calling LLM
-                    if text and timestamp:
-                        emoji = get_reaction_emoji(text)
+                    # Extract image URLs from files attached to the message
+                    image_urls = [
+                        f["url_private"]
+                        for f in event.get("files", [])
+                        if f.get("mimetype", "").startswith("image/") and f.get("url_private")
+                    ]
+                    # Resolve the workspace bot token up front (needed for image download + reactions)
+                    reaction_token = None
+                    if team_id:
+                        record = installations_col.find_one({"team_id": team_id})
+                        if record:
+                            reaction_token = record.get("bot_token")
+                    # Validate we have content (text or images) and a timestamp before calling LLM
+                    if (text or image_urls) and timestamp:
+                        emoji = get_reaction_emoji(
+                            text,
+                            image_urls=image_urls,
+                            slack_token=reaction_token or cfg.token,
+                        )
                         if emoji:
                             try:
-                                client.reactions_add(
+                                from slack_sdk import WebClient as _WebClient
+                                reaction_client = _WebClient(token=reaction_token or cfg.token)
+                                reaction_client.reactions_add(
                                     channel=channel_id,
                                     timestamp=timestamp,
                                     name=emoji
@@ -131,3 +151,47 @@ def install_structured_message_logging(app, client, cfg=None, log_file: str = No
                                 print(f"[REACTION] Added emoji :{emoji}: to message in {cache.channel_name(channel_id)}")
                             except Exception as e:
                                 print(f"[REACTION] Failed to add emoji reaction ({emoji}): {e}")
+
+            # Send an LLM-generated reply (if enabled and probabilistically)
+            if cfg and cfg.llm_replies_enabled:
+                if random.random() < cfg.llm_replies_probability:
+                    text = event.get("text") or ""
+                    timestamp = event.get("ts")
+                    # Extract image URLs from files attached to the message
+                    image_urls = [
+                        f["url_private"]
+                        for f in event.get("files", [])
+                        if f.get("mimetype", "").startswith("image/") and f.get("url_private")
+                    ]
+                    # Resolve the workspace bot token
+                    reply_token = None
+                    if team_id:
+                        record = installations_col.find_one({"team_id": team_id})
+                        if record:
+                            reply_token = record.get("bot_token")
+                    if (text or image_urls) and timestamp:
+                        reply_text = get_reply_message(
+                            text,
+                            image_urls=image_urls,
+                            slack_token=reply_token or cfg.token,
+                        )
+                        if reply_text:
+                            try:
+                                from slack_sdk import WebClient as _WebClient
+                                reply_client = _WebClient(token=reply_token or cfg.token)
+                                reply_client.chat_postMessage(
+                                    channel=channel_id,
+                                    text=reply_text,
+                                )
+                                print(f"[REPLY] Sent reply in {cache.channel_name(channel_id)}")
+                            except Exception as e:
+                                print(f"[REPLY] Failed to send reply: {e}")
+
+        # check + announce streaks for real user messages
+        if user_id and not event.get("bot_id") and channel_id:
+            try:
+                from services.streak_service import check_and_announce_streak
+                check_and_announce_streak(user_id, cache.user_name(user_id) or user_id, client, channel_id)
+            except Exception as e:
+                print(f"[streaks] {e}")
+

@@ -21,7 +21,10 @@ from commands.control_panel_commands import register_control_panel
 from commands.prompt_stats_command import register_prompt_stats_command
 from commands.pick_topic_command import register_pick_topic_command
 from commands.onboarding import register_onboarding
+from commands.social_connector import register_social_connector_command
 from commands.user_prompt_command import register_user_prompt_handlers
+from commands.check_vibes_command import register_check_vibes_command
+from commands.mentor_mentee_command import register_mentor_mentee_command
 from app_logging.structured_logger import install_structured_message_logging
 from services.mongo_service import init_tracker, init_user_interests
 from services.prompt_service import load_prompts_df
@@ -54,6 +57,7 @@ def make_authorize(cfg, mongo_uri):
             )
 
     return authorize
+from services.streak_service import register_streak_command
 
 
 def main():
@@ -71,7 +75,7 @@ def main():
 
     try:
         auth_info = client.auth_test()
-        print(f"[BOOT] Bot username: @{auth_info['user']} (team: {auth_info['team']})")
+        print(f"[BOOT] Bot username: @{auth_info['user']} (team: {auth_info['team']}) (Bot UserID: {auth_info['user_id']})")
     except Exception as e:
         print(f"[BOOT] Could not fetch bot username: {e}")
     bolt_app = App(authorize=authorize, signing_secret=cfg.signing_secret, ignoring_self_events_enabled=False)
@@ -87,11 +91,14 @@ def main():
     register_prompt_stats_command(bolt_app)
     register_pick_topic_command(bolt_app, state_manager)
     register_onboarding(bolt_app, state_manager)
+    register_social_connector_command(bolt_app)
     register_user_prompt_handlers(bolt_app, state_manager)
+    register_check_vibes_command(bolt_app, state_manager, auth_info['user_id'])
+    register_mentor_mentee_command(bolt_app, state_manager)
 
     # Online message to primary workspace
     try:
-        client.chat_postMessage(channel=cfg.default_channel, text="bot online")
+        client.chat_postMessage(channel=cfg.default_channel, text="bot online!!")
     except Exception as e:
         print(f"Error posting 'bot online' message: {e}")
 

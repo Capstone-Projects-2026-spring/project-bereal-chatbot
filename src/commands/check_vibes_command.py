@@ -255,6 +255,54 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
             "text": f"\n## Vibe Prompt:\n{vibePrompt}\n{vibeMatch}{vibeType}\n",
             }
         )
+        msg_block.append({
+			"type": "divider"
+		}
+        )
+        localTime = datetime.fromisoformat(vibeTime).astimezone()
+        avgResponseTime = 0
+        chartVibeData = []
+        chartVibeLabels = []
+        vibeReplyID = 0
+        for reply in vibe["replies"]:
+            avgResponseTime += reply.get("timeBetweenVibe")
+            chartVibeData.append(reply.get("timeBetweenVibe"))
+            vibeReplyID += 1
+            chartVibeLabels.append(f"Reply #{vibeReplyID}")
+
+        avgResponseTime = (avgResponseTime / vibeReplies)
+        msg_block.append({
+            "type": "markdown",
+            "text": f"\n### Vibe Information:\n • Time Sent: {localTime.strftime("%I:%M:%S %p")} {localTime.tzinfo}\n • Unique Users: {vibeUniqueUsers}\n • Replies: {vibeReplies}\n • Average Time To Reply: {avgResponseTime} seconds\n • Engagement Score: {vibeEngagement}",
+            }
+        )
+
+        chartVibeConfig = {
+            "type": "bar",
+            "data": {
+                "labels": chartVibeLabels,
+                "datasets": [{
+                    "label": "Response Time (seconds)",
+                    "data": chartVibeData
+                }]
+            }
+        }
+
+        chartVibeParams = {
+            'chart' : json.dumps(chartVibeConfig),
+            'width' : 1200,
+            'height' : 400,
+            'backgroundColor': 'white',
+        }
+
+        msg_block.append(
+            {
+            "type": "image",
+            "image_url": 'https://quickchart.io/chart?%s' % urlencode(chartVibeParams),
+            "alt_text": "Response Time Chart, how fast do users respond."
+            }
+        )
+        # TIME IT WAS SENT, #OF UNIQUE USERS, #OF REPLIES, AVERAGE TIME TO RESPOND, GRAPH TO SHOW THE TIME TO RESPOND.
 
  #   lines.append(f"\nRandom Vibes: {randomVibes}\nForced Vibes: {forcedVibes}\nUser-Created Vibes: {userCreatedVibes}\n")
  #   respond("\n".join(lines))

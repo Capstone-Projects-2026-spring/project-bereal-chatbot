@@ -1,0 +1,7 @@
+src.commands.check\_vibes\_command module
+=========================================
+
+.. automodule:: src.commands.check_vibes_command
+   :members:
+   :show-inheritance:
+   :undoc-members:

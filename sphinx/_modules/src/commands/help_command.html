@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>src.commands.help_command &#8212; VibeCheck 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for src.commands.help_command</h1><div class="highlight"><pre>
+<span></span><span class="c1"># src/commands/help_command.py</span>
+
+<span class="n">_HELP_TEXT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">*Vibe Check Bot — Setup &amp; Usage Guide*</span>
+
+<span class="s2">*Step 1: Add the bot to your channel*</span>
+<span class="s2">Go to the channel you want the bot to post in and type:</span>
+<span class="s2">`/invite @VibeCheck`</span>
+<span class="s2">The bot must be a member of the channel before it can post there.</span>
+
+<span class="s2">*Step 2: Set the active channel*</span>
+<span class="s2">Run this command in any channel:</span>
+<span class="s2">`/setchannel #your-channel-name`</span>
+<span class="s2">This tells the bot where to send daily prompts.</span>
+
+<span class="s2">*Step 3: Configure the bot via the Control Panel*</span>
+<span class="s2">Open the bot&#39;s *App Home* tab (click the bot&#39;s name in the sidebar).</span>
+<span class="s2">From there you can:</span>
+
+<span class="s2">• *Mode* — choose how the daily prompt time is picked:</span>
+<span class="s2">  - *Random Time* — picks a random time within your start/end range each day</span>
+<span class="s2">  - *Preset Time Select* — pick from a list of preset times</span>
+<span class="s2">  - *Static Set Time* — type in a specific time that repeats every day</span>
+
+<span class="s2">• *Random Time Range* — set the start and end window for random mode (e.g. `09:30:00 AM` to `05:00:00 PM`)</span>
+
+<span class="s2">• *Preset Times* — select a fixed time from the dropdown</span>
+
+<span class="s2">• *Static Set Time* — type an exact time in `HH:MM:SS AM/PM` format (e.g. `03:00:00 PM`)</span>
+
+<span class="s2">• *Active Days* — check the days you want the bot to post (uncheck days to skip them)</span>
+
+<span class="s2">*Other Commands*</span>
+<span class="s2">`/forceprompt` — immediately post a random prompt to the current channel</span>
+<span class="s2">`/forceprompt #channel-name` — post a prompt to a specific channel</span>
+<span class="s2">`/connect` — run the social connector now in the current channel</span>
+<span class="s2">`/setchannel #channel-name` — change the active channel</span>
+<span class="s2">`/vibestatus` — show current bot configuration</span>
+<span class="s2">`/picktags` — set or update your personal topic interest tags</span>
+<span class="s2">`/connect` — set or update your personal topic interest tags</span>
+<span class="s2">`/help` — show this message</span>
+
+<span class="s2">*User-Created Prompts*</span>
+<span class="s2">Once a day, the bot may randomly DM a channel member and invite them to write that day&#39;s prompt.</span>
+<span class="s2">You&#39;ll have *5 minutes* to submit — pick a topic (required) and optionally add your own custom text.</span>
+<span class="s2">Admins can also manually assign any user as prompt creator from the *Control Panel* (App Home).</span>
+
+<span class="s2">*Social Connector*</span>
+<span class="s2">Each afternoon the bot may pair two teammates who share common interest tags and post a friendly</span>
+<span class="s2">intro message in the main channel to help them get to know each other.</span>
+<span class="s2">Set your interest tags with `/picktags` or during onboarding.</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="register_help_command">
+<a class="viewcode-back" href="../../../_generated/src.commands.help_command.html#src.commands.help_command.register_help_command">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_help_command</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">):</span>
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;/help&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_help</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">respond</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">respond</span><span class="p">(</span><span class="n">_HELP_TEXT</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">VibeCheck</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">API Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_generated/modules.html">src</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

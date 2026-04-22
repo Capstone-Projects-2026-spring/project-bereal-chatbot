@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>src.commands.control_panel_commands &#8212; VibeCheck 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for src.commands.control_panel_commands</h1><div class="highlight"><pre>
+<span></span><span class="c1"># src/commands/control_panel_commands.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">services.time_library</span><span class="w"> </span><span class="kn">import</span> <span class="n">preSet_time_library</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">services.prompt_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_available_topics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bot.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_team_id</span>
+
+<span class="n">_TIME_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;%I:%M:%S %p&quot;</span>  <span class="c1"># e.g. 09:15:00 AM</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_time</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return parsed datetime if value matches HH:MM:SS AM/PM, else None.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">_TIME_FORMAT</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<span class="n">_PRESET_OPTIONS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;09:30:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_1&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;09:35:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_2&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;09:40:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_3&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;09:45:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_4&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;09:50:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_5&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;09:55:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_6&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:00:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_7&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:05:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_8&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:10:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_9&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:15:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_10&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:20:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_11&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:25:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_12&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:30:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_13&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:35:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_14&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:40:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_15&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:45:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_16&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:50:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;time_17&quot;</span><span class="p">},</span>
+<span class="p">]</span>
+
+<span class="n">_MODE_OPTIONS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Random Time&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;mode_random&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Preset Time Select&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;mode_preset&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Static Set Time&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;mode_static&quot;</span><span class="p">},</span>
+<span class="p">]</span>
+
+<span class="n">_PRESET_VALUE_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;time_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">18</span><span class="p">)}</span>
+
+
+<span class="n">_DAY_OPTIONS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Monday&quot;</span><span class="p">,</span> <span class="s2">&quot;Tuesday&quot;</span><span class="p">,</span> <span class="s2">&quot;Wednesday&quot;</span><span class="p">,</span> <span class="s2">&quot;Thursday&quot;</span><span class="p">,</span> <span class="s2">&quot;Friday&quot;</span><span class="p">,</span> <span class="s2">&quot;Saturday&quot;</span><span class="p">,</span> <span class="s2">&quot;Sunday&quot;</span><span class="p">]</span>
+<span class="p">]</span>
+
+<span class="n">_RESPONSE_TYPE_OPTIONS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Photo only (BeReal style)&quot;</span><span class="p">,</span> <span class="s2">&quot;emoji&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Text only&quot;</span><span class="p">,</span> <span class="s2">&quot;emoji&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Any (photo or text)&quot;</span><span class="p">,</span> <span class="s2">&quot;emoji&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;any&quot;</span><span class="p">},</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_tag_options</span><span class="p">():</span>
+    <span class="n">topics</span> <span class="o">=</span> <span class="n">get_available_topics</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">}</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_topic_options</span><span class="p">():</span>
+    <span class="n">topics</span> <span class="o">=</span> <span class="n">get_available_topics</span><span class="p">()</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;(any topic)&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;__none__&quot;</span><span class="p">}]</span>
+    <span class="n">opts</span> <span class="o">+=</span> <span class="p">[{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">}</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">opts</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_home_view</span><span class="p">(</span><span class="n">selected_preset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selected_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">random_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">static_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">active_days</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pending_topic</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">active_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">reminder_enabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">prompt_response_type</span><span class="o">=</span><span class="s2">&quot;image&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">mode_initial</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">_MODE_OPTIONS</span> <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">selected_mode</span><span class="p">),</span>
+        <span class="kc">None</span>
+    <span class="p">)</span>
+
+    <span class="n">mode_accessory</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;radio_buttons&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">_MODE_OPTIONS</span><span class="p">,</span>
+        <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;mode_selection&quot;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">mode_initial</span><span class="p">:</span>
+        <span class="n">mode_accessory</span><span class="p">[</span><span class="s2">&quot;initial_option&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode_initial</span>
+
+    <span class="k">if</span> <span class="n">active_days</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">active_days</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Monday&quot;</span><span class="p">,</span> <span class="s2">&quot;Tuesday&quot;</span><span class="p">,</span> <span class="s2">&quot;Wednesday&quot;</span><span class="p">,</span> <span class="s2">&quot;Thursday&quot;</span><span class="p">,</span> <span class="s2">&quot;Friday&quot;</span><span class="p">,</span> <span class="s2">&quot;Saturday&quot;</span><span class="p">,</span> <span class="s2">&quot;Sunday&quot;</span><span class="p">}</span>
+    <span class="n">day_initial</span> <span class="o">=</span> <span class="p">[</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">_DAY_OPTIONS</span> <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">active_days</span><span class="p">]</span>
+
+    <span class="n">tag_options</span> <span class="o">=</span> <span class="n">_build_tag_options</span><span class="p">()</span>
+    <span class="n">tag_initial</span> <span class="o">=</span> <span class="p">[</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">tag_options</span> <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">active_tags</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">())]</span>
+
+    <span class="n">topic_options</span> <span class="o">=</span> <span class="n">_build_topic_options</span><span class="p">()</span>
+    <span class="n">topic_initial</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">topic_options</span> <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="n">pending_topic</span> <span class="ow">or</span> <span class="s2">&quot;__none__&quot;</span><span class="p">)),</span>
+        <span class="n">topic_options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --- always-visible blocks ---</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;header&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Vibe Check Bot Settings&quot;</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;*1. Select Operation Mode*&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;accessory&quot;</span><span class="p">:</span> <span class="n">mode_accessory</span>
+        <span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="c1"># --- dynamic time config based on selected mode ---</span>
+    <span class="k">if</span> <span class="n">selected_mode</span> <span class="o">==</span> <span class="s2">&quot;mode_random&quot;</span><span class="p">:</span>
+        <span class="n">start_element</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text_input&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;start_time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;placeholder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;HH:MM:SS AM/PM  e.g. 09:00:00 AM&quot;</span><span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">random_start</span><span class="p">:</span>
+            <span class="n">start_element</span><span class="p">[</span><span class="s2">&quot;initial_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_start</span>
+
+        <span class="n">end_element</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text_input&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;end_time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;placeholder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;HH:MM:SS AM/PM  e.g. 05:00:00 PM&quot;</span><span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">random_end</span><span class="p">:</span>
+            <span class="n">end_element</span><span class="p">[</span><span class="s2">&quot;initial_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_end</span>
+
+        <span class="n">blocks</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;*2. Random Time Range*</span><span class="se">\n</span><span class="s2">Set a window — the bot picks a random time within it each day.&quot;</span><span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dispatch_action&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;element&quot;</span><span class="p">:</span> <span class="n">start_element</span><span class="p">,</span>
+                <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Start Time&quot;</span><span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dispatch_action&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;element&quot;</span><span class="p">:</span> <span class="n">end_element</span><span class="p">,</span>
+                <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;End Time&quot;</span><span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+        <span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">selected_mode</span> <span class="o">==</span> <span class="s2">&quot;mode_preset&quot;</span><span class="p">:</span>
+        <span class="n">preset_initial</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">_PRESET_OPTIONS</span> <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">selected_preset</span><span class="p">),</span>
+            <span class="n">_PRESET_OPTIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">blocks</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;*2. Preset Time*</span><span class="se">\n</span><span class="s2">Pick one of the preset times.&quot;</span><span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;actions&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;static_select&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;placeholder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Select a time...&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;initial_option&quot;</span><span class="p">:</span> <span class="n">preset_initial</span><span class="p">,</span>
+                        <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">_PRESET_OPTIONS</span><span class="p">,</span>
+                        <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;preset_time_selection&quot;</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+        <span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">selected_mode</span> <span class="o">==</span> <span class="s2">&quot;mode_static&quot;</span><span class="p">:</span>
+        <span class="n">static_element</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text_input&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;static_entry&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;placeholder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;HH:MM:SS AM/PM  e.g. 09:15:00 AM&quot;</span><span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">static_time</span><span class="p">:</span>
+            <span class="n">static_element</span><span class="p">[</span><span class="s2">&quot;initial_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">static_time</span>
+
+        <span class="n">blocks</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dispatch_action&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;element&quot;</span><span class="p">:</span> <span class="n">static_element</span><span class="p">,</span>
+                <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;2. Static Set Time&quot;</span><span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+        <span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No mode selected yet — prompt the user</span>
+        <span class="n">blocks</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;_Select a mode above to configure its time settings._&quot;</span><span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+        <span class="p">]</span>
+
+    <span class="c1"># --- always-visible: active days ---</span>
+    <span class="n">blocks</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;*3. Active Days*&quot;</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;actions&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;checkboxes&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;active_days_selection&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;initial_options&quot;</span><span class="p">:</span> <span class="n">day_initial</span><span class="p">,</span>
+                    <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">_DAY_OPTIONS</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="c1"># --- always-visible: tag filter ---</span>
+    <span class="n">tag_filter_block</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;actions&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;checkboxes&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;tag_filter_selection&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">tag_options</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">tag_initial</span><span class="p">:</span>
+        <span class="n">tag_filter_block</span><span class="p">[</span><span class="s2">&quot;elements&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;initial_options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tag_initial</span>
+
+    <span class="n">blocks</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;*4. Topic Filter*</span><span class="se">\n</span><span class="s2">Only send prompts from these tags. Leave all unchecked for any topic.&quot;</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="n">tag_filter_block</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="c1"># --- always-visible: next prompt one-time override ---</span>
+    <span class="n">blocks</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;*5. Next Prompt Override*</span><span class="se">\n</span><span class="s2">Force the next scheduled prompt to use a specific topic. Resets after it fires.&quot;</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;actions&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;static_select&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;placeholder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Pick a topic...&quot;</span><span class="p">},</span>
+                    <span class="s2">&quot;initial_option&quot;</span><span class="p">:</span> <span class="n">topic_initial</span><span class="p">,</span>
+                    <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">topic_options</span><span class="p">,</span>
+                    <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;topic_selection&quot;</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="n">reminder_block</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;actions&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;checkboxes&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;reminder_toggle&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Send DM reminders 30 min after a prompt posts&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;reminder_enabled&quot;</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">reminder_enabled</span><span class="p">:</span>
+        <span class="n">reminder_block</span><span class="p">[</span><span class="s2">&quot;elements&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;initial_options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Send DM reminders 30 min after a prompt posts&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;reminder_enabled&quot;</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+
+    <span class="n">response_type_initial</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">_RESPONSE_TYPE_OPTIONS</span> <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">prompt_response_type</span><span class="p">),</span>
+        <span class="n">_RESPONSE_TYPE_OPTIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">blocks</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;*6. Late Response Reminders*</span><span class="se">\n</span><span class="s2">DM users who haven&#39;t responded 30 minutes after a vibe check posts.&quot;</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="n">reminder_block</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;*7. Prompt Type*</span><span class="se">\n</span><span class="s2">Choose whether prompts ask for a photo, a text response, or either.&quot;</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;actions&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;radio_buttons&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;response_type_selection&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;initial_option&quot;</span><span class="p">:</span> <span class="n">response_type_initial</span><span class="p">,</span>
+                    <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">_RESPONSE_TYPE_OPTIONS</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span><span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;*8. Assign Prompt Creator*</span><span class="se">\n</span><span class="s2">Pick a user to DM them the prompt creation invite! They will have 5 minutes to submit.&quot;</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;actions&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;users_select&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;placeholder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Select a user...&quot;</span><span class="p">},</span>
+                    <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;admin_assign_prompt_creator&quot;</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;home&quot;</span><span class="p">,</span> <span class="s2">&quot;blocks&quot;</span><span class="p">:</span> <span class="n">blocks</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_publish_home</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">views_publish</span><span class="p">(</span>
+        <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">_build_home_view</span><span class="p">(</span>
+            <span class="n">selected_preset</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">get_selected_preset</span><span class="p">(),</span>
+            <span class="n">selected_mode</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">get_selected_mode</span><span class="p">(),</span>
+            <span class="n">random_start</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">get_random_start_time</span><span class="p">(),</span>
+            <span class="n">random_end</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">get_random_end_time</span><span class="p">(),</span>
+            <span class="n">static_time</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">get_static_time</span><span class="p">(),</span>
+            <span class="n">active_days</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">get_active_days</span><span class="p">(),</span>
+            <span class="n">pending_topic</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">_pending_topic</span><span class="p">,</span>
+            <span class="n">active_tags</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">get_active_tags</span><span class="p">(),</span>
+            <span class="n">reminder_enabled</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">get_reminder_enabled</span><span class="p">(),</span>
+            <span class="n">prompt_response_type</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">get_prompt_response_type</span><span class="p">(),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">chat_postMessage</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_repick_random_time</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Re-pick today&#39;s target time from the current range and announce it. Only acts in random mode.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">bot.scheduler</span><span class="w"> </span><span class="kn">import</span> <span class="n">_pick_random_time</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_selected_mode</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;mode_random&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="n">new_time</span> <span class="o">=</span> <span class="n">_pick_random_time</span><span class="p">(</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">get_random_start_time</span><span class="p">(),</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">get_random_end_time</span><span class="p">(),</span>
+        <span class="n">after</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">set_daily_target_time</span><span class="p">(</span><span class="n">new_time</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] Re-picked daily target time: </span><span class="si">{</span><span class="n">new_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;:dart: New target time for today: `</span><span class="si">{</span><span class="n">new_time</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="register_control_panel">
+<a class="viewcode-back" href="../../../_generated/src.commands.control_panel_commands.html#src.commands.control_panel_commands.register_control_panel">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_control_panel</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">,</span> <span class="n">state_manager</span><span class="p">):</span>
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;app_home_opened&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_home_tab</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+            <span class="n">_publish_home</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error publishing home tab: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;mode_selection&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_mode_selection</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;selected_option&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">set_selected_mode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">set_active_token</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Operation mode set to: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mode selected: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_publish_home</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+        <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:gear: *Operation mode* changed to `</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+        <span class="n">_repick_random_time</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;start_time&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_start_time</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">_parse_time</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed</span><span class="p">:</span>
+            <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                      <span class="sa">f</span><span class="s2">&quot;:x: *Invalid start time* `</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">` — must be `HH:MM:SS AM/PM` (e.g. `12:00:00 PM`)&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%I:%M:%S %p&quot;</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">set_random_start_time</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Random start time set to: </span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Random start time set: </span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:clock1: *Random range start* set to `</span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+        <span class="n">_repick_random_time</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;end_time&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_end_time</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">_parse_time</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed</span><span class="p">:</span>
+            <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                      <span class="sa">f</span><span class="s2">&quot;:x: *Invalid end time* `</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">` — must be `HH:MM:SS AM/PM` (e.g. `05:00:00 PM`)&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%I:%M:%S %p&quot;</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">set_random_end_time</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Random end time set to: </span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Random end time set: </span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:clock1: *Random range end* set to `</span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+        <span class="n">_repick_random_time</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;static_entry&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_static_entry</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">_parse_time</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed</span><span class="p">:</span>
+            <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                      <span class="sa">f</span><span class="s2">&quot;:x: *Invalid static time* `</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">` — must be `HH:MM:SS AM/PM` (e.g. `09:15:00 AM`)&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%I:%M:%S %p&quot;</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">set_static_time</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Static time set to: </span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Static time set: </span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:clock1: *Static time* set to `</span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;active_days_selection&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_active_days</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;selected_options&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="p">{</span><span class="n">opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">}</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">set_active_days</span><span class="p">(</span><span class="n">days</span><span class="p">)</span>
+        <span class="n">day_list</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">days</span><span class="p">))</span> <span class="k">if</span> <span class="n">days</span> <span class="k">else</span> <span class="s2">&quot;none&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Active days set to: </span><span class="si">{</span><span class="n">day_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Active days set: </span><span class="si">{</span><span class="n">day_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_publish_home</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+        <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:calendar: *Active days* set to: </span><span class="si">{</span><span class="n">day_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;preset_time_selection&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_preset_time_selection</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;selected_option&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">_PRESET_VALUE_MAP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">preSet_time_library</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">set_daily_target_time</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">set_selected_preset</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Preset time selected: </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Preset time selected: </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">_publish_home</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+            <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:clock1: *Preset time* set to `</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;topic_selection&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_topic_selection</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;selected_option&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;__none__&quot;</span><span class="p">:</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">set_pending_topic</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Topic cleared (any)&quot;</span><span class="p">)</span>
+            <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="s2">&quot;No topic selected — topic will still be random.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">set_pending_topic</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Pending topic set to: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pending topic set: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;Next prompt topic set to `</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">`.&quot;</span><span class="p">)</span>
+        <span class="n">_publish_home</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;tag_filter_selection&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_tag_filter_selection</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;selected_options&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="n">opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">}</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">set_active_tags</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
+        <span class="n">tag_list</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">tags</span><span class="p">))</span> <span class="k">if</span> <span class="n">tags</span> <span class="k">else</span> <span class="s2">&quot;any&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Active tag filter set to: </span><span class="si">{</span><span class="n">tag_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tag filter set: </span><span class="si">{</span><span class="n">tag_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_publish_home</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+        <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:label: *Topic filter* set to: </span><span class="si">{</span><span class="n">tag_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;reminder_toggle&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_reminder_toggle</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;selected_options&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">enabled</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;reminder_enabled&quot;</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">set_reminder_enabled</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;enabled&quot;</span> <span class="k">if</span> <span class="n">enabled</span> <span class="k">else</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Late response reminders </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reminder toggle: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_publish_home</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+        <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:bell: *Late response reminders* </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;response_type_selection&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_response_type_selection</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;selected_option&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">set_prompt_response_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="s2">&quot;Photo only&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Text only&quot;</span><span class="p">,</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span> <span class="s2">&quot;Any (photo or text)&quot;</span><span class="p">}</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Prompt response type set to: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prompt response type set: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_publish_home</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">state</span><span class="p">)</span>
+        <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:camera: *Prompt type* set to: *</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">*&quot;</span><span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;admin_assign_prompt_creator&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_admin_assign_prompt_creator</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">selected_user</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;selected_user&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">selected_user</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">commands.user_prompt_command</span><span class="w"> </span><span class="kn">import</span> <span class="n">send_user_prompt_invitation</span>
+        <span class="n">send_user_prompt_invitation</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">selected_user</span><span class="p">,</span> <span class="n">team_id</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CONTROL PANEL] [</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">] Admin assigned prompt creator: </span><span class="si">{</span><span class="n">selected_user</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Admin assigned prompt creator: </span><span class="si">{</span><span class="n">selected_user</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_dm_admin</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;:pencil: Prompt creation invite sent to &lt;@</span><span class="si">{</span><span class="n">selected_user</span><span class="si">}</span><span class="s2">&gt;.&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">VibeCheck</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">API Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_generated/modules.html">src</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

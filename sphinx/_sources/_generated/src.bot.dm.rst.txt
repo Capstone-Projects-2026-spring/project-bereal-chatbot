@@ -1,0 +1,7 @@
+src.bot.dm module
+=================
+
+.. automodule:: src.bot.dm
+   :members:
+   :show-inheritance:
+   :undoc-members:

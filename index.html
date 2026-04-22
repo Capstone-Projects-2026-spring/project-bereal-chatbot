@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">Hello from VibeCheck | VibeCheck</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docusaurus_tag" content="default"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docsearch:docusaurus_tag" content="default"><meta data-rh="true" property="og:title" content="Hello from VibeCheck | VibeCheck"><meta data-rh="true" name="description" content="Description will go into a meta tag in &lt;head /&gt;"><meta data-rh="true" property="og:description" content="Description will go into a meta tag in &lt;head /&gt;"><link data-rh="true" rel="icon" href="/project-bereal-chatbot/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/" hreflang="en"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/" hreflang="x-default"><script data-rh="true">function insertBanner(){var n=document.createElement("div");n.id="__docusaurus-base-url-issue-banner-container";n.innerHTML='\n<div id="__docusaurus-base-url-issue-banner" style="border: thick solid red; background-color: rgb(255, 230, 179); margin: 20px; padding: 20px; font-size: 20px;">\n   <p style="font-weight: bold; font-size: 30px;">Your Docusaurus site did not load properly.</p>\n   <p>A very common reason is a wrong site <a href="https://docusaurus.io/docs/docusaurus.config.js/#baseUrl" style="font-weight: bold;">baseUrl configuration</a>.</p>\n   <p>Current configured baseUrl = <span style="font-weight: bold; color: red;">/project-bereal-chatbot/</span> </p>\n   <p>We suggest trying baseUrl = <span id="__docusaurus-base-url-issue-banner-suggestion-container" style="font-weight: bold; color: green;"></span></p>\n</div>\n',document.body.prepend(n);var e=document.getElementById("__docusaurus-base-url-issue-banner-suggestion-container"),o=window.location.pathname,s="/"===o.substr(-1)?o:o+"/";e.innerHTML=s}document.addEventListener("DOMContentLoaded",function(){void 0===window.docusaurus&&insertBanner()})</script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script><link rel="stylesheet" href="/project-bereal-chatbot/assets/css/styles.7aa687c6.css">
-<script src="/project-bereal-chatbot/assets/js/runtime~main.4b0bded8.js" defer="defer"></script>
+<script src="/project-bereal-chatbot/assets/js/runtime~main.8d18a5d8.js" defer="defer"></script>
 <script src="/project-bereal-chatbot/assets/js/main.89998b7b.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -33,6 +33,67 @@
 <p>Join the Slack workspace: <a href="https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw" target="_blank" rel="noopener noreferrer" class="">VibeCheck Bot Team</a></p>
 <p>You can also add the chatbot to your own workspace: <a href="https://worker-production-234c.up.railway.app/slack/install" target="_blank" rel="noopener noreferrer" class="">VibeCheck Bot</a></p>
 <p>Running the chatbot locally is not necessary, since it is already deployed on Railway. Use the slash command &quot;/help&quot; in # bot-test channel to see what the bot can do and check out the docusaurus for additional details.</p>
+<p>If you still want to run the chatbot locally, here are the following instructions:</p>
+<ol>
+<li class="">
+<p>Prerequisites</p>
+<ul>
+<li class="">Python 3.10+</li>
+<li class="">Access to a Slack workspace where you can configure an app</li>
+<li class="">A MongoDB connection string</li>
+<li class="">Optional: <code>GROQ_API_KEY</code> for LLM-powered reactions/features</li>
+</ul>
+</li>
+<li class="">
+<p>Clone the repo and open it</p>
+<p><code>git clone https://github.com/capstone-projects-2026-spring/project-bereal-chatbot.git</code></p>
+<p><code>cd project-bereal-chatbot</code></p>
+</li>
+<li class="">
+<p>Create and activate a virtual environment</p>
+<p>Windows (PowerShell):
+<code>python -m venv .venv</code>
+<code>.\.venv\Scripts\Activate.ps1</code></p>
+<p>macOS/Linux:
+<code>python3 -m venv .venv</code>
+<code>source .venv/bin/activate</code></p>
+</li>
+<li class="">
+<p>Install dependencies</p>
+<p><code>python -m pip install -r requirements-dev.txt</code></p>
+</li>
+<li class="">
+<p>Create a <code>.env</code> file in the project root with at least:</p>
+<p><code>SLACK_BOT_TOKEN=your_xoxb_token</code>
+<code>SLACK_SIGNING_SECRET=your_signing_secret</code>
+<code>MONGO_URI=your_mongodb_connection_string</code></p>
+<p>Optional values:
+<code>DEFAULT_CHANNEL=#bot-test</code>
+<code>PORT=8080</code>
+<code>GROQ_API_KEY=your_groq_api_key</code>
+<code>LLM_REACTIONS_ENABLED=true</code>
+<code>LLM_REACTIONS_PROBABILITY=0.5</code></p>
+</li>
+<li class="">
+<p>Start the bot</p>
+<p><code>python run.py</code></p>
+</li>
+<li class="">
+<p>Expose your local server to Slack (required for local event callbacks)</p>
+<p>Use a tunnel such as ngrok or Cloudflare Tunnel and map it to your local bot port (default 8080).</p>
+</li>
+<li class="">
+<p>Configure your Slack app URLs</p>
+<p>Set Request URL for Event Subscriptions to:
+<code>https://&lt;your-public-url&gt;/slack/events</code></p>
+<p>If using OAuth install flow, also configure:
+<code>https://&lt;your-public-url&gt;/slack/oauth_redirect</code></p>
+</li>
+<li class="">
+<p>Verify in Slack</p>
+<p>Run <code>/help</code> in your test channel. If the bot responds, your local setup is working.</p>
+</li>
+</ol>
 <p>Any and all critiques will be greatly appreciated. Have fun testing! 🙂</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="contact-information">Contact Information<a href="#contact-information" class="hash-link" aria-label="Direct link to Contact Information" title="Direct link to Contact Information" translate="no">​</a></h2>
 <p>To reach out for any questions, comments, or concerns regarding this project, you can contact me via email or text:</p>

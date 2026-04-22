@@ -269,7 +269,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
         avgResponseTime = (avgResponseTime / vibeReplies)
         msg_block.append({
             "type": "markdown",
-            "text": f"\n### Vibe Information:\n • Time Sent: {localTime.strftime("%I:%M:%S %p")}{localTime.tzinfo}\n • Unique Users: {vibeUniqueUsers}\n • Replies: {vibeReplies}\n • Average Time To Reply: {avgResponseTime}\n • Engagement Score: {vibeEngagement}",
+            "text": f"\n### Vibe Information:\n • Time Sent: {localTime.strftime("%I:%M:%S %p")} {localTime.tzinfo}\n • Unique Users: {vibeUniqueUsers}\n • Replies: {vibeReplies}\n • Average Time To Reply: {avgResponseTime} seconds\n • Engagement Score: {vibeEngagement}",
             }
         )
 
@@ -278,7 +278,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
             "data": {
                 "labels": chartLabels,
                 "datasets": [{
-                    "label": "Response Time",
+                    "label": "Response Time (seconds)",
                     "data": chartVibeData
                 }]
             }

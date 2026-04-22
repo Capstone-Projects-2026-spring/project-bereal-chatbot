@@ -39,8 +39,8 @@ const baseUrl = process.env.PROJECT_NAME || "docs-dev-mode";
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   /*TODO: Change to your project's title and tagline*/
-  title: title,
-  tagline: 'Owls are cool',
+  title: 'VibeCheck',
+  tagline: 'Keeps the conversation real, one check-in at a time',
   /*Unless you move this website to a seperate repo don't change url and baseurl.*/
   url: 'https://'+process.env.ORG_NAME+'.github.io/',
   baseUrl: '/'+baseUrl+'/',

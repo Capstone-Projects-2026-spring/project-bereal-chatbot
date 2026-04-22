@@ -6,13 +6,13 @@ sidebar_position: 2
 
 ## Overview
 
-This is an illustration of the command flow between each component of VibeCheck, consisting of messaging platforms where users interact, a platform adapter layer that translates platform-specific events, the chatbot core that handles all business logic, and a database that persists user activity and analytics.
+This is an illustration of the command flow between each component of VibeCheck. The system is Slack-specific, having users interact in Slack. Slack Bolt app handles routing and command events, the chatbot core runs business logic, and MongoDB persists activity and analytics.
 
 ![BeReal ChatBot](/img/VibeCheck-SystemBlockDiagram.png)            
 
 ## System Flow
 
-Users communicate with VibeCheck through messaging platforms that will deliver message events and slash commands to the chatbot through WebSocket connections. The chatbot processes commands, schedules prompts, selects prompt content, generates responses, sends messages back to the platform via Web API, and stores activity data in MongoDB.
+Users communicate with VibeCheck through Slack. Slack delivers message events and slash commands through Socket Mode/Web API flows. The chatbot processes commands, schedules prompts, selects prompt content, generates responses, sends messages back to Slack, and stores activity data in MongoDB.
 
 ---
 
@@ -32,6 +32,6 @@ The chatbot, VibeCheck, is the core project. It processes slash commands, contai
 
 ---
 
-### Adapter Layer
+### Slack Integration Layer
 
-The adapter layer translates platform-specific interfaces into a standardized structure for the chatbot to respond appropriately. Currently Slack Bolt provides the Slack adapter, but future adapters will be implemented soon for other message platforms, such as Discord, without changing the chatbot core.
+Slack Bolt and Slack SDK provide the single integration layer for this project. The chatbot core is designed for Slack events and slash commands only.

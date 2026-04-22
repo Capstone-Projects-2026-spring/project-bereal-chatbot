@@ -11,13 +11,13 @@
 
 ## Keywords
 
-Section 1, chatbot application, Python, SQL, Slack Bolt, FastAPI, social connection, future of work 
+Section 1, chatbot application, Python, MongoDB, Railway, Slack Bolt, FastAPI, social connection, future of work 
 
 ## Project Abstract
 
 This project presents the design and implementation of a BeReal-inspired chatbot integrated within Slack that aims to form social connections in both professional and academic environments. Vibecheck operates entirely within a messaging platform, allowing users to share short, but time-restricted updates about their day during breaks, such as lunch periods. Users interact with the chatbot through Slack messages, buttons, bot commands, image uploads that enables users to submit photos with captions, or just text in response to daily prompts.
 
-The system is built using a Pytho processes Slack events through the Slack API. database is used to persist user data, prompts, submissions, timestamps, and late flags, enabling consistent tracking and retrieval of shared content. Communication between Slack and the backend, where Slack acts as the user interface and the FastAPI service serves as the application logic layer.
+The system is built using Python and processes Slack events through the Slack API. MongoDB is used to persist user data, prompts, submissions, timestamps, and late flags, enabling consistent tracking and retrieval of shared content. Communication occurs between Slack and the backend, where Slack acts as the user interface and the FastAPI service serves as the application logic layer.
 
 ## High Level Requirement
 
@@ -41,12 +41,12 @@ No hardware requirements. Resources are commonly available within standard Compu
 
 ## How to Run the Project
 
-Join the Slack workspace: 
-[vibecheckbotteam.slack.com]
-https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw
+Join the Slack workspace: [VibeCheck Bot Team](https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw)
 
-You can also add the chatbot to your own workspace: 
-https://slack.com/oauth/v2/authorize?client_id=10423543431858.10430963976773&scope=app_mentions:read,channels:history,channels:read,chat:write,im:history,commands,groups:history,mpim:history&user_scope=files:write,channels:read,channels:write,chat:write  
+You can also add the chatbot to your own workspace: [VibeCheck Bot](https://worker-production-234c.up.railway.app/slack/install) 
+
+
+Running the chatbot locally is not necessary, since it is already deployed on Railway. Use the slash command "/help" in # bot-test channel to see what the bot can do and check out the docusaurus for additional details.
 
 Any and all critiques will be greatly appreciated. Have fun testing! 🙂
 

@@ -22,7 +22,12 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
     except ConnectionError:
         respond(f"Installations collection not found.")
     channel = payload.get("channel_id")  # default to the channel where command was used
-    team_id = payload.get("team_id") or (payload.get("authorizations") or [{}])[0].get("team_id") or ""
+    team_id = ( 
+        payload.get("team_id") 
+        or (payload.get("authorizations") or [{}])[0].get("team_id") 
+        or None
+    )
+   
     team_name = None
     if team_id:
         record = installations_col.find_one({"team_id": team_id})

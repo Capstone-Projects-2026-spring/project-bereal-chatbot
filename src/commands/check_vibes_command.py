@@ -262,9 +262,13 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
         localTime = datetime.fromisoformat(vibeTime).astimezone()
         avgResponseTime = 0
         chartVibeData = []
+        chartVibeLabels = []
+        vibeReplyID = 0
         for reply in vibe["replies"]:
             avgResponseTime += reply.get("timeBetweenVibe")
             chartVibeData.append(reply.get("timeBetweenVibe"))
+            vibeReplyID += 1
+            chartVibeLabels.append(f"Reply #{vibeReplyID}")
 
         avgResponseTime = (avgResponseTime / vibeReplies)
         msg_block.append({
@@ -276,7 +280,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
         chartVibeConfig = {
             "type": "bar",
             "data": {
-                "labels": chartLabels,
+                "labels": chartVibeLabels,
                 "datasets": [{
                     "label": "Response Time (seconds)",
                     "data": chartVibeData

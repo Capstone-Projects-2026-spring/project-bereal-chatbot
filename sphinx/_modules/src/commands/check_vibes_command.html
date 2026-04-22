@@ -290,6 +290,54 @@
             <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">## Vibe Prompt:</span><span class="se">\n</span><span class="si">{</span><span class="n">vibePrompt</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">vibeMatch</span><span class="si">}{</span><span class="n">vibeType</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="p">)</span>
+        <span class="n">msg_block</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+			<span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span>
+		<span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">localTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">vibeTime</span><span class="p">)</span><span class="o">.</span><span class="n">astimezone</span><span class="p">()</span>
+        <span class="n">avgResponseTime</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">chartVibeData</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">chartVibeLabels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">vibeReplyID</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">reply</span> <span class="ow">in</span> <span class="n">vibe</span><span class="p">[</span><span class="s2">&quot;replies&quot;</span><span class="p">]:</span>
+            <span class="n">avgResponseTime</span> <span class="o">+=</span> <span class="n">reply</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeBetweenVibe&quot;</span><span class="p">)</span>
+            <span class="n">chartVibeData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reply</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeBetweenVibe&quot;</span><span class="p">))</span>
+            <span class="n">vibeReplyID</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">chartVibeLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reply #</span><span class="si">{</span><span class="n">vibeReplyID</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">avgResponseTime</span> <span class="o">=</span> <span class="p">(</span><span class="n">avgResponseTime</span> <span class="o">/</span> <span class="n">vibeReplies</span><span class="p">)</span>
+        <span class="n">msg_block</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;markdown&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">### Vibe Information:</span><span class="se">\n</span><span class="s2"> • Time Sent: </span><span class="si">{</span><span class="n">localTime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%I:%M:%S %p&quot;</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">localTime</span><span class="o">.</span><span class="n">tzinfo</span><span class="si">}</span><span class="se">\n</span><span class="s2"> • Unique Users: </span><span class="si">{</span><span class="n">vibeUniqueUsers</span><span class="si">}</span><span class="se">\n</span><span class="s2"> • Replies: </span><span class="si">{</span><span class="n">vibeReplies</span><span class="si">}</span><span class="se">\n</span><span class="s2"> • Average Time To Reply: </span><span class="si">{</span><span class="n">avgResponseTime</span><span class="si">}</span><span class="s2"> seconds</span><span class="se">\n</span><span class="s2"> • Engagement Score: </span><span class="si">{</span><span class="n">vibeEngagement</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+        <span class="n">chartVibeConfig</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">chartVibeLabels</span><span class="p">,</span>
+                <span class="s2">&quot;datasets&quot;</span><span class="p">:</span> <span class="p">[{</span>
+                    <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Response Time (seconds)&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">chartVibeData</span>
+                <span class="p">}]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="n">chartVibeParams</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;chart&#39;</span> <span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">chartVibeConfig</span><span class="p">),</span>
+            <span class="s1">&#39;width&#39;</span> <span class="p">:</span> <span class="mi">1200</span><span class="p">,</span>
+            <span class="s1">&#39;height&#39;</span> <span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+            <span class="s1">&#39;backgroundColor&#39;</span><span class="p">:</span> <span class="s1">&#39;white&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">msg_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;image_url&quot;</span><span class="p">:</span> <span class="s1">&#39;https://quickchart.io/chart?</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">chartVibeParams</span><span class="p">),</span>
+            <span class="s2">&quot;alt_text&quot;</span><span class="p">:</span> <span class="s2">&quot;Response Time Chart, how fast do users respond.&quot;</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="c1"># TIME IT WAS SENT, #OF UNIQUE USERS, #OF REPLIES, AVERAGE TIME TO RESPOND, GRAPH TO SHOW THE TIME TO RESPOND.</span>
 
  <span class="c1">#   lines.append(f&quot;\nRandom Vibes: {randomVibes}\nForced Vibes: {forcedVibes}\nUser-Created Vibes: {userCreatedVibes}\n&quot;)</span>
  <span class="c1">#   respond(&quot;\n&quot;.join(lines))</span>

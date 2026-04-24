@@ -14,13 +14,13 @@ from services.mongo_service import get_tracker
 def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specificVibe):
     try:
         db =  mongo_client.get_database("vibecheck")
-    except ConnectionError:
-        respond(f"MongoDB Connection Failure.")
+    except Exception as e:
+        print(f"[CHECK VIBES COMMAND] Failed to get the vibe check database: {e}")    
 
     try:
         installations_col = db.get_collection("installations")
-    except ConnectionError:
-        respond(f"Installations collection not found.")
+    except Exception as e:
+        print(f"[CHECK VIBES COMMAND] Failed to get the installations collection: {e}")    
     channel = payload.get("channel_id")  # default to the channel where command was used
     team_id = ( 
         payload.get("team_id") 
@@ -39,7 +39,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
         messages_col = db[collection_name] # db.get_collection(collection_name)
         print(collection_name)
     except Exception as e:
-        print(f"[CHECK VIBES COMMAND] Failed to get the message collection.")    
+        print(f"[CHECK VIBES COMMAND] Failed to get the message collection: {e}")    
 
     message_array = list(messages_col.find({}))
     prompt_list = organize_data(message_array, botID)

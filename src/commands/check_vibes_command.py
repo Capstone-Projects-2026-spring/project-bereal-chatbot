@@ -330,6 +330,7 @@ def register_check_vibes_command(bolt_app, state_manager, botID):
     @bolt_app.command("/checkvibes")
     def handle_checkvibes(ack, respond, body, client):
         ack("Checking out the vibes...")
+        print(f"[CHECK VIBES COMMAND] GETTING THE BOT ID INFORMATION: {client.auth_test()["user_id"] }")
         user_input = (body.get("text") or "").strip()
         parts = user_input.split()
         # Parse args in any order:
@@ -475,6 +476,7 @@ def organize_data(db, bot_id):
                     VibeInstance["unique_users"].append(record.get("user_id"))
 
                 VibeInstance["engagement"] += engageVal
+   
     return  vibe_prompt_list
    
     

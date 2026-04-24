@@ -41,7 +41,7 @@ No hardware requirements. Resources are commonly available within standard Compu
 
 ## How to Run the Project
 
-Join the Slack workspace: [VibeCheck Bot Team](https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw)
+Join the Slack workspace: [VibeCheck Bot Team](https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3wece43pd-kmnn3h4TqKhGvB15URcT0A)
 
 You can also add the chatbot to your own workspace: [VibeCheck Bot](https://worker-production-234c.up.railway.app/slack/install) 
 

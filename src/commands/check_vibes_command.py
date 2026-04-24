@@ -324,13 +324,13 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
     # for message in message_array :
     #    print(f"Message:{message.get("text")}")
 
-def register_check_vibes_command(bolt_app, state_manager, botID):
+def register_check_vibes_command(bolt_app, state_manager):
     mongo_client = MongoClient(os.getenv("MONGO_URI"))
     # BOT_USERID = 
     @bolt_app.command("/checkvibes")
     def handle_checkvibes(ack, respond, body, client):
         ack("Checking out the vibes...")
-        print(f"[CHECK VIBES COMMAND] GETTING THE BOT ID INFORMATION: {client.auth_test()["user_id"] }")
+        botID = client.auth_test()["user_id"]
         user_input = (body.get("text") or "").strip()
         parts = user_input.split()
         # Parse args in any order:

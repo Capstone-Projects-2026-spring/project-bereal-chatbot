@@ -44,8 +44,9 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
     try:
 
         message_array = list(messages_col.find({}))
-        print(f"Message Array fo the Message Collections: {message_array}")
+        
         prompt_list = organize_data(message_array, botID)
+        print(f"Bot ID: {botID} | \n Prompt List: {prompt_list}")
     except Exception as e:
         print(f"[CHECK VIBES COMMAND] Failed to create the message array: {e}")    
 

@@ -41,8 +41,14 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
     except Exception as e:
         print(f"[CHECK VIBES COMMAND] Failed to get the message collection: {e}")    
 
-    message_array = list(messages_col.find({}))
-    prompt_list = organize_data(message_array, botID)
+    try:
+
+        message_array = list(messages_col.find({}))
+        print(f"Message Array fo the Message Collections: {message_array}")
+        prompt_list = organize_data(message_array, botID)
+    except Exception as e:
+        print(f"[CHECK VIBES COMMAND] Failed to create the message array: {e}")    
+
     CurrentDaysVibes = []
     curDate = dayValue
     if dayValue:
@@ -312,7 +318,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
 
  #   lines.append(f"\nRandom Vibes: {randomVibes}\nForced Vibes: {forcedVibes}\nUser-Created Vibes: {userCreatedVibes}\n")
  #   respond("\n".join(lines))
-    client.chat_postMessage(channel=channel, blocks=msg_block)
+    client.chat_postMessage(channel=channel, blocks=msg_block, text="Check Vibes Information")
     
     # for message in message_array :
     #    print(f"Message:{message.get("text")}")
@@ -375,7 +381,7 @@ def organize_data(db, bot_id):
         
         if (record.get("user_id") == bot_id):
             check_type = None
-            if "VIBES SENT SO FAR" not in record.get("text") and "SPECIFIC VIBE" not in record.get("text"):
+            if "VIBES SENT SO FAR" not in record.get("text") and "SPECIFIC VIBE" not in record.get("text") and "Check Vibes Information" not in record.get("text"):
                 if "forced vibe check" in record.get("text"):
                     check_type = "forced"
                 elif "random vibe check" in record.get("text"):

@@ -36,9 +36,10 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
     
     collection_name = f"messages_{team_name}" if team_name else f"messages_{team_id or 'unknown'}"
     try:
-        messages_col = db.get_collection(collection_name)
-    except ConnectionError:
-        respond(f"Message Collection Not Connected Successfully")     
+        messages_col = db[collection_name] # db.get_collection(collection_name)
+        print(collection_name)
+    except Exception as e:
+        print(f"[CHECK VIBES COMMAND] Failed to get the message collection.")    
 
     message_array = list(messages_col.find({}))
     prompt_list = organize_data(message_array, botID)

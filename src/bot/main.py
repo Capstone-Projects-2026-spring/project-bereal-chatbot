@@ -32,6 +32,7 @@ from services.streak_service import register_streak_command
 
 
 def make_authorize(cfg, mongo_uri):
+    """Return a Bolt authorize callback that looks up bot tokens from MongoDB, falling back to the default token."""
     mongo_client = MongoClient(mongo_uri)
     installations = mongo_client["vibecheck"]["installations"]
 
@@ -61,6 +62,7 @@ def make_authorize(cfg, mongo_uri):
 
 
 def main():
+    """Bootstrap the bot: load config, register all commands, start the scheduler thread, and serve HTTP."""
     print("\n[BOOT] Starting bot...")
 
     cfg = load_config()

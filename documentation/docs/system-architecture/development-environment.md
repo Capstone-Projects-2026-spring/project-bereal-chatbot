@@ -16,6 +16,15 @@ sidebar_position: 4
 - python-dotenv
 - pandas
 - gunicorn
+- flask
+- pymongo
+- requests
+- groq
+- PyYAML
+
+## Dev Dependencies
+
+- sphinx
 
 ## Testing
 

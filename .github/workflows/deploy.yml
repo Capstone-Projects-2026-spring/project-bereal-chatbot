@@ -27,6 +27,11 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: documentation/yarn.lock
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Create or verify gh-pages branch
         run: |
           git config --global user.name "github-actions[bot]"
@@ -48,6 +53,14 @@ jobs:
 
       - name: Install Dependencies
         run: cd documentation && yarn install
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate OpenAPI Spec From Code
+        run: python generate_openapi.py
 
       - name: Generate Dependencies Page
         if: github.repository_owner == 'applebaumian'

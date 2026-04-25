@@ -6,286 +6,333 @@ description: Frontend API Design Docuement
 Frontend API - Design Document - Part II API
 =============================
 
-# Purpose
+## Purpose
 
-This document defines the frontend contract for VibeCheck.
-
-For this project, the frontend is not a browser application. The frontend is the Slack user interface that users interact with through:
-
-- slash commands
-- App Home controls
-- bot-posted messages in Slack channels
-- direct-message feedback from the bot
-
-This contract explains what the Slack-facing interface accepts, what it returns to the user, and how the backend responds to valid and invalid inputs.
-
-Language: Slack UI / Slack Bolt
-Tools: Slack slash commands, Slack App Home, Block Kit components
-<<<<<<< deploychris
-=======
+This page documents inputs users send from Slack and the outputs the bot returns through Slack responses, channel posts, and App Home interactions.
 
 ---
->>>>>>> main
 
-# Requirements
+## Frontend Surface
 
-The frontend API contract must stay synchronized with the actual Slack interaction behavior implemented by the bot.
+VibeCheck currently exposes these user-facing interfaces in Slack:
 
-This includes:
+1. Slash commands
+2. App Home control panel actions
+3. Bot-posted prompt messages
+4. Direct-message feedback after App Home updates
 
-- supported slash commands
-- expected command parameters
-- validation rules for user input
-- bot responses shown in channels or direct messages
-- App Home interactive controls and their effects
-- error messages that are meaningful to the user
-
-<<<<<<< deploychris
-=======
 ---
 
->>>>>>> main
-## Frontend Surface Overview
+## Slash Command Contract
 
-VibeCheck exposes the following user-facing interaction points in Slack:
-
-1. `/findtime`
-2. `/picktime`
-3. `/setchannel`
-4. `/forceprompt`
-5. App Home control panel interactions
-
-<<<<<<< deploychris
-=======
----
-
->>>>>>> main
-## Slack Slash Commands
-
-| Command | Input Pattern | Primary Behavior | Success Response |
+| Command | Input | Output | Notes |
 | --- | --- | --- | --- |
-| `/findtime` | `/findtime` | Returns the currently scheduled prompt time for the workspace | `Today's random scheduled prompt time is {time}` |
-| `/picktime` | `/picktime <number>` | Sets daily target time from preset option `1` through `11` | `Time set to: {daily_target_time}` |
-| `/setchannel` | `/setchannel #channel-name` | Sets active posting/listening channel and posts channel confirmation | `Active channel set to #channel-name` |
-| `/forceprompt` | `/forceprompt [text\|image] [#channel-name]` | Posts a random prompt immediately, optionally filtered and channel-targeted | `Posted a prompt to {channel}.` |
+| `/findtime` | No arguments | Scheduled prompt time for the current workspace | Read-only command |
+| `/picktime` | `/picktime <number>` | Confirmation or validation error | `number` must be in the supported preset range |
+| `/setchannel` | `/setchannel #channel-name` | Confirmation in command response and in target channel | Updates active channel |
+| `/forceprompt` | `/forceprompt [text\|image] [#channel-name]` | Confirmation or error | Can filter prompt type and optionally override channel |
+| `/vibestatus` | No arguments | Current scheduling mode, channel, time, and active days | Read-only status summary |
+| `/promptstats` | No arguments | Top prompt metrics for the current workspace | Read-only metrics summary |
+| `/picktopic` | `/picktopic [topic]` | Topic list or confirmation | One-time override for next scheduled prompt |
+| `/picktags` | No arguments | Opens interest tag modal | Stores personal topic preferences per user |
+| `/help` | No arguments | Setup and usage guide | Read-only informational response |
 
 ---
 
-## /findtime
+## Slash Command I/O
 
-### Purpose
-Returns the currently scheduled prompt time for the workspace.
+### `/findtime`
 
-### Input
-No arguments.
+**Request**
 
-### Processing
-The command resolves the Slack workspace team id, loads the stored team state, and reads the current daily target time.
+```text
+/findtime
+```
 
-### Success Response
-The bot responds in Slack with:
+**Response**
 
-`Today's random scheduled prompt time is {time}`
+```text
+Scheduled prompt time: *02:00:00 PM* (mode: `mode_random`)
+```
 
-### Preconditions
-- The bot must be installed in the Slack workspace.
-- Workspace state must be available.
+**Output fields**
 
-### Error Behavior
-- If an exception occurs, the command currently logs the error to the backend console.
-- No user-facing recovery message is guaranteed by the current implementation.
+- `scheduled prompt time`: the time currently selected for today's post
+- `mode`: the saved scheduling mode for the workspace
+
+### `/picktime`
+
+**Request**
+
+```text
+/picktime 5
+```
+
+**Success response**
+
+```text
+Time set to: 09:50:00 AM
+```
+
+**Validation responses**
+
+```text
+Please provide a valid number between 1 and 11 to set the time
+```
+
+```text
+Must pick a number between 1 and 11 to set the time.
+```
+
+**Input rules**
+
+- `number` is required to change the stored preset time
+- when omitted, the bot returns the list of available preset options
+
+### `/setchannel`
+
+**Request**
+
+```text
+/setchannel #general
+```
+
+**Slash command response**
+
+```text
+Active channel set to #general
+```
+
+**Channel post**
+
+```text
+The bot will now listen to this channel
+```
+
+**Validation responses**
+
+```text
+Please provide a channel name using /setchannel #channel-name
+```
+
+```text
+Please provide a valid channel name starting with #
+```
+
+**Input rules**
+
+- `#channel-name` is required; omitting it returns a validation error
+- the argument must start with `#`
+
+### `/forceprompt`
+
+**Valid request forms**
+
+```text
+/forceprompt
+/forceprompt text
+/forceprompt image
+/forceprompt #general
+/forceprompt text #general
+```
+
+**Success response**
+
+```text
+✅ Posted a prompt to #general.
+```
+
+**Error response**
+
+```text
+❌ Failed to post prompt: <exception message>
+```
+
+**Output behavior**
+
+- posts a prompt message into the resolved Slack channel
+- records prompt metrics when the tracker is enabled
+- optionally filters by `text` or `image`
+
+**Input rules**
+
+- all arguments are optional
+- `text` or `image` filters the prompt type; omitting it selects from all types
+- `#channel-name` overrides the target channel; omitting it uses the channel where the command was invoked
+- arguments can appear in any order
+
+### `/vibestatus`
+
+**Request**
+
+```text
+/vibestatus
+```
+
+**Response**
+
+```text
+*Vibe Check Bot Status*
+• *Mode:* Random (09:00:00 AM – 05:00:00 PM)
+• *Channel:* #general
+• *Today's prompt time:* 02:00:00 PM
+• *Active days:* Monday, Wednesday, Friday
+• *Posting today:* yes
+```
+
+**Output fields**
+
+- mode
+- active channel
+- today's resolved prompt time
+- active days
+- whether the bot will post today
+
+### `/promptstats`
+
+**Request**
+
+```text
+/promptstats
+```
+
+**Response**
+
+```text
+*Prompt Stats (most asked first)*
+• [asked 8x | responses 5] _work_life_ — What are you doing after class today?…
+• [asked 6x | responses 2] _friends, social_ — Show your current vibe in one picture…
+```
+
+**Output fields**
+
+- `times asked`
+- `responses`
+- prompt tags
+- truncated prompt text
+
+### `/picktopic`
+
+**Request (no args — list available topics)**
+
+```text
+/picktopic
+```
+
+**Response**
+
+```text
+*Available topics:*
+  • `food`
+  • `social`
+  • `work_life`
+
+Usage: `/picktopic <topic>` — the next scheduled prompt will use that topic.
+```
+
+**Request (set topic)**
+
+```text
+/picktopic social
+```
+
+**Success response**
+
+```text
+Topic set, the next prompt will be from the `social` topic.
+```
+
+**Validation response**
+
+```text
+Unknown topic `xyz`. Pick from the available topics: `food`, `social`, `work_life`
+```
+
+**Input rules**
+
+- when no argument is provided, returns the topic list
+- the override applies to the next scheduled prompt only and resets after it fires
+
+### `/picktags`
+
+**Request**
+
+```text
+/picktags
+```
+
+**Response**
+
+Opens a modal with a checkbox list of available topic tags. The user selects their interests and submits. Tags are stored per-user in MongoDB and have no effect on which prompts the bot sends.
+
+**Output behavior**
+
+- opens `user_interests_modal`
+- on submit, saves selected tags via `save_user_interests`
+- on skip, closes the modal without saving
+
+### `/help`
+
+**Request**
+
+```text
+/help
+```
+
+**Response**
+
+```text
+*Vibe Check Bot — Setup & Usage Guide*
+
+*Step 1: Add the bot to your channel*
+...
+```
+
+Returns the full setup and usage guide as a Slack response, including configuration steps, available commands, and descriptions of the user-created prompt and social connector features.
 
 ---
 
-## /picktime
+## App Home Control Panel I/O
 
-### Purpose
-Allows an administrator or user to choose a preset prompt time from a numbered list.
+The App Home tab is an interactive frontend surface backed by Slack Block Kit actions.
 
-### Input
-`/picktime <number>`
+| Action ID | Input | Output | Stored Effect |
+| --- | --- | --- | --- |
+| `mode_selection` | selected radio button | DM confirmation message | updates scheduling mode |
+| `start_time` | free-text time in `HH:MM:SS AM/PM` | validation feedback or updated view | updates random range start |
+| `end_time` | free-text time in `HH:MM:SS AM/PM` | validation feedback or updated view | updates random range end |
+| `preset_time_selection` | selected preset time | updated App Home state | updates preset time |
+| `static_entry` | free-text time in `HH:MM:SS AM/PM` | validation feedback or updated view | updates static time |
+| `active_days_selection` | selected weekdays | updated App Home state | updates active posting days |
+| `tag_filter_selection` | selected topic tags | updated App Home state | updates allowed prompt tags |
+| `topic_selection` | one-time topic override | updated App Home state | sets next prompt override |
+| `reminder_delay_selection` | selected delay in minutes | DM confirmation | updates DM reminder delay |
+| `admin_assign_prompt_creator` | selected user | DM confirmation | sends prompt creation invite to selected user |
 
-### Accepted Parameters
-- `number` must be an integer from `1` to `11`.
+### Example App Home feedback
 
-### Behavior
-- If no argument is provided, the bot returns the list of available numbered time choices.
-- If the argument is a valid number in range, the corresponding preset time is stored as the new daily target time.
-- If the argument is not numeric, the bot responds with a validation error.
-- If the number is outside the valid range, the bot responds with a range error.
+```text
+:gear: *Operation mode* changed to `mode_random`
+:clock1: *Preset time* set to `09:30:00 AM`
+:calendar: *Active days* set to: Friday, Monday, Wednesday
+:label: *Topic filter* set to: social, work_life
+:bell: *Reminder delay* set to `10 minutes`
+:pencil: Prompt creation invite sent to @username.
+```
 
-### Success Response
-`Time set to: {daily_target_time}`
+### Time input format
 
-### Validation Responses
-- `Please provide a valid number between 1 and 11 to set the time`
-- `Must pick a number between 1 and 11 to set the time.`
+The App Home time-entry actions accept:
 
-### Output Variables
-- Updated daily target time in workspace state.
+```text
+HH:MM:SS AM/PM
+```
 
----
+Example:
 
-## /setchannel
-
-### Purpose
-Sets the Slack channel that the bot will actively listen to and post updates to.
-
-### Input
-`/setchannel #channel-name`
-
-### Accepted Parameters
-- Channel value must begin with `#`.
-
-### Behavior
-- Saves the selected channel to workspace state.
-- Stores the active Slack token for the current session.
-- Posts a confirmation message directly into the selected channel.
-
-### Success Responses
-- Slash command response: `Active channel set to #channel-name`
-- Channel message: `The bot will now listen to this channel`
-
-### Validation Responses
-- `Please provide a channel name using /setchannel #channel-name`
-- `Please provide a valid channel name starting with #`
-
-### Output Variables
-- Active channel in workspace state.
-
----
-
-## /forceprompt
-
-### Purpose
-Immediately posts a prompt to the current or specified Slack channel.
-
-### Input Forms
-- `/forceprompt`
-- `/forceprompt text`
-- `/forceprompt image`
-- `/forceprompt #channel-name`
-- `/forceprompt text #channel-name`
-- `/forceprompt image #channel-name`
-
-### Accepted Parameters
-- `text` or `image` to filter prompt type
-- optional `#channel-name` to override the current channel
-
-### Behavior
-- Chooses a random prompt from the prompt service.
-- Marks that prompt as asked.
-- Records the prompt in tracking storage if tracking is enabled.
-- Posts the prompt to Slack with the prefix `Forced vibe check prompt:`.
-
-### Success Response
-`Posted a prompt to {channel}.`
-
-### Error Response
-`Failed to post prompt: {exception}`
-
-### Output Variables
-- Prompt posted to Slack channel.
-- Prompt tracking metadata updated if tracker exists.
-
----
-
-## App Home Control Panel
-
-The App Home tab provides a persistent control panel for time configuration.
-<<<<<<< deploychris
-
-### Purpose
-Allows an administrator to configure scheduling behavior without typing slash commands.
-
-
-
-### UI Sections
-1. Operation mode selection
-2. Random time range start
-3. Random time range end
-4. Preset time selection
-5. Static manual time entry
-6. Active day checkboxes
-=======
-
-### Purpose
-Allows an administrator to configure scheduling behavior without typing slash commands.
-
-
-
-### UI Sections
-1. Operation mode selection
-2. Random time range start
-3. Random time range end
-4. Preset time selection
-5. Static manual time entry
-6. Active day checkboxes
-
-### Operation Modes
-- `Random Time`
-- `Preset Time Select`
-- `Static Set Time`
-
-### Interactive Actions
-
-mode_selection
-
-Changes the scheduling mode stored in team state.
-
-Success feedback is sent by direct message:
-
-`:gear: Operation mode changed to {value}`
-
-If the selected mode is random mode, the system may immediately repick the current daily target time.
-
----
-
-## start_time
-
-### Input Format
-`HH:MM:SS AM/PM`
-
-### Purpose
-Sets the beginning of the random time range.
-
-### Success Feedback
-`:clock1: Random range start set to {time}`
-
-### Validation Error
-`:x: Invalid start time {value} — must be HH:MM:SS AM/PM`
-
----
-
-## end_time
-
-### Input Format
-`HH:MM:SS AM/PM`
-
-### Purpose
-Sets the end of the random time range.
-
-### Success Feedback
-`:clock1: Random range end set to {time}`
-
-### Validation Error
-`:x: Invalid end time {value} — must be HH:MM:SS AM/PM`
-
----
-
-## static_entry
-
-### Input Format
-`HH:MM:SS AM/PM`
-
-### Purpose
-Sets a manual fixed time for prompt scheduling.
-
-### Success Feedback
-`:clock1: Static time set to {time}`
-
-### Validation Error
-`:x: Invalid static time {value} — must be HH:MM:SS AM/PM`
+```text
+09:15:00 AM
+```
 
 ---
 
@@ -300,92 +347,8 @@ Lets the user choose one of the predefined preset times from a Slack static sele
 
 ### Success Feedback
 `:clock1: Preset time set to {time}`
->>>>>>> main
 
-### Operation Modes
-- `Random Time`
-- `Preset Time Select`
-- `Static Set Time`
-
-<<<<<<< deploychris
-### Interactive Actions
-
-mode_selection
-
-Changes the scheduling mode stored in team state.
-
-Success feedback is sent by direct message:
-
-`:gear: Operation mode changed to {value}`
-
-If the selected mode is random mode, the system may immediately repick the current daily target time.
-
----
-
-## start_time
-
-### Input Format
-`HH:MM:SS AM/PM`
-
-### Purpose
-Sets the beginning of the random time range.
-
-### Success Feedback
-`:clock1: Random range start set to {time}`
-
-### Validation Error
-`:x: Invalid start time {value} — must be HH:MM:SS AM/PM`
-
----
-
-## end_time
-
-### Input Format
-`HH:MM:SS AM/PM`
-
-### Purpose
-Sets the end of the random time range.
-
-### Success Feedback
-`:clock1: Random range end set to {time}`
-
-### Validation Error
-`:x: Invalid end time {value} — must be HH:MM:SS AM/PM`
-
----
-
-## static_entry
-
-### Input Format
-`HH:MM:SS AM/PM`
-
-### Purpose
-Sets a manual fixed time for prompt scheduling.
-
-### Success Feedback
-`:clock1: Static time set to {time}`
-
-### Validation Error
-`:x: Invalid static time {value} — must be HH:MM:SS AM/PM`
-
----
-
-## preset_time_selection
-
-### Purpose
-Lets the user choose one of the predefined preset times from a Slack static select menu.
-
-### Behavior
-- Maps a selected option like `time_1`, `time_2`, and so on to a real preset time value.
-- Saves both the selected preset id and resolved daily target time.
-
-### Success Feedback
-`:clock1: Preset time set to {time}`
-
-
-=======
->>>>>>> main
-<summary>active_days_selection</summary>
+## active_days_selection
 
 
 ### Purpose

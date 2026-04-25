@@ -29,7 +29,7 @@ Active slash commands currently registered in the bot:
 
 ***test_install_workspace_success()***
 
-	Status: Planned
+	
 	Purpose: Verifies OAuth install flow persists installation data and returns success.
 	Input parameters:
 	- Mocked request query string containing a valid authorization code
@@ -46,7 +46,7 @@ Active slash commands currently registered in the bot:
 
 ***test_install_workspace_missing_code_returns_400()***
 
-	Status: Planned
+	
 	Purpose: Verifies installation request fails fast when OAuth code is missing.
 	Input parameters:
 	- Request payload without code
@@ -63,7 +63,6 @@ Active slash commands currently registered in the bot:
 
 ***test_setchannel_updates_state()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies `/setchannel` updates workspace channel state and posts confirmation.
 	Input parameters:
 	- Command body: `{"text":"#new-channel", "team_id":"T123"}`
@@ -80,7 +79,6 @@ Active slash commands currently registered in the bot:
 
 ***test_setchannel_rejects_missing_channel()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies `/setchannel` rejects missing channel input.
 	Input parameters:
 	- Command body: `{"text":"", "team_id":"T123"}`
@@ -99,7 +97,6 @@ Active slash commands currently registered in the bot:
 
 ***test_forceprompt_acks()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies `/forceprompt` acknowledges immediately.
 	Input parameters:
 	- Command body: `{"text":"", "channel_id":"C123"}`
@@ -112,7 +109,6 @@ Active slash commands currently registered in the bot:
 
 ***test_forceprompt_posts_to_command_channel()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies `/forceprompt` posts to command channel when no override channel is supplied.
 	Input parameters:
 	- Command body: `{"text":"", "channel_id":"C123"}`
@@ -130,7 +126,6 @@ Active slash commands currently registered in the bot:
 
 ***test_forceprompt_posts_to_specified_channel()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies `/forceprompt #channel` overrides the command channel.
 	Input parameters:
 	- Command body: `{"text":"#general", "channel_id":"C123"}`
@@ -145,7 +140,6 @@ Active slash commands currently registered in the bot:
 
 ***test_picktags_command_opens_static_checkbox_modal()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies `/picktags` opens the modal with static checkbox options and pre-selected existing tags.
 	Input parameters:
 	- Command body with team_id, user_id, trigger_id
@@ -160,7 +154,6 @@ Active slash commands currently registered in the bot:
 
 ***test_picktags_submission_saves_selected_tags()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies modal submission persists tags and sends confirmation DM.
 	Input parameters:
 	- View submission payload with selected options
@@ -177,31 +170,26 @@ Active slash commands currently registered in the bot:
 
 ***test_social_connector_finds_pair_from_shared_tags()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies shared-tag matching logic returns a valid pair.
 
 
 ***test_social_connector_randomly_selects_from_all_matching_pairs()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies random selection occurs from all valid matching pairs.
 
 
 ***test_social_connector_posts_soft_intro_message()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies connector posts intro plus icebreaker to the channel.
 
 
 ***test_social_connector_command_posts_in_current_channel()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies `/connect` calls connector flow for current channel/workspace.
 
 
 ***test_social_connector_command_responds_when_no_match_found()***
 
-	Status: Implemented (tests/test_commands.py)
 	Purpose: Verifies user gets a friendly no-match response when no eligible pair exists.
 
 ---
@@ -237,7 +225,6 @@ Active slash commands currently registered in the bot:
 
 ***test_promptstats_returns_sorted_summary()***
 
-	Status: Planned
 	Purpose: Verifies `/promptstats` returns formatted prompt engagement summary.
 	Input parameters:
 	- Mocked tracker get_all_stats() returns prompt records with ask/respond counts
@@ -248,7 +235,6 @@ Active slash commands currently registered in the bot:
 
 ***test_promptstats_handles_empty_data()***
 
-	Status: Planned
 	Purpose: Verifies `/promptstats` returns no-data message when stats list is empty.
 	Input parameters:
 	- Mocked tracker returns []
@@ -261,19 +247,16 @@ Active slash commands currently registered in the bot:
 
 ***test_picktopic_lists_topics_when_no_arg()***
 
-	Status: Planned
 	Purpose: Verifies `/picktopic` (without args) lists available topics and usage hint.
 
 
 ***test_picktopic_sets_pending_topic_when_valid()***
 
-	Status: Planned
 	Purpose: Verifies `/picktopic <topic>` stores one-time pending topic in workspace state.
 
 
 ***test_picktopic_rejects_unknown_topic()***
 
-	Status: Planned
 	Purpose: Verifies `/picktopic` returns validation guidance for invalid topics.
 
 ---
@@ -282,25 +265,21 @@ Active slash commands currently registered in the bot:
 
 ***test_findtime_returns_target_time_and_mode()***
 
-	Status: Planned
 	Purpose: Verifies `/findtime` reports workspace target time and active mode.
 
 
 ***test_picktime_lists_options_when_empty()***
 
-	Status: Planned
 	Purpose: Verifies `/picktime` without argument returns preset list.
 
 
 ***test_picktime_sets_target_time_for_valid_choice()***
 
-	Status: Planned
 	Purpose: Verifies `/picktime <1..11>` updates state daily target time.
 
 
 ***test_picktime_rejects_invalid_input()***
 
-	Status: Planned
 	Purpose: Verifies `/picktime` handles non-numeric and out-of-range values safely.
 
 ---
@@ -309,13 +288,11 @@ Active slash commands currently registered in the bot:
 
 ***test_vibestatus_random_mode_summary()***
 
-	Status: Planned
 	Purpose: Verifies `/vibestatus` includes mode label, channel, target time, active days, and posting status for random mode.
 
 
 ***test_vibestatus_static_mode_summary()***
 
-	Status: Planned
 	Purpose: Verifies `/vibestatus` reports static time correctly when static mode is active.
 
 ---
@@ -324,7 +301,6 @@ Active slash commands currently registered in the bot:
 
 ***test_help_returns_setup_guide_text()***
 
-	Status: Planned
 	Purpose: Verifies `/help` returns non-empty setup and usage guidance and acknowledges once.
 
 ---
@@ -333,25 +309,21 @@ Active slash commands currently registered in the bot:
 
 ***test_mentor_signup_opens_modal_for_valid_role()***
 
-	Status: Planned
 	Purpose: Verifies `/mentor signup mentor|mentee` opens the signup modal when user is not already registered.
 
 
 ***test_mentor_status_returns_waiting_or_pairing()***
 
-	Status: Planned
 	Purpose: Verifies `/mentor status` returns correct summary for unmatched and matched users.
 
 
 ***test_mentor_leave_removes_registration_and_clears_pair()***
 
-	Status: Planned
 	Purpose: Verifies `/mentor leave` removes profile and clears existing pairing.
 
 
 ***test_mentor_match_notifies_pairs_when_available()***
 
-	Status: Planned
 	Purpose: Verifies `/mentor match` creates and notifies pairs when compatible unmatched users exist.
 
 ---
@@ -360,19 +332,16 @@ Active slash commands currently registered in the bot:
 
 ***test_checkvibes_defaults_to_today()***
 
-	Status: Planned
 	Purpose: Verifies `/checkvibes` with no args triggers analysis for current day.
 
 
 ***test_checkvibes_accepts_all_and_date_filters()***
 
-	Status: Planned
 	Purpose: Verifies `/checkvibes all`, `/checkvibes yesterday`, and `/checkvibes MM-DD-YYYY` parse correctly.
 
 
 ***test_checkvibes_invalid_date_returns_validation_error()***
 
-	Status: Planned
 	Purpose: Verifies invalid date input returns a user-facing validation response.
 
 ---

@@ -61,6 +61,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">app_logging.structured_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">install_structured_message_logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">services.mongo_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_tracker</span><span class="p">,</span> <span class="n">init_user_interests</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">services.prompt_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_prompts_df</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">services.streak_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_streak_command</span>
 
 
 <div class="viewcode-block" id="make_authorize">
@@ -93,7 +94,6 @@
 
     <span class="k">return</span> <span class="n">authorize</span></div>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">services.streak_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_streak_command</span>
 
 
 <div class="viewcode-block" id="main">
@@ -133,6 +133,7 @@
     <span class="n">register_user_prompt_handlers</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">,</span> <span class="n">state_manager</span><span class="p">)</span>
     <span class="n">register_check_vibes_command</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">,</span> <span class="n">state_manager</span><span class="p">,</span> <span class="n">auth_info</span><span class="p">[</span><span class="s1">&#39;user_id&#39;</span><span class="p">])</span>
     <span class="n">register_mentor_mentee_command</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">,</span> <span class="n">state_manager</span><span class="p">)</span>
+    <span class="n">register_streak_command</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">,</span> <span class="n">client</span><span class="p">)</span>
 
     <span class="c1"># Online message to primary workspace</span>
     <span class="k">try</span><span class="p">:</span>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
-<title data-rh="true">Integration tests | VibeCheck</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Integration tests | VibeCheck"><meta data-rh="true" name="description" content="Use Case 1 - Installing VibeCheck in a Slack Workspace"><meta data-rh="true" property="og:description" content="Use Case 1 - Installing VibeCheck in a Slack Workspace"><link data-rh="true" rel="icon" href="/project-bereal-chatbot/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing" hreflang="en"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Test Procedures","item":"https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/category/test-procedures"},{"@type":"ListItem","position":2,"name":"Integration tests","item":"https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing"}]}</script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script><link rel="stylesheet" href="/project-bereal-chatbot/assets/css/styles.0c5679d9.css">
-<script src="/project-bereal-chatbot/assets/js/runtime~main.3bdcb52c.js" defer="defer"></script>
+<title data-rh="true">Integration tests | VibeCheck</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Integration tests | VibeCheck"><meta data-rh="true" name="description" content="This page tracks integration-level command and workflow coverage for the current Slack app implementation."><meta data-rh="true" property="og:description" content="This page tracks integration-level command and workflow coverage for the current Slack app implementation."><link data-rh="true" rel="icon" href="/project-bereal-chatbot/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing" hreflang="en"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Test Procedures","item":"https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/category/test-procedures"},{"@type":"ListItem","position":2,"name":"Integration tests","item":"https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/docs/testing/integration-testing"}]}</script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script><link rel="stylesheet" href="/project-bereal-chatbot/assets/css/styles.0c5679d9.css">
+<script src="/project-bereal-chatbot/assets/js/runtime~main.00235c24.js" defer="defer"></script>
 <script src="/project-bereal-chatbot/assets/js/main.89998b7b.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -12,11 +12,30 @@
 <symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
 </defs></svg>
 <script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/project-bereal-chatbot/"><div class="navbar__logo"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Project Bereal Chatbot</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/project-bereal-chatbot/docs/intro">Documentation</a><a class="navbar__item navbar__link" href="/project-bereal-chatbot/tutorial/Intro">Docusaurus Tutorial</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/Capstone-Projects-2026-spring/project-bereal-chatbot" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/project-bereal-chatbot/docs/intro"><span title="Introduction" class="linkLabel_WmDU">Introduction</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/project-bereal-chatbot/docs/category/requirements-specification"><span title="Requirements Specification" class="categoryLinkLabel_W154">Requirements Specification</span></a><button aria-label="Expand sidebar category &#x27;Requirements Specification&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/project-bereal-chatbot/docs/category/system-architecture"><span title="System Architecture" class="categoryLinkLabel_W154">System Architecture</span></a><button aria-label="Expand sidebar category &#x27;System Architecture&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/project-bereal-chatbot/docs/category/api-specification"><span title="API Specification" class="categoryLinkLabel_W154">API Specification</span></a><button aria-label="Expand sidebar category &#x27;API Specification&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" href="/project-bereal-chatbot/docs/category/test-procedures"><span title="Test Procedures" class="categoryLinkLabel_W154">Test Procedures</span></a><button aria-label="Collapse sidebar category &#x27;Test Procedures&#x27;" aria-expanded="true" type="button" class="clean-btn menu__caret"></button></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/project-bereal-chatbot/docs/testing/unit-testing"><span title="Unit tests" class="linkLabel_WmDU">Unit tests</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/project-bereal-chatbot/docs/testing/integration-testing"><span title="Integration tests" class="linkLabel_WmDU">Integration tests</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/project-bereal-chatbot/docs/testing/acceptance-testing"><span title="Acceptance test" class="linkLabel_WmDU">Acceptance test</span></a></li></ul></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/project-bereal-chatbot/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><a class="breadcrumbs__link" href="/project-bereal-chatbot/docs/category/test-procedures"><span>Test Procedures</span></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Integration tests</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Integration tests</h1></header>
+<p>This page tracks integration-level command and workflow coverage for the current Slack app implementation.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="current-slash-command-inventory">Current slash command inventory<a href="#current-slash-command-inventory" class="hash-link" aria-label="Direct link to Current slash command inventory" title="Direct link to Current slash command inventory" translate="no">​</a></h3>
+<p>Active slash commands currently registered in the bot:</p>
+<ul>
+<li class=""><code>/setchannel</code></li>
+<li class=""><code>/forceprompt</code></li>
+<li class=""><code>/picktags</code></li>
+<li class=""><code>/connect</code></li>
+<li class=""><code>/findtime</code></li>
+<li class=""><code>/picktime</code></li>
+<li class=""><code>/vibestatus</code></li>
+<li class=""><code>/promptstats</code></li>
+<li class=""><code>/picktopic</code></li>
+<li class=""><code>/checkvibes</code></li>
+<li class=""><code>/mentor</code></li>
+<li class=""><code>/streak</code></li>
+<li class=""><code>/help</code></li>
+</ul>
+<hr>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-1---installing-vibecheck-in-a-slack-workspace">Use Case 1 - Installing VibeCheck in a Slack Workspace<a href="#use-case-1---installing-vibecheck-in-a-slack-workspace" class="hash-link" aria-label="Direct link to Use Case 1 - Installing VibeCheck in a Slack Workspace" title="Direct link to Use Case 1 - Installing VibeCheck in a Slack Workspace" translate="no">​</a></h3>
 <p><em><strong>test_install_workspace_success()</strong></em></p>
-<p>Status: Planned</p>
-<p>Purpose: Verifies OAuth install flow persists installation data and returns success.</p>
-<p>Input parameters:</p>
+<p>Status: Planned
+Purpose: Verifies OAuth install flow persists installation data and returns success.
+Input parameters:</p>
 <ul>
 <li class="">Mocked request query string containing a valid authorization code</li>
 <li class="">Mocked Slack OAuth response with team.id, team.name, and access_token
@@ -43,10 +62,10 @@ Uses:</li>
 <li class="">Mocked MongoDB installations collection</li>
 </ul>
 <hr>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-2---setting-active-channel">Use Case 2 - Setting Active Channel<a href="#use-case-2---setting-active-channel" class="hash-link" aria-label="Direct link to Use Case 2 - Setting Active Channel" title="Direct link to Use Case 2 - Setting Active Channel" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-2---setting-active-channel-setchannel">Use Case 2 - Setting Active Channel (<code>/setchannel</code>)<a href="#use-case-2---setting-active-channel-setchannel" class="hash-link" aria-label="Direct link to use-case-2---setting-active-channel-setchannel" title="Direct link to use-case-2---setting-active-channel-setchannel" translate="no">​</a></h3>
 <p><em><strong>test_setchannel_updates_state()</strong></em></p>
 <p>Status: Implemented (tests/test_commands.py)
-Purpose: Verifies /setchannel updates workspace channel state and posts confirmation.
+Purpose: Verifies <code>/setchannel</code> updates workspace channel state and posts confirmation.
 Input parameters:</p>
 <ul>
 <li class="">Command body: <code>{&quot;text&quot;:&quot;#new-channel&quot;, &quot;team_id&quot;:&quot;T123&quot;}</code></li>
@@ -62,7 +81,7 @@ Uses:</li>
 </ul>
 <p><em><strong>test_setchannel_rejects_missing_channel()</strong></em></p>
 <p>Status: Implemented (tests/test_commands.py)
-Purpose: Verifies /setchannel rejects missing channel input.
+Purpose: Verifies <code>/setchannel</code> rejects missing channel input.
 Input parameters:</p>
 <ul>
 <li class="">Command body: <code>{&quot;text&quot;:&quot;&quot;, &quot;team_id&quot;:&quot;T123&quot;}</code></li>
@@ -76,41 +95,22 @@ Uses:</li>
 <li class="">Mock callbacks and Slack client object</li>
 </ul>
 <hr>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-3---configuring-prompt-time">Use Case 3 - Configuring Prompt Time<a href="#use-case-3---configuring-prompt-time" class="hash-link" aria-label="Direct link to Use Case 3 - Configuring Prompt Time" title="Direct link to Use Case 3 - Configuring Prompt Time" translate="no">​</a></h3>
-<p><em><strong>test_pick_random_time_from_range()</strong></em></p>
-<p>Status: Implemented (tests/test_acceptance.py)
-Purpose: Verifies scheduler time selection returns a valid time within configured bounds.
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-3---sending-prompt-forceprompt">Use Case 3 - Sending Prompt (<code>/forceprompt</code>)<a href="#use-case-3---sending-prompt-forceprompt" class="hash-link" aria-label="Direct link to use-case-3---sending-prompt-forceprompt" title="Direct link to use-case-3---sending-prompt-forceprompt" translate="no">​</a></h3>
+<p><em><strong>test_forceprompt_acks()</strong></em></p>
+<p>Status: Implemented (tests/test_commands.py)
+Purpose: Verifies <code>/forceprompt</code> acknowledges immediately.
 Input parameters:</p>
 <ul>
-<li class="">start_str=&quot;09:30:00 AM&quot;</li>
-<li class="">end_str=&quot;10:50:00 AM&quot;
+<li class="">Command body: <code>{&quot;text&quot;:&quot;&quot;, &quot;channel_id&quot;:&quot;C123&quot;}</code>
 Expected results:</li>
-<li class="">Returned time is not None</li>
-<li class="">Parsed time is within start/end range
+<li class="">ack() called exactly once
 Uses:</li>
-<li class="">Scheduler component: _pick_random_time(...)</li>
+<li class="">DummyApp command registry</li>
+<li class="">Mock callbacks and Slack client object</li>
 </ul>
-<p><em><strong>test_full_flow_state_and_scheduler()</strong></em></p>
-<p>Status: Implemented (tests/test_acceptance.py)
-Purpose: Verifies state + scheduler integration preserves selected mode, selected channel, and chosen time.
-Input parameters:</p>
-<ul>
-<li class="">State created with default_channel=&quot;#general&quot;</li>
-<li class="">Mode set to mode_random</li>
-<li class="">Time generated from _pick_random_time(...)
-Expected results:</li>
-<li class="">get_daily_target_time() matches selected time</li>
-<li class="">get_selected_mode() returns mode_random</li>
-<li class="">get_active_channel() returns #general
-Uses:</li>
-<li class="">Bot state component: create_state</li>
-<li class="">Scheduler component: _pick_random_time</li>
-</ul>
-<hr>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-4---sending-prompt">Use Case 4 - Sending Prompt<a href="#use-case-4---sending-prompt" class="hash-link" aria-label="Direct link to Use Case 4 - Sending Prompt" title="Direct link to Use Case 4 - Sending Prompt" translate="no">​</a></h3>
 <p><em><strong>test_forceprompt_posts_to_command_channel()</strong></em></p>
 <p>Status: Implemented (tests/test_commands.py)
-Purpose: Verifies /forceprompt posts to command channel when no override channel is supplied.
+Purpose: Verifies <code>/forceprompt</code> posts to command channel when no override channel is supplied.
 Input parameters:</p>
 <ul>
 <li class="">Command body: <code>{&quot;text&quot;:&quot;&quot;, &quot;channel_id&quot;:&quot;C123&quot;}</code></li>
@@ -127,49 +127,165 @@ Uses:</li>
 </ul>
 <p><em><strong>test_forceprompt_posts_to_specified_channel()</strong></em></p>
 <p>Status: Implemented (tests/test_commands.py)
-Purpose: Verifies /forceprompt #channel overrides the command channel.
+Purpose: Verifies <code>/forceprompt #channel</code> overrides the command channel.
 Input parameters:</p>
 <ul>
-<li class="">Command body: <code>{&quot;text&quot;:&quot;#general&quot;, &quot;channel_id&quot;:&quot;C123&quot;}</code></li>
-<li class="">Same patched prompt dependencies as above
+<li class="">Command body: <code>{&quot;text&quot;:&quot;#general&quot;, &quot;channel_id&quot;:&quot;C123&quot;}</code>
 Expected results:</li>
 <li class="">chat_postMessage(...) called with channel=&quot;#general&quot;
 Uses:</li>
-<li class="">Same patched prompt dependencies and mocked client setup</li>
+<li class="">Patched prompt dependencies and mocked client setup</li>
 </ul>
 <hr>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-5---viewing-prompt-statistics">Use Case 5 - Viewing Prompt Statistics<a href="#use-case-5---viewing-prompt-statistics" class="hash-link" aria-label="Direct link to Use Case 5 - Viewing Prompt Statistics" title="Direct link to Use Case 5 - Viewing Prompt Statistics" translate="no">​</a></h3>
-<p><em><strong>test_promptstats_returns_sorted_summary()</strong></em></p>
-<p>Status: Planned
-Purpose: Verifies /promptstats returns formatted prompt engagement summary.
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-4---managing-user-interest-tags-picktags">Use Case 4 - Managing User Interest Tags (<code>/picktags</code>)<a href="#use-case-4---managing-user-interest-tags-picktags" class="hash-link" aria-label="Direct link to use-case-4---managing-user-interest-tags-picktags" title="Direct link to use-case-4---managing-user-interest-tags-picktags" translate="no">​</a></h3>
+<p><em><strong>test_picktags_command_opens_static_checkbox_modal()</strong></em></p>
+<p>Status: Implemented (tests/test_commands.py)
+Purpose: Verifies <code>/picktags</code> opens the modal with static checkbox options and pre-selected existing tags.
 Input parameters:</p>
 <ul>
-<li class="">Mocked tracker get_all_stats() returns prompt records with ask/respond counts</li>
-<li class="">Mocked callbacks: ack, respond
+<li class="">Command body with team_id, user_id, trigger_id</li>
+<li class="">Mocked existing interest tags
 Expected results:</li>
 <li class="">ack() called once</li>
-<li class="">respond() includes ask/response totals in formatted output
+<li class="">client.views_open(...) called with expected checkbox options and initial selections
 Uses:</li>
-<li class="">Patch get_tracker() to return mocked tracker</li>
-<li class="">Mock callbacks</li>
+<li class="">DummyApp command registry</li>
+<li class="">Patched get_user_interests</li>
+</ul>
+<p><em><strong>test_picktags_submission_saves_selected_tags()</strong></em></p>
+<p>Status: Implemented (tests/test_commands.py)
+Purpose: Verifies modal submission persists tags and sends confirmation DM.
+Input parameters:</p>
+<ul>
+<li class="">View submission payload with selected options
+Expected results:</li>
+<li class="">save_user_interests(team_id, user_id, tags) called</li>
+<li class="">client.chat_postMessage(...) called once
+Uses:</li>
+<li class="">Patched save_user_interests</li>
+<li class="">Mocked Slack client</li>
+</ul>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-5---running-social-connector-connect">Use Case 5 - Running Social Connector (<code>/connect</code>)<a href="#use-case-5---running-social-connector-connect" class="hash-link" aria-label="Direct link to use-case-5---running-social-connector-connect" title="Direct link to use-case-5---running-social-connector-connect" translate="no">​</a></h3>
+<p><em><strong>test_social_connector_finds_pair_from_shared_tags()</strong></em></p>
+<p>Status: Implemented (tests/test_commands.py)
+Purpose: Verifies shared-tag matching logic returns a valid pair.</p>
+<p><em><strong>test_social_connector_randomly_selects_from_all_matching_pairs()</strong></em></p>
+<p>Status: Implemented (tests/test_commands.py)
+Purpose: Verifies random selection occurs from all valid matching pairs.</p>
+<p><em><strong>test_social_connector_posts_soft_intro_message()</strong></em></p>
+<p>Status: Implemented (tests/test_commands.py)
+Purpose: Verifies connector posts intro plus icebreaker to the channel.</p>
+<p><em><strong>test_social_connector_command_posts_in_current_channel()</strong></em></p>
+<p>Status: Implemented (tests/test_commands.py)
+Purpose: Verifies <code>/connect</code> calls connector flow for current channel/workspace.</p>
+<p><em><strong>test_social_connector_command_responds_when_no_match_found()</strong></em></p>
+<p>Status: Implemented (tests/test_commands.py)
+Purpose: Verifies user gets a friendly no-match response when no eligible pair exists.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-6---scheduler-and-state-integration-time-behavior-used-by-findtime-picktime-and-app-home-settings">Use Case 6 - Scheduler and State Integration (time behavior used by <code>/findtime</code>, <code>/picktime</code>, and App Home settings)<a href="#use-case-6---scheduler-and-state-integration-time-behavior-used-by-findtime-picktime-and-app-home-settings" class="hash-link" aria-label="Direct link to use-case-6---scheduler-and-state-integration-time-behavior-used-by-findtime-picktime-and-app-home-settings" title="Direct link to use-case-6---scheduler-and-state-integration-time-behavior-used-by-findtime-picktime-and-app-home-settings" translate="no">​</a></h3>
+<p><em><strong>test_pick_random_time_from_range()</strong></em></p>
+<p>Status: Implemented (tests/test_acceptance.py)
+Purpose: Verifies scheduler time selection returns a valid time within configured bounds.</p>
+<p><em><strong>test_pick_random_time_falls_back_to_preset_when_no_range()</strong></em></p>
+<p>Status: Implemented (tests/test_acceptance.py)
+Purpose: Verifies fallback behavior when no explicit random range is configured.</p>
+<p><em><strong>test_pick_random_time_after_filters_past_times()</strong></em></p>
+<p>Status: Implemented (tests/test_acceptance.py)
+Purpose: Verifies selected time is constrained to valid future choices for the day.</p>
+<p><em><strong>test_full_flow_state_and_scheduler()</strong></em></p>
+<p>Status: Implemented (tests/test_acceptance.py)
+Purpose: Verifies state + scheduler integration preserves selected mode, selected channel, and chosen time.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-7---viewing-prompt-statistics-promptstats">Use Case 7 - Viewing Prompt Statistics (<code>/promptstats</code>)<a href="#use-case-7---viewing-prompt-statistics-promptstats" class="hash-link" aria-label="Direct link to use-case-7---viewing-prompt-statistics-promptstats" title="Direct link to use-case-7---viewing-prompt-statistics-promptstats" translate="no">​</a></h3>
+<p><em><strong>test_promptstats_returns_sorted_summary()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/promptstats</code> returns formatted prompt engagement summary.
+Input parameters:</p>
+<ul>
+<li class="">Mocked tracker get_all_stats() returns prompt records with ask/respond counts
+Expected results:</li>
+<li class="">ack() called once</li>
+<li class="">respond() includes ask/response totals in formatted output</li>
 </ul>
 <p><em><strong>test_promptstats_handles_empty_data()</strong></em></p>
 <p>Status: Planned
-Purpose: Verifies /promptstats returns no-data message when stats list is empty.
+Purpose: Verifies <code>/promptstats</code> returns no-data message when stats list is empty.
 Input parameters:</p>
 <ul>
 <li class="">Mocked tracker returns []
 Expected results:</li>
-<li class="">respond() returns no-data message path
-Uses:</li>
-<li class="">Patch get_tracker() and mock callbacks</li>
+<li class="">respond() returns no-data message path</li>
 </ul>
 <hr>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="automation-notes">Automation Notes<a href="#automation-notes" class="hash-link" aria-label="Direct link to Automation Notes" title="Direct link to Automation Notes" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-8---picking-topic-picktopic">Use Case 8 - Picking Topic (<code>/picktopic</code>)<a href="#use-case-8---picking-topic-picktopic" class="hash-link" aria-label="Direct link to use-case-8---picking-topic-picktopic" title="Direct link to use-case-8---picking-topic-picktopic" translate="no">​</a></h3>
+<p><em><strong>test_picktopic_lists_topics_when_no_arg()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/picktopic</code> (without args) lists available topics and usage hint.</p>
+<p><em><strong>test_picktopic_sets_pending_topic_when_valid()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/picktopic &lt;topic&gt;</code> stores one-time pending topic in workspace state.</p>
+<p><em><strong>test_picktopic_rejects_unknown_topic()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/picktopic</code> returns validation guidance for invalid topics.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-9---time-commands-findtime-and-picktime">Use Case 9 - Time Commands (<code>/findtime</code> and <code>/picktime</code>)<a href="#use-case-9---time-commands-findtime-and-picktime" class="hash-link" aria-label="Direct link to use-case-9---time-commands-findtime-and-picktime" title="Direct link to use-case-9---time-commands-findtime-and-picktime" translate="no">​</a></h3>
+<p><em><strong>test_findtime_returns_target_time_and_mode()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/findtime</code> reports workspace target time and active mode.</p>
+<p><em><strong>test_picktime_lists_options_when_empty()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/picktime</code> without argument returns preset list.</p>
+<p><em><strong>test_picktime_sets_target_time_for_valid_choice()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/picktime &lt;1..11&gt;</code> updates state daily target time.</p>
+<p><em><strong>test_picktime_rejects_invalid_input()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/picktime</code> handles non-numeric and out-of-range values safely.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-10---viewing-status-vibestatus">Use Case 10 - Viewing Status (<code>/vibestatus</code>)<a href="#use-case-10---viewing-status-vibestatus" class="hash-link" aria-label="Direct link to use-case-10---viewing-status-vibestatus" title="Direct link to use-case-10---viewing-status-vibestatus" translate="no">​</a></h3>
+<p><em><strong>test_vibestatus_random_mode_summary()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/vibestatus</code> includes mode label, channel, target time, active days, and posting status for random mode.</p>
+<p><em><strong>test_vibestatus_static_mode_summary()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/vibestatus</code> reports static time correctly when static mode is active.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-11---help-command-help">Use Case 11 - Help Command (<code>/help</code>)<a href="#use-case-11---help-command-help" class="hash-link" aria-label="Direct link to use-case-11---help-command-help" title="Direct link to use-case-11---help-command-help" translate="no">​</a></h3>
+<p><em><strong>test_help_returns_setup_guide_text()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/help</code> returns non-empty setup and usage guidance and acknowledges once.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-12---mentor-program-command-mentor">Use Case 12 - Mentor Program Command (<code>/mentor</code>)<a href="#use-case-12---mentor-program-command-mentor" class="hash-link" aria-label="Direct link to use-case-12---mentor-program-command-mentor" title="Direct link to use-case-12---mentor-program-command-mentor" translate="no">​</a></h3>
+<p><em><strong>test_mentor_signup_opens_modal_for_valid_role()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/mentor signup mentor|mentee</code> opens the signup modal when user is not already registered.</p>
+<p><em><strong>test_mentor_status_returns_waiting_or_pairing()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/mentor status</code> returns correct summary for unmatched and matched users.</p>
+<p><em><strong>test_mentor_leave_removes_registration_and_clears_pair()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/mentor leave</code> removes profile and clears existing pairing.</p>
+<p><em><strong>test_mentor_match_notifies_pairs_when_available()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/mentor match</code> creates and notifies pairs when compatible unmatched users exist.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="use-case-13---vibe-analytics-command-checkvibes">Use Case 13 - Vibe Analytics Command (<code>/checkvibes</code>)<a href="#use-case-13---vibe-analytics-command-checkvibes" class="hash-link" aria-label="Direct link to use-case-13---vibe-analytics-command-checkvibes" title="Direct link to use-case-13---vibe-analytics-command-checkvibes" translate="no">​</a></h3>
+<p><em><strong>test_checkvibes_defaults_to_today()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/checkvibes</code> with no args triggers analysis for current day.</p>
+<p><em><strong>test_checkvibes_accepts_all_and_date_filters()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies <code>/checkvibes all</code>, <code>/checkvibes yesterday</code>, and <code>/checkvibes MM-DD-YYYY</code> parse correctly.</p>
+<p><em><strong>test_checkvibes_invalid_date_returns_validation_error()</strong></em></p>
+<p>Status: Planned
+Purpose: Verifies invalid date input returns a user-facing validation response.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="automation-notes">Automation notes<a href="#automation-notes" class="hash-link" aria-label="Direct link to Automation notes" title="Direct link to Automation notes" translate="no">​</a></h3>
 <ul>
-<li class="">All integration tests are run with pytest.</li>
-<li class="">External services (Slack API, OAuth requests, and database operations) are mocked or patched.</li>
-<li class="">Test outcomes are assertion-based and pass/fail automatically.</li>
-</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/Capstone-Projects-2026-spring/project-bereal-chatbot/edit/main/documentation/docs/testing/integration-testing.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><details><summary>Revision History</summary><table><thead><tr><th scope="row">Author</th><th scope="row">Revision</th><th scope="row">Date</th></tr></thead><tbody><tr><td colspan="3" style="text-align:center;font-style:italic;color:#666">Loading...</td></tr></tbody></table></details><span class="theme-last-updated">Last updated<!-- --> by <b>Khai Thach</b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/project-bereal-chatbot/docs/testing/unit-testing"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Unit tests</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/project-bereal-chatbot/docs/testing/acceptance-testing"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Acceptance test</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#use-case-1---installing-vibecheck-in-a-slack-workspace" class="table-of-contents__link toc-highlight">Use Case 1 - Installing VibeCheck in a Slack Workspace</a></li><li><a href="#use-case-2---setting-active-channel" class="table-of-contents__link toc-highlight">Use Case 2 - Setting Active Channel</a></li><li><a href="#use-case-3---configuring-prompt-time" class="table-of-contents__link toc-highlight">Use Case 3 - Configuring Prompt Time</a></li><li><a href="#use-case-4---sending-prompt" class="table-of-contents__link toc-highlight">Use Case 4 - Sending Prompt</a></li><li><a href="#use-case-5---viewing-prompt-statistics" class="table-of-contents__link toc-highlight">Use Case 5 - Viewing Prompt Statistics</a></li><li><a href="#automation-notes" class="table-of-contents__link toc-highlight">Automation Notes</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/project-bereal-chatbot/docs/intro">Documentation</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/Capstone-Projects-2026-spring/project-bereal-chatbot" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a class="footer__link-item" href="/project-bereal-chatbot/tutorial/open-source-usage">Template Contributors</a></li></ul></div></div><div class="footer__bottom text--center"><div class="margin-bottom--sm"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="footer__logo themedComponent_mlkZ themedComponent--light_NVdE"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="footer__logo themedComponent_mlkZ themedComponent--dark_xIcU"></div><div class="footer__copyright">Copyright © 2026 Project Bereal Chatbot, Inc. Built with Docusaurus.</div></div></div></footer></div>
+<li class="">All automated tests are run with pytest.</li>
+<li class="">External services (Slack API, OAuth requests, MongoDB, and LLM-dependent calls) are mocked or patched in integration-style tests.</li>
+<li class="">Existing automated coverage for slash command flows is strongest today for <code>/forceprompt</code>, <code>/setchannel</code>, <code>/picktags</code>, and <code>/connect</code>; other active slash commands are now explicitly tracked as planned integration scenarios.</li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/Capstone-Projects-2026-spring/project-bereal-chatbot/edit/main/documentation/docs/testing/integration-testing.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><details><summary>Revision History</summary><table><thead><tr><th scope="row">Author</th><th scope="row">Revision</th><th scope="row">Date</th></tr></thead><tbody><tr><td colspan="3" style="text-align:center;font-style:italic;color:#666">Loading...</td></tr></tbody></table></details><span class="theme-last-updated">Last updated<!-- --> by <b>Khai Thach</b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/project-bereal-chatbot/docs/testing/unit-testing"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Unit tests</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/project-bereal-chatbot/docs/testing/acceptance-testing"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Acceptance test</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#current-slash-command-inventory" class="table-of-contents__link toc-highlight">Current slash command inventory</a></li><li><a href="#use-case-1---installing-vibecheck-in-a-slack-workspace" class="table-of-contents__link toc-highlight">Use Case 1 - Installing VibeCheck in a Slack Workspace</a></li><li><a href="#use-case-2---setting-active-channel-setchannel" class="table-of-contents__link toc-highlight">Use Case 2 - Setting Active Channel (<code>/setchannel</code>)</a></li><li><a href="#use-case-3---sending-prompt-forceprompt" class="table-of-contents__link toc-highlight">Use Case 3 - Sending Prompt (<code>/forceprompt</code>)</a></li><li><a href="#use-case-4---managing-user-interest-tags-picktags" class="table-of-contents__link toc-highlight">Use Case 4 - Managing User Interest Tags (<code>/picktags</code>)</a></li><li><a href="#use-case-5---running-social-connector-connect" class="table-of-contents__link toc-highlight">Use Case 5 - Running Social Connector (<code>/connect</code>)</a></li><li><a href="#use-case-6---scheduler-and-state-integration-time-behavior-used-by-findtime-picktime-and-app-home-settings" class="table-of-contents__link toc-highlight">Use Case 6 - Scheduler and State Integration (time behavior used by <code>/findtime</code>, <code>/picktime</code>, and App Home settings)</a></li><li><a href="#use-case-7---viewing-prompt-statistics-promptstats" class="table-of-contents__link toc-highlight">Use Case 7 - Viewing Prompt Statistics (<code>/promptstats</code>)</a></li><li><a href="#use-case-8---picking-topic-picktopic" class="table-of-contents__link toc-highlight">Use Case 8 - Picking Topic (<code>/picktopic</code>)</a></li><li><a href="#use-case-9---time-commands-findtime-and-picktime" class="table-of-contents__link toc-highlight">Use Case 9 - Time Commands (<code>/findtime</code> and <code>/picktime</code>)</a></li><li><a href="#use-case-10---viewing-status-vibestatus" class="table-of-contents__link toc-highlight">Use Case 10 - Viewing Status (<code>/vibestatus</code>)</a></li><li><a href="#use-case-11---help-command-help" class="table-of-contents__link toc-highlight">Use Case 11 - Help Command (<code>/help</code>)</a></li><li><a href="#use-case-12---mentor-program-command-mentor" class="table-of-contents__link toc-highlight">Use Case 12 - Mentor Program Command (<code>/mentor</code>)</a></li><li><a href="#use-case-13---vibe-analytics-command-checkvibes" class="table-of-contents__link toc-highlight">Use Case 13 - Vibe Analytics Command (<code>/checkvibes</code>)</a></li><li><a href="#automation-notes" class="table-of-contents__link toc-highlight">Automation notes</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/project-bereal-chatbot/docs/intro">Documentation</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/Capstone-Projects-2026-spring/project-bereal-chatbot" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a class="footer__link-item" href="/project-bereal-chatbot/tutorial/open-source-usage">Template Contributors</a></li></ul></div></div><div class="footer__bottom text--center"><div class="margin-bottom--sm"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="footer__logo themedComponent_mlkZ themedComponent--light_NVdE"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="footer__logo themedComponent_mlkZ themedComponent--dark_xIcU"></div><div class="footer__copyright">Copyright © 2026 Project Bereal Chatbot, Inc. Built with Docusaurus.</div></div></div></footer></div>
 </body>
 </html>

@@ -41,6 +41,8 @@
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BotState</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Thread-safe per-workspace bot configuration and runtime state.&quot;&quot;&quot;</span>
+
     <span class="n">_lock</span><span class="p">:</span> <span class="n">Lock</span>
     <span class="n">_daily_target_time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">_active_channel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -68,6 +70,7 @@
 <div class="viewcode-block" id="BotState.set_last_prompt_ts">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_last_prompt_ts">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_last_prompt_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">channel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store the timestamp of the last prompt and reset the reminder flag.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_last_prompt_ts</span> <span class="o">=</span> <span class="n">ts</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_reminder_sent</span> <span class="o">=</span> <span class="kc">False</span>
@@ -78,6 +81,7 @@
 <div class="viewcode-block" id="BotState.get_last_prompt_ts">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_last_prompt_ts">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_last_prompt_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the Slack message timestamp of the last posted prompt.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_prompt_ts</span></div>
 
@@ -85,6 +89,7 @@
 <div class="viewcode-block" id="BotState.get_reminder_sent">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_reminder_sent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_reminder_sent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether a reminder has already been sent for the current prompt.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reminder_sent</span></div>
 
@@ -92,6 +97,7 @@
 <div class="viewcode-block" id="BotState.set_reminder_sent">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_reminder_sent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_reminder_sent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark whether a reminder has been sent for the current prompt.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_reminder_sent</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -99,6 +105,7 @@
 <div class="viewcode-block" id="BotState.get_reminder_enabled">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_reminder_enabled">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_reminder_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether prompt reminders are enabled for this workspace.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reminder_enabled</span></div>
 
@@ -106,6 +113,7 @@
 <div class="viewcode-block" id="BotState.set_reminder_enabled">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_reminder_enabled">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_reminder_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enable or disable prompt reminders for this workspace.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_reminder_enabled</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -113,6 +121,7 @@
 <div class="viewcode-block" id="BotState.set_active_tags">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_active_tags">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_active_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replace the set of tags used to filter prompt selection.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_active_tags</span> <span class="o">=</span> <span class="n">tags</span></div>
 
@@ -120,6 +129,7 @@
 <div class="viewcode-block" id="BotState.get_active_tags">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_active_tags">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_active_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a snapshot of the active tag filter set.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_tags</span><span class="p">)</span></div>
 
@@ -127,6 +137,7 @@
 <div class="viewcode-block" id="BotState.set_pending_topic">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_pending_topic">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_pending_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Queue a topic to be used as context for the next prompt.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pending_topic</span> <span class="o">=</span> <span class="n">topic</span></div>
 
@@ -144,6 +155,7 @@
 <div class="viewcode-block" id="BotState.set_daily_target_time">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_daily_target_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_daily_target_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the resolved daily target time (HH:MM) for the current day.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_daily_target_time</span> <span class="o">=</span> <span class="n">t</span></div>
 
@@ -151,6 +163,7 @@
 <div class="viewcode-block" id="BotState.set_active_channel">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_active_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_active_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the Slack channel ID where prompts will be posted.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_active_channel</span> <span class="o">=</span> <span class="n">channel</span></div>
 
@@ -158,6 +171,7 @@
 <div class="viewcode-block" id="BotState.get_active_channel">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_active_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_active_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the Slack channel ID where prompts will be posted.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_channel</span></div>
 
@@ -165,6 +179,7 @@
 <div class="viewcode-block" id="BotState.set_active_token">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_active_token">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_active_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store the Slack bot token for this workspace.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_active_token</span> <span class="o">=</span> <span class="n">token</span></div>
 
@@ -172,6 +187,7 @@
 <div class="viewcode-block" id="BotState.get_active_token">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_active_token">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_active_token</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the Slack bot token for this workspace.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_token</span></div>
 
@@ -179,6 +195,7 @@
 <div class="viewcode-block" id="BotState.get_daily_target_time">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_daily_target_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_daily_target_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the resolved daily target time (HH:MM) for the current day.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_daily_target_time</span></div>
 
@@ -186,6 +203,7 @@
 <div class="viewcode-block" id="BotState.set_selected_preset">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_selected_preset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_selected_preset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the active scheduling preset name.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_selected_preset</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -193,6 +211,7 @@
 <div class="viewcode-block" id="BotState.get_selected_preset">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_selected_preset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_selected_preset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the active scheduling preset name.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_preset</span></div>
 
@@ -200,6 +219,7 @@
 <div class="viewcode-block" id="BotState.set_selected_mode">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_selected_mode">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_selected_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the scheduling mode (e.g. &#39;random&#39;, &#39;static&#39;).&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_selected_mode</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -207,6 +227,7 @@
 <div class="viewcode-block" id="BotState.get_selected_mode">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_selected_mode">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_selected_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the scheduling mode (e.g. &#39;random&#39;, &#39;static&#39;).&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_mode</span></div>
 
@@ -214,6 +235,7 @@
 <div class="viewcode-block" id="BotState.set_random_start_time">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_random_start_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_random_start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the earliest time (HH:MM) for random prompt scheduling.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_random_start_time</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -221,6 +243,7 @@
 <div class="viewcode-block" id="BotState.get_random_start_time">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_random_start_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_random_start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the earliest time (HH:MM) for random prompt scheduling.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_start_time</span></div>
 
@@ -228,6 +251,7 @@
 <div class="viewcode-block" id="BotState.set_random_end_time">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_random_end_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_random_end_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the latest time (HH:MM) for random prompt scheduling.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_random_end_time</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -235,6 +259,7 @@
 <div class="viewcode-block" id="BotState.get_random_end_time">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_random_end_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_random_end_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the latest time (HH:MM) for random prompt scheduling.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_end_time</span></div>
 
@@ -242,6 +267,7 @@
 <div class="viewcode-block" id="BotState.set_static_time">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_static_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_static_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the fixed daily time (HH:MM) used in static scheduling mode.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_static_time</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -249,6 +275,7 @@
 <div class="viewcode-block" id="BotState.get_static_time">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_static_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_static_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the fixed daily time (HH:MM) used in static scheduling mode.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_time</span></div>
 
@@ -256,6 +283,7 @@
 <div class="viewcode-block" id="BotState.set_active_days">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_active_days">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_active_days</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replace the set of weekday names on which prompts are posted.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_active_days</span> <span class="o">=</span> <span class="n">days</span></div>
 
@@ -263,6 +291,7 @@
 <div class="viewcode-block" id="BotState.get_active_days">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_active_days">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_active_days</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a snapshot of the weekday names on which prompts are posted.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_days</span><span class="p">)</span></div>
 
@@ -270,6 +299,7 @@
 <div class="viewcode-block" id="BotState.is_today_active">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.is_today_active">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_today_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if today&#39;s weekday is in the active days set.&quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
         <span class="n">today</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%A&quot;</span><span class="p">)</span>  <span class="c1"># e.g. &quot;Monday&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
@@ -279,6 +309,7 @@
 <div class="viewcode-block" id="BotState.set_pending_custom_prompt">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_pending_custom_prompt">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_pending_custom_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Queue a user-authored prompt text to be used instead of a generated one.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pending_custom_prompt</span> <span class="o">=</span> <span class="n">text</span></div>
 
@@ -286,6 +317,7 @@
 <div class="viewcode-block" id="BotState.get_and_clear_pending_custom_prompt">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_and_clear_pending_custom_prompt">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_and_clear_pending_custom_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the pending custom prompt text and clear it so it is used only once.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_custom_prompt</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pending_custom_prompt</span> <span class="o">=</span> <span class="kc">None</span>
@@ -295,6 +327,7 @@
 <div class="viewcode-block" id="BotState.set_user_prompt_creator_used_today">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_user_prompt_creator_used_today">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_user_prompt_creator_used_today</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark whether a user has already been invited to create a prompt today.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_user_prompt_creator_used_today</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -302,6 +335,7 @@
 <div class="viewcode-block" id="BotState.get_user_prompt_creator_used_today">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_user_prompt_creator_used_today">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_user_prompt_creator_used_today</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether a user has already been invited to create a prompt today.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_prompt_creator_used_today</span></div>
 
@@ -309,6 +343,7 @@
 <div class="viewcode-block" id="BotState.set_social_connector_used_today">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_social_connector_used_today">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_social_connector_used_today</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark whether the social connector flow has already run today.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_social_connector_used_today</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -316,6 +351,7 @@
 <div class="viewcode-block" id="BotState.get_social_connector_used_today">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_social_connector_used_today">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_social_connector_used_today</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the social connector flow has already run today.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_social_connector_used_today</span></div>
 
@@ -323,6 +359,7 @@
 <div class="viewcode-block" id="BotState.set_mentor_checkin_week">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_mentor_checkin_week">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_mentor_checkin_week</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">week</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store the ISO week number when the last mentor check-in was sent.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_mentor_checkin_week</span> <span class="o">=</span> <span class="n">week</span></div>
 
@@ -330,6 +367,7 @@
 <div class="viewcode-block" id="BotState.get_mentor_checkin_week">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_mentor_checkin_week">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_mentor_checkin_week</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the ISO week number when the last mentor check-in was sent.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mentor_checkin_week</span></div>
 
@@ -337,6 +375,7 @@
 <div class="viewcode-block" id="BotState.set_prompt_response_type">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_prompt_response_type">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_prompt_response_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the expected response type for prompts: &#39;image&#39;, &#39;text&#39;, or &#39;any&#39;.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_response_type</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -344,6 +383,7 @@
 <div class="viewcode-block" id="BotState.get_prompt_response_type">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_prompt_response_type">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_prompt_response_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the expected response type for prompts: &#39;image&#39;, &#39;text&#39;, or &#39;any&#39;.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_response_type</span></div>
 
@@ -351,6 +391,7 @@
 <div class="viewcode-block" id="BotState.set_last_prompt_channel">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.set_last_prompt_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_last_prompt_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the channel ID where the most recent prompt was posted.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_last_prompt_channel</span> <span class="o">=</span> <span class="n">channel</span></div>
 
@@ -358,6 +399,7 @@
 <div class="viewcode-block" id="BotState.get_last_prompt_channel">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.BotState.get_last_prompt_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_last_prompt_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the channel ID where the most recent prompt was posted.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_prompt_channel</span></div>
 </div>
@@ -375,6 +417,7 @@
 <div class="viewcode-block" id="create_state">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.create_state">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_state</span><span class="p">(</span><span class="n">default_channel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BotState</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new BotState with a fresh lock, optionally pre-setting the active channel.&quot;&quot;&quot;</span>
     <span class="n">state</span> <span class="o">=</span> <span class="n">BotState</span><span class="p">(</span><span class="n">_lock</span><span class="o">=</span><span class="n">Lock</span><span class="p">())</span>
     <span class="k">if</span> <span class="n">default_channel</span><span class="p">:</span>
         <span class="n">state</span><span class="o">.</span><span class="n">set_active_channel</span><span class="p">(</span><span class="n">default_channel</span><span class="p">)</span>
@@ -385,6 +428,8 @@
 <div class="viewcode-block" id="StateManager">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.StateManager">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StateManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registry that maps workspace team IDs to their BotState instances.&quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_states</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
@@ -392,6 +437,7 @@
 <div class="viewcode-block" id="StateManager.get_state">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.StateManager.get_state">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">team_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BotState</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the BotState for the given team, creating one if it does not exist.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">team_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_states</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_states</span><span class="p">[</span><span class="n">team_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">BotState</span><span class="p">(</span><span class="n">_lock</span><span class="o">=</span><span class="n">Lock</span><span class="p">())</span>
@@ -401,6 +447,7 @@
 <div class="viewcode-block" id="StateManager.all_states">
 <a class="viewcode-back" href="../../../_generated/src.bot.state.html#src.bot.state.StateManager.all_states">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">all_states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a shallow copy of the team_id → BotState mapping.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_states</span><span class="p">)</span></div>
 </div>

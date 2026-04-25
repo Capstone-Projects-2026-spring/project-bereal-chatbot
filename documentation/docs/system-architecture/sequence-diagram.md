@@ -105,3 +105,215 @@ sequenceDiagram
     Tracker-->>Bot: Formatted top entries
     Bot-->>User: Prompt statistics summary
 ```
+
+#### Use Case 6: Configuring the Bot via the Control Panel
+
+```mermaid
+sequenceDiagram
+    participant Admin
+    participant Slack
+    participant Bot as VibeCheck Bot
+    participant State as BotState
+
+    Admin->>Slack: Opens App Home tab
+    Slack->>Bot: app_home_opened event
+    Bot->>State: Read current workspace config
+    State-->>Bot: Current settings
+    Bot-->>Slack: Render control panel UI
+
+    Admin->>Slack: Submits config changes
+    Slack->>Bot: view_submission payload
+    Bot->>State: Apply updated settings (mode, time, days, tags, reminders, etc.)
+    Bot->>Slack: Send confirmation DM to admin
+```
+
+#### Use Case 7: User-Created Prompt Invitation
+
+```mermaid
+sequenceDiagram
+    participant Scheduler
+    participant Bot as VibeCheck Bot
+    participant Slack
+    participant User
+    participant State as BotState
+    participant Catalog as Prompt Library (CSV)
+
+    Scheduler->>Bot: 9:15 AM trigger (30% probability)
+    Bot->>Slack: Fetch channel members
+    Slack-->>Bot: Member list
+    Bot->>Slack: Send DM with "Create Today's Prompt" button
+    Slack-->>User: DM received
+
+    User->>Slack: Clicks button within 5-minute window
+    Slack->>Bot: action payload
+    Bot-->>User: Opens prompt creation modal
+
+    User->>Slack: Submits modal (topic, custom text, send time)
+    Slack->>Bot: view_submission payload
+    Bot->>Bot: Validate submission within time window
+    alt Submission within window
+        Bot->>State: Store pending custom prompt and target time
+        Bot->>Catalog: Resolve topic-matched prompt if no custom text
+        Bot-->>User: Confirm submission
+    else Window expired
+        Bot-->>User: Return expiry error message
+    end
+```
+
+#### Use Case 8: Tracking Response Streaks
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Slack
+    participant Bot as VibeCheck Bot
+    participant StreakSvc as Streak Service
+    participant LogFile as Structured Log (JSONL)
+
+    User->>Slack: /streak
+    Slack->>Bot: Slash command payload
+    Bot->>StreakSvc: get_user_streak(user_id)
+    StreakSvc->>LogFile: Read response entries for user
+    LogFile-->>StreakSvc: Timestamped response records
+    StreakSvc-->>Bot: Current streak count
+    Bot->>StreakSvc: check_and_announce_streak(user_id)
+    alt Milestone reached (7, 14, 21, 50, 100, 365, 730 days)
+        StreakSvc->>Slack: Post milestone announcement in channel
+    end
+    Bot-->>User: Return streak count with emoji
+
+    opt /streak leaderboard
+        User->>Slack: /streak leaderboard
+        Slack->>Bot: Slash command payload
+        Bot->>StreakSvc: get_all_streaks()
+        StreakSvc->>LogFile: Read all user response entries
+        LogFile-->>StreakSvc: All timestamped records
+        StreakSvc-->>Bot: Top 10 users by streak
+        Bot-->>User: Leaderboard summary
+    end
+```
+
+#### Use Case 9: Social Connector
+
+```mermaid
+sequenceDiagram
+    participant Scheduler
+    participant Bot as VibeCheck Bot
+    participant DB as MongoDB (user_interests)
+    participant LLM as LLM Service (Groq)
+    participant Slack
+
+    Scheduler->>Bot: 2:00 PM trigger (50% probability) or /connect
+    Bot->>DB: get_all_user_interests(team_id)
+    DB-->>Bot: Users with interest tags
+    Bot->>Bot: Find two users with shared tags
+    alt LLM enabled
+        Bot->>LLM: get_social_connector_message(user1, user2, shared_tags)
+        LLM-->>Bot: Personalized introduction message
+    else LLM unavailable
+        Bot->>Bot: Use default introduction template
+    end
+    Bot->>Slack: Post introduction message tagging both users
+```
+
+#### Use Case 10: Mentor-Mentee Program
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Admin
+    participant Slack
+    participant Bot as VibeCheck Bot
+    participant MentorSvc as Mentor Service
+    participant DB as MongoDB (mentor_mentee)
+    participant LLM as LLM Service (Groq)
+
+    User->>Slack: /mentor signup mentor
+    Slack->>Bot: Slash command payload
+    Bot-->>User: Opens signup modal
+    User->>Slack: Submits profile (title, experience, bio, interests)
+    Slack->>Bot: view_submission payload
+    Bot->>MentorSvc: upsert_registration(team_id, user_id, role, ...)
+    MentorSvc->>DB: Save profile document
+
+    Admin->>Slack: /mentor match
+    Slack->>Bot: Slash command payload
+    Bot->>MentorSvc: get_all_unmatched(team_id)
+    MentorSvc->>DB: Query unmatched mentors and mentees
+    DB-->>MentorSvc: Unmatched lists
+    MentorSvc->>MentorSvc: run_matching() — greedy algorithm by shared interests
+    loop For each matched pair
+        MentorSvc->>DB: Save pairing
+        Bot->>Slack: Create group DM for pair
+        Slack-->>Bot: Group DM channel id
+        Bot->>LLM: get_mentor_intro_message(mentor_id, mentee_id, shared_tags)
+        LLM-->>Bot: Personalized intro messages
+        Bot->>Slack: Send intro DM to each user
+        Bot->>Slack: Post welcome message in group DM
+    end
+
+    Note over Bot,Slack: Every Monday at 9:00 AM
+    Bot->>MentorSvc: get_all_pairs(team_id)
+    MentorSvc->>DB: Query active pairs
+    DB-->>MentorSvc: Matched pairs with group DM channels
+    loop For each active pair
+        Bot->>Slack: Send weekly check-in message to group DM
+    end
+```
+
+#### Use Case 11: Late Response Reminders
+
+```mermaid
+sequenceDiagram
+    participant Scheduler
+    participant Bot as VibeCheck Bot
+    participant State as BotState
+    participant Slack
+    participant LogFile as Structured Log (JSONL)
+
+    Scheduler->>Bot: ~30 seconds after prompt posted
+    Bot->>State: Check reminder_enabled
+    alt Reminders enabled
+        Bot->>Slack: conversations.members(channel)
+        Slack-->>Bot: Channel member list
+        Bot->>LogFile: Read responses since last_prompt_ts
+        LogFile-->>Bot: Users who have already responded
+        loop For each non-responding, non-bot member
+            Bot->>Slack: Send reminder DM to user
+        end
+        Bot->>State: Set reminder_sent = true
+    else Reminders disabled
+        Bot->>Bot: Skip
+    end
+```
+
+#### Use Case 12: AI-Powered Reactions and Replies
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Slack
+    participant Bot as VibeCheck Bot
+    participant Tracker as Response Tracker
+    participant DB as MongoDB (prompt_stats)
+    participant LogFile as Structured Log (JSONL)
+    participant LLM as LLM Service (Groq)
+
+    User->>Slack: Posts message in active channel
+    Slack->>Bot: message event
+    Bot->>LogFile: Log structured response entry
+    Bot->>Tracker: record_response(channel, team_id)
+    Tracker->>DB: Increment times_responded
+
+    alt LLM reactions enabled and probability check passes
+        Bot->>LLM: get_reaction_emoji(message_text, prompt_text, image_urls)
+        LLM-->>Bot: Slack emoji name
+        Bot->>Slack: reactions.add(emoji, message_ts)
+    end
+
+    alt LLM replies enabled and probability check passes
+        Bot->>LLM: get_reply_message(message_text, image_urls)
+        LLM-->>Bot: Short casual reply text
+        Bot->>Slack: Post reply in channel thread
+    end
+```

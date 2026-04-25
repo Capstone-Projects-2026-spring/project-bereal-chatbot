@@ -95,7 +95,7 @@ def main():
     register_onboarding(bolt_app, state_manager)
     register_social_connector_command(bolt_app)
     register_user_prompt_handlers(bolt_app, state_manager)
-    register_check_vibes_command(bolt_app, state_manager, auth_info['user_id'])
+    register_check_vibes_command(bolt_app, state_manager)
     register_mentor_mentee_command(bolt_app, state_manager)
     register_streak_command(bolt_app, client)
 

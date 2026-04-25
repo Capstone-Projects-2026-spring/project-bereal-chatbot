@@ -14,13 +14,13 @@ from services.mongo_service import get_tracker
 def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specificVibe):
     try:
         db =  mongo_client.get_database("vibecheck")
-    except ConnectionError:
-        respond(f"MongoDB Connection Failure.")
+    except Exception as e:
+        print(f"[CHECK VIBES COMMAND] Failed to get the vibe check database: {e}")    
 
     try:
         installations_col = db.get_collection("installations")
-    except ConnectionError:
-        respond(f"Installations collection not found.")
+    except Exception as e:
+        print(f"[CHECK VIBES COMMAND] Failed to get the installations collection: {e}")    
     channel = payload.get("channel_id")  # default to the channel where command was used
     team_id = ( 
         payload.get("team_id") 
@@ -36,12 +36,20 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
     
     collection_name = f"messages_{team_name}" if team_name else f"messages_{team_id or 'unknown'}"
     try:
-        messages_col = db.get_collection(collection_name)
-    except ConnectionError:
-        respond(f"Message Collection Not Connected Successfully")     
+        messages_col = db[collection_name] # db.get_collection(collection_name)
+        print(collection_name)
+    except Exception as e:
+        print(f"[CHECK VIBES COMMAND] Failed to get the message collection: {e}")    
 
-    message_array = list(messages_col.find({}))
-    prompt_list = organize_data(message_array, botID)
+    try:
+
+        message_array = list(messages_col.find({}))
+        
+        prompt_list = organize_data(message_array, botID)
+        print(f"Bot ID: {botID} | \n Prompt List: {prompt_list}")
+    except Exception as e:
+        print(f"[CHECK VIBES COMMAND] Failed to create the message array: {e}")    
+
     CurrentDaysVibes = []
     curDate = dayValue
     if dayValue:
@@ -311,17 +319,18 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
 
  #   lines.append(f"\nRandom Vibes: {randomVibes}\nForced Vibes: {forcedVibes}\nUser-Created Vibes: {userCreatedVibes}\n")
  #   respond("\n".join(lines))
-    client.chat_postMessage(channel=channel, blocks=msg_block)
+    client.chat_postMessage(channel=channel, blocks=msg_block, text="Check Vibes Information")
     
     # for message in message_array :
     #    print(f"Message:{message.get("text")}")
 
-def register_check_vibes_command(bolt_app, state_manager, botID):
+def register_check_vibes_command(bolt_app, state_manager):
     mongo_client = MongoClient(os.getenv("MONGO_URI"))
     # BOT_USERID = 
     @bolt_app.command("/checkvibes")
     def handle_checkvibes(ack, respond, body, client):
         ack("Checking out the vibes...")
+        botID = client.auth_test()["user_id"]
         user_input = (body.get("text") or "").strip()
         parts = user_input.split()
         # Parse args in any order:
@@ -374,7 +383,7 @@ def organize_data(db, bot_id):
         
         if (record.get("user_id") == bot_id):
             check_type = None
-            if "VIBES SENT SO FAR" not in record.get("text") and "SPECIFIC VIBE" not in record.get("text"):
+            if "VIBES SENT SO FAR" not in record.get("text") and "SPECIFIC VIBE" not in record.get("text") and "Check Vibes Information" not in record.get("text"):
                 if "forced vibe check" in record.get("text"):
                     check_type = "forced"
                 elif "random vibe check" in record.get("text"):
@@ -467,6 +476,7 @@ def organize_data(db, bot_id):
                     VibeInstance["unique_users"].append(record.get("user_id"))
 
                 VibeInstance["engagement"] += engageVal
+   
     return  vibe_prompt_list
    
     

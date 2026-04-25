@@ -12,61 +12,61 @@ sidebar_position: 2
 classDiagram
 direction TB
     namespace Core {
-        class vibecheck_bot {
+        class VibeCheckBot {
         }
-
-        class bot_settings {
+        class BotConfig {
         }
-
-        class workspace_hub {
+        class StateManager {
         }
-
-        class schedule_engine {
+        class BotState {
         }
-
-        class prompt_engine {
+        class Scheduler {
         }
-
-        class activity_logger {
+        class Posting {
+        }
+        class OAuthServer {
         }
     }
 
-    namespace Data {
-        class workspace_profile {
+    namespace Services {
+        class PromptService {
         }
-
-        class response_tracker {
+        class PromptTracker {
         }
-
-        class prompt_library {
+        class LLMService {
         }
-
-        class mongo_store {
+        class MentorService {
         }
-    }
-
-    namespace SlackIntegration {
-        class slack_adapter {
+        class StreakService {
         }
     }
 
-    vibecheck_bot *-- bot_settings
-    vibecheck_bot *-- workspace_hub
-    vibecheck_bot *-- schedule_engine
-    vibecheck_bot *-- prompt_engine
-    vibecheck_bot *-- activity_logger
+    namespace Logging {
+        class StructuredLogger {
+        }
+        class SlackNameCache {
+        }
+    }
 
-    workspace_hub *-- workspace_profile
-    prompt_engine *-- prompt_library
-    prompt_engine *-- response_tracker
-    activity_logger *-- response_tracker
+    VibeCheckBot *-- BotConfig
+    VibeCheckBot *-- StateManager
+    VibeCheckBot *-- Scheduler
+    VibeCheckBot *-- OAuthServer
 
-    vibecheck_bot ..> slack_adapter
-    activity_logger ..> mongo_store
-    response_tracker ..> mongo_store
+    StateManager *-- BotState
+
+    Scheduler ..> StateManager
+    Scheduler ..> Posting
+
+    Posting ..> PromptService
+    Posting ..> PromptTracker
+
+    StructuredLogger *-- SlackNameCache
+    StructuredLogger ..> PromptTracker
+    StructuredLogger ..> StreakService
 ```
 
-The overview shows the main pieces of VibeCheck in a way that reflects the bot's actual job. The vibecheck_bot coordinates scheduling, prompt posting, logging, and workspace control. The data layer keeps track of prompt content and engagement, and the Slack integration layer handles Slack-specific messaging and command wiring.
+The overview shows the main pieces of VibeCheck. `VibeCheckBot` (main.py) initializes all components, registers every Slack Bolt command and event handler directly, and launches the background scheduler thread. The `StateManager` keeps one `BotState` per workspace, the services layer handles data persistence and AI interactions, and the logging layer records all message activity for analytics and streak tracking.
 
 ## __Core Component__
 
@@ -74,134 +74,200 @@ The overview shows the main pieces of VibeCheck in a way that reflects the bot's
 classDiagram
 direction TB
     namespace Core {
-        class vibecheck_bot {
-            +start()
-            +authorize_workspace()
+        class VibeCheckBot {
+            +main()
+            +make_authorize()
         }
 
-        class bot_settings {
+        class BotConfig {
             +token
             +signing_secret
             +default_channel
             +mongo_uri
+            +llm_reactions_enabled
+            +llm_reactions_probability
+            +llm_replies_enabled
+            +llm_replies_probability
+            +load_config()
         }
 
-        class workspace_hub {
-            +get_workspace(team_id)
-            +all_workspaces()
+        class StateManager {
+            +get_state(team_id)
+            +all_states()
         }
 
-        class workspace_profile {
+        class BotState {
             +active_channel
             +daily_target_time
             +selected_mode
             +active_days
+            +pending_topic
+            +pending_custom_prompt
+            +reminder_enabled
+            +last_prompt_ts
+            +prompt_response_type
             +set_active_channel()
-            +set_daily_target_time()
+            +get_daily_target_time()
             +is_today_active()
         }
 
-        class schedule_engine {
+        class Scheduler {
             +run_time_checker()
-            +pick_random_time()
+            +_pick_random_time()
+            +_get_target_time()
+            +_ensure_initial_time()
+            +_send_reminders()
+            +_pick_random_channel_user()
         }
 
-        class prompt_engine {
-            +post_prompt()
+        class Posting {
+            +post_csv_prompt()
+            +post_custom_prompt()
             +display_current_time()
+            +randomize_message_block()
+        }
+
+        class OAuthServer {
+            +run_oauth_server()
+            +oauth_redirect()
+            +install()
         }
     }
 
-    vibecheck_bot *-- bot_settings
-    vibecheck_bot *-- workspace_hub
-    vibecheck_bot *-- schedule_engine
-    vibecheck_bot *-- prompt_engine
-    workspace_hub *-- workspace_profile
-    schedule_engine ..> workspace_hub
-    schedule_engine ..> workspace_profile
-    schedule_engine ..> prompt_engine
+    VibeCheckBot *-- BotConfig
+    VibeCheckBot *-- StateManager
+    VibeCheckBot *-- Scheduler
+    VibeCheckBot *-- OAuthServer
+    StateManager *-- BotState
+    Scheduler ..> StateManager
+    Scheduler ..> BotState
+    Scheduler ..> Posting
 ```
 
-The core component contains the bot's day-to-day control flow. The vibecheck_bot loads settings, starts shared services, and launches the schedule engine. The workspace_hub keeps one workspace_profile per workspace so each team can have its own channel, timing mode, and active days.
+The core component contains the bot's control flow. `VibeCheckBot` loads configuration, initializes the `StateManager`, registers all Slack Bolt handlers, and starts the scheduler thread. `StateManager` holds a thread-safe `BotState` instance per workspace so each team maintains its own channel, schedule, and feature flags. `OAuthServer` runs the Flask HTTP server that handles multi-workspace OAuth installs.
 
-## __Data Component__
+## __Services Component__
 
 ```mermaid
 classDiagram
 direction TB
-    namespace Data {
-        class prompt_engine {
-            +post_prompt()
-        }
-
-        class prompt_library {
-            +load_prompts()
-            +get_random_prompt()
+    namespace Services {
+        class PromptService {
+            +load_prompts_df()
+            +get_random_prompt_text()
+            +get_random_prompt_by_topic()
+            +get_available_topics()
             +mark_prompt_asked()
         }
 
-        class response_tracker {
+        class PromptTracker {
             +record_prompt_sent()
             +record_response()
             +get_all_stats()
         }
 
-        class activity_logger {
-            +install_logging()
+        class MongoUserInterests {
+            +init_user_interests()
+            +save_user_interests()
+            +get_user_interests()
+            +get_all_user_interests()
         }
 
-        class slack_name_cache {
-            +user_name()
-            +channel_name()
+        class LLMService {
+            +get_reaction_emoji()
+            +get_reply_message()
+            +get_mentor_intro_message()
+            +get_mentor_group_intro_message()
+            +get_social_connector_message()
         }
 
-        class mongo_store {
+        class MentorService {
+            +upsert_registration()
+            +get_registration()
+            +remove_registration()
+            +get_all_registrations()
+            +get_all_unmatched()
+            +run_matching()
+            +get_all_pairs()
+            +clear_pair()
+        }
+
+        class StreakService {
+            +get_user_streak()
+            +get_all_streaks()
+            +check_and_announce_streak()
+            +register_streak_command()
         }
     }
 
-    prompt_engine *-- prompt_library
-    prompt_engine *-- response_tracker
-    activity_logger *-- slack_name_cache
-    activity_logger ..> response_tracker
-    activity_logger ..> mongo_store
-    response_tracker ..> mongo_store
+    PromptTracker ..> MongoUserInterests
+    MentorService ..> LLMService
 ```
 
-The data component focuses on how prompts and message activity are stored. The prompt_library reads the CSV prompt set, the response_tracker keeps runtime counts for asks and replies, and the activity_logger records message activity while enriching it with user and channel names.
+The services component handles all external data and AI interactions. `PromptService` reads and caches the CSV prompt catalog. `PromptTracker` persists per-workspace prompt send and response counts in MongoDB. `MongoUserInterests` stores user interest tags for the social connector and mentor matching. `LLMService` calls the Groq API for emoji reactions, replies, and personalized introductions. `MentorService` manages the full mentor-mentee lifecycle in MongoDB. `StreakService` derives consecutive daily response streaks from the structured log file.
 
-## __Slack Integration Pattern__
+## __Slack Command and Event Wiring__
 
 ```mermaid
 classDiagram
 direction TB
-    namespace SlackIntegration {
-        class slack_bolt_app {
+    namespace SlackBolt {
+        class App {
             +event(event_name, handler)
             +command(command_name, handler)
             +action(action_id, handler)
-        }
-
-        class slack_adapter {
-            +send_message(channel_id, text)
-            +register_message_handler(handler)
-            +register_command_handler(command, handler)
-            +register_action_handler(action_id, handler)
-        }
-
-        class vibecheck_bot {
-            +start()
-        }
-
-        class command_handlers {
-            +handle_findtime(...)
-            +handle_forceprompt(...)
-            +handle_status(...)
+            +view(callback_id, handler)
         }
     }
 
-    vibecheck_bot ..> slack_adapter
-    slack_adapter ..> slack_bolt_app
-    slack_bolt_app ..> command_handlers
+    namespace CommandHandlers {
+        class SetChannelCommand {
+            +handle_setchannel()
+        }
+        class ForcePromptCommand {
+            +handle_forceprompt()
+        }
+        class StatusCommand {
+            +handle_vibestatus()
+        }
+        class TimeCommands {
+            +handle_findtime()
+            +handle_picktime()
+        }
+        class ControlPanelCommands {
+            +handle_app_home_opened()
+            +handle_control_panel_submit()
+        }
+        class UserPromptCommand {
+            +handle_user_prompt_invite()
+            +handle_user_prompt_submit()
+        }
+        class MentorMenteeCommand {
+            +handle_mentor_signup()
+            +handle_mentor_match()
+            +handle_mentor_admin()
+        }
+        class SocialConnector {
+            +handle_connect()
+        }
+        class OnboardingCommand {
+            +handle_picktags()
+        }
+        class HelpCommand {
+            +handle_help()
+        }
+    }
+
+    App ..> SetChannelCommand
+    App ..> ForcePromptCommand
+    App ..> StatusCommand
+    App ..> TimeCommands
+    App ..> ControlPanelCommands
+    App ..> UserPromptCommand
+    App ..> MentorMenteeCommand
+    App ..> SocialConnector
+    App ..> OnboardingCommand
+    App ..> HelpCommand
 ```
 
-This is the project's Slack-specific integration pattern. VibeCheck is intentionally coupled to Slack Bolt and Slack SDK event/command flows, with no adapter abstraction for other messaging platforms.
+VibeCheck registers all command and event handlers directly with the Slack Bolt `App` instance — there is no adapter layer. Each handler module receives the Slack `client`, `body`, `ack`, and `say` objects directly from Bolt and calls into the services layer as needed.

@@ -28,6 +28,7 @@ from commands.mentor_mentee_command import register_mentor_mentee_command
 from app_logging.structured_logger import install_structured_message_logging
 from services.mongo_service import init_tracker, init_user_interests
 from services.prompt_service import load_prompts_df
+from services.streak_service import register_streak_command
 
 
 def make_authorize(cfg, mongo_uri):
@@ -57,7 +58,6 @@ def make_authorize(cfg, mongo_uri):
             )
 
     return authorize
-from services.streak_service import register_streak_command
 
 
 def main():
@@ -95,6 +95,7 @@ def main():
     register_user_prompt_handlers(bolt_app, state_manager)
     register_check_vibes_command(bolt_app, state_manager, auth_info['user_id'])
     register_mentor_mentee_command(bolt_app, state_manager)
+    register_streak_command(bolt_app, client)
 
     # Online message to primary workspace
     try:

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>src.commands.status_command &#8212; VibeCheck 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for src.commands.status_command</h1><div class="highlight"><pre>
+<span></span><span class="c1"># src/commands/status_command.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bot.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_team_id</span>
+
+
+<div class="viewcode-block" id="register_status_command">
+<a class="viewcode-back" href="../../../_generated/src.commands.status_command.html#src.commands.status_command.register_status_command">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_status_command</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">,</span> <span class="n">state_manager</span><span class="p">):</span>
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;/vibestatus&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_status</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">respond</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_selected_mode</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;not set&quot;</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_active_channel</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;not set&quot;</span>
+        <span class="n">active_days</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_active_days</span><span class="p">()</span>
+        <span class="n">days_str</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">active_days</span><span class="p">))</span> <span class="k">if</span> <span class="n">active_days</span> <span class="k">else</span> <span class="s2">&quot;none&quot;</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mode_static&quot;</span><span class="p">:</span>
+            <span class="n">scheduled</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_static_time</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;not set&quot;</span>
+            <span class="n">mode_label</span> <span class="o">=</span> <span class="s2">&quot;Static&quot;</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mode_preset&quot;</span><span class="p">:</span>
+            <span class="n">scheduled</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_daily_target_time</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;not set&quot;</span>
+            <span class="n">mode_label</span> <span class="o">=</span> <span class="s2">&quot;Preset&quot;</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mode_random&quot;</span><span class="p">:</span>
+            <span class="n">scheduled</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_daily_target_time</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;not set&quot;</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_random_start_time</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;?&quot;</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_random_end_time</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;?&quot;</span>
+            <span class="n">mode_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Random (</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2"> – </span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">scheduled</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_daily_target_time</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;not set&quot;</span>
+            <span class="n">mode_label</span> <span class="o">=</span> <span class="n">mode</span>
+
+        <span class="n">today_active</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">is_today_active</span><span class="p">()</span>
+
+        <span class="n">respond</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;*Vibe Check Bot Status*</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;• *Mode:* </span><span class="si">{</span><span class="n">mode_label</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;• *Channel:* </span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;• *Today&#39;s prompt time:* </span><span class="si">{</span><span class="n">scheduled</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;• *Active days:* </span><span class="si">{</span><span class="n">days_str</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;• *Posting today:* </span><span class="si">{</span><span class="s1">&#39;yes&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">today_active</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;no&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">VibeCheck</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">API Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_generated/modules.html">src</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

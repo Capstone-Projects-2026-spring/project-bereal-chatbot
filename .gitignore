@@ -1,7 +1,5 @@
 # Generated files
 .docusaurus
-documentation/static/sphinx/
-documentation/sphinx/source/_generated/
 
 # Misc
 .DS_Store

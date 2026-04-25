@@ -8,11 +8,13 @@ from services.mongo_service import get_tracker
 import random
 
 def display_current_time() -> str:
+    """Return the current local time formatted as HH:MM:SS AM/PM."""
     now = datetime.now()
     return now.strftime("%I:%M:%S %p")
 
 
 def post_csv_prompt(client, channel: str, team_id: str = "", prefix_text: Optional[str] = None, topic: Optional[str] = None, active_tags: Optional[set] = None, footnote_text: Optional[str] = None, response_type: Optional[str] = "image") -> None:
+    """Select a prompt from the CSV, record it as sent, and post it to the channel with a randomized block layout."""
     # "any" means no filter — pass None to the prompt service
     rt = None if response_type == "any" else response_type
 
@@ -61,6 +63,7 @@ def post_custom_prompt(client, prompt_text: str, channel: str, team_id: str = ""
 
 
 def randomize_message_block(message):
+    """Build a Slack Block Kit payload, randomly including a GIF header image 90% of the time."""
     num = random.randint(1,10)
     headerMSGs = [
         ":camera: VIBE CHECK :camera:",

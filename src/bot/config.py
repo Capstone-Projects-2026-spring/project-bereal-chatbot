@@ -8,6 +8,8 @@ from bot.paths import REPO_ROOT
 
 @dataclass(frozen=True)
 class BotConfig:
+    """Immutable configuration loaded from environment variables at startup."""
+
     token: str
     signing_secret: str
     default_channel: str
@@ -19,6 +21,7 @@ class BotConfig:
 
 
 def load_config() -> BotConfig:
+    """Load and validate bot configuration from the .env file at repo root."""
     env_path = REPO_ROOT / ".env"
     load_dotenv(dotenv_path=env_path)
     print("Loaded .env from:", env_path)

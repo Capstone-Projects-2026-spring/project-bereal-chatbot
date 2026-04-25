@@ -43,6 +43,7 @@
 <div class="viewcode-block" id="display_current_time">
 <a class="viewcode-back" href="../../../_generated/src.bot.posting.html#src.bot.posting.display_current_time">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">display_current_time</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the current local time formatted as HH:MM:SS AM/PM.&quot;&quot;&quot;</span>
     <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%I:%M:%S %p&quot;</span><span class="p">)</span></div>
 
@@ -51,6 +52,7 @@
 <div class="viewcode-block" id="post_csv_prompt">
 <a class="viewcode-back" href="../../../_generated/src.bot.posting.html#src.bot.posting.post_csv_prompt">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">post_csv_prompt</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">team_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">prefix_text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">active_tags</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">set</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">footnote_text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">response_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;image&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select a prompt from the CSV, record it as sent, and post it to the channel with a randomized block layout.&quot;&quot;&quot;</span>
     <span class="c1"># &quot;any&quot; means no filter — pass None to the prompt service</span>
     <span class="n">rt</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">response_type</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span> <span class="k">else</span> <span class="n">response_type</span>
 
@@ -105,6 +107,7 @@
 <div class="viewcode-block" id="randomize_message_block">
 <a class="viewcode-back" href="../../../_generated/src.bot.posting.html#src.bot.posting.randomize_message_block">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">randomize_message_block</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a Slack Block Kit payload, randomly including a GIF header image 90% of the time.&quot;&quot;&quot;</span>
     <span class="n">num</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
     <span class="n">headerMSGs</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;:camera: VIBE CHECK :camera:&quot;</span><span class="p">,</span>

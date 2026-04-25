@@ -67,6 +67,7 @@
 <div class="viewcode-block" id="make_authorize">
 <a class="viewcode-back" href="../../../_generated/src.bot.main.html#src.bot.main.make_authorize">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_authorize</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mongo_uri</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a Bolt authorize callback that looks up bot tokens from MongoDB, falling back to the default token.&quot;&quot;&quot;</span>
     <span class="n">mongo_client</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">mongo_uri</span><span class="p">)</span>
     <span class="n">installations</span> <span class="o">=</span> <span class="n">mongo_client</span><span class="p">[</span><span class="s2">&quot;vibecheck&quot;</span><span class="p">][</span><span class="s2">&quot;installations&quot;</span><span class="p">]</span>
 
@@ -99,6 +100,7 @@
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../../_generated/src.bot.main.html#src.bot.main.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bootstrap the bot: load config, register all commands, start the scheduler thread, and serve HTTP.&quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[BOOT] Starting bot...&quot;</span><span class="p">)</span>
 
     <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()</span>

@@ -31,7 +31,7 @@
           <div class="body" role="main">
             
   <h1>Source code for src.bot.dm</h1><div class="highlight"><pre>
-<span></span><span class="c1"># src/bot/scheduler.py</span>
+<span></span><span class="c1"># src/bot/dm.py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span>
@@ -40,9 +40,11 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">services.time_library</span><span class="w"> </span><span class="kn">import</span> <span class="n">preSet_time_library</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">bot.posting</span><span class="w"> </span><span class="kn">import</span> <span class="n">display_current_time</span><span class="p">,</span> <span class="n">post_csv_prompt</span><span class="p">,</span> <span class="n">post_custom_prompt</span>
+
 <div class="viewcode-block" id="load_prompts">
 <a class="viewcode-back" href="../../../_generated/src.bot.dm.html#src.bot.dm.load_prompts">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_prompts</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load non-empty prompt strings from the prompts CSV into a list.&quot;&quot;&quot;</span>
     <span class="n">prompts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PROMPTS_CSV</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
@@ -59,10 +61,11 @@
 <span class="c1">#     &quot;user_id&quot;: &quot;U12345678&quot;,</span>
 <span class="c1">#     &quot;prompt&quot;: &quot;How are you feeling today?&quot;,</span>
 <span class="c1">#     &quot;response&quot;: null</span>
-<span class="c1"># } </span>
+<span class="c1"># }</span>
 <div class="viewcode-block" id="log_no_response">
 <a class="viewcode-back" href="../../../_generated/src.bot.dm.html#src.bot.dm.log_no_response">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">log_no_response</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">prompt</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a structured log entry for a user who did not respond to a vibe check.&quot;&quot;&quot;</span>
     <span class="n">log_entry</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span>
         <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span>
@@ -74,6 +77,7 @@
 <div class="viewcode-block" id="send_dm">
 <a class="viewcode-back" href="../../../_generated/src.bot.dm.html#src.bot.dm.send_dm">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">send_dm</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">WebClient</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Send a direct message to a user and return the Slack API response, or None on error.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat_postMessage</span><span class="p">(</span>
             <span class="n">channel</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>

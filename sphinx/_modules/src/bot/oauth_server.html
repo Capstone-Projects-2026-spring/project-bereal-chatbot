@@ -52,6 +52,7 @@
 <div class="viewcode-block" id="get_db">
 <a class="viewcode-back" href="../../../_generated/src.bot.oauth_server.html#src.bot.oauth_server.get_db">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_db</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the MongoDB installations collection, creating the client lazily on first call.&quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">_mongo_client</span>
     <span class="k">if</span> <span class="n">_mongo_client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_mongo_client</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">MONGO_URI</span><span class="p">)</span>
@@ -63,6 +64,7 @@
 <a class="viewcode-back" href="../../../_generated/src.bot.oauth_server.html#src.bot.oauth_server.install">[docs]</a>
 <span class="nd">@flask_app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/slack/install&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">install</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Redirect the browser to the Slack OAuth v2 authorization URL to begin app installation.&quot;&quot;&quot;</span>
     <span class="n">scopes</span> <span class="o">=</span> <span class="s2">&quot;chat:write,channels:history,groups:history,im:history,mpim:history,commands,reactions:write, files:read&quot;</span>
     <span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;https://slack.com/oauth/v2/authorize&quot;</span>
@@ -78,6 +80,7 @@
 <a class="viewcode-back" href="../../../_generated/src.bot.oauth_server.html#src.bot.oauth_server.slack_events">[docs]</a>
 <span class="nd">@flask_app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/slack/events&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">slack_events</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Forward incoming Slack event payloads to the Bolt request handler.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_bolt_handler</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
 
 
@@ -86,6 +89,7 @@
 <a class="viewcode-back" href="../../../_generated/src.bot.oauth_server.html#src.bot.oauth_server.oauth_redirect">[docs]</a>
 <span class="nd">@flask_app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/slack/oauth_redirect&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">oauth_redirect</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete the OAuth v2 flow, exchange the code for a token, and persist the installation to MongoDB.&quot;&quot;&quot;</span>
     <span class="n">code</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;code&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;Missing code&quot;</span><span class="p">,</span> <span class="mi">400</span>
@@ -123,6 +127,7 @@
 <div class="viewcode-block" id="run_oauth_server">
 <a class="viewcode-back" href="../../../_generated/src.bot.oauth_server.html#src.bot.oauth_server.run_oauth_server">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">run_oauth_server</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wire up the Bolt handler and start the Flask server on the configured PORT.&quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">_bolt_handler</span>
     <span class="n">_bolt_handler</span> <span class="o">=</span> <span class="n">SlackRequestHandler</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">)</span>
     <span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PORT&quot;</span><span class="p">,</span> <span class="mi">8080</span><span class="p">))</span>

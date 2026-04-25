@@ -43,6 +43,8 @@
 <a class="viewcode-back" href="../../../_generated/src.bot.config.html#src.bot.config.BotConfig">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BotConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Immutable configuration loaded from environment variables at startup.&quot;&quot;&quot;</span>
+
     <span class="n">token</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">signing_secret</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">default_channel</span><span class="p">:</span> <span class="nb">str</span>
@@ -57,6 +59,7 @@
 <div class="viewcode-block" id="load_config">
 <a class="viewcode-back" href="../../../_generated/src.bot.config.html#src.bot.config.load_config">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">BotConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load and validate bot configuration from the .env file at repo root.&quot;&quot;&quot;</span>
     <span class="n">env_path</span> <span class="o">=</span> <span class="n">REPO_ROOT</span> <span class="o">/</span> <span class="s2">&quot;.env&quot;</span>
     <span class="n">load_dotenv</span><span class="p">(</span><span class="n">dotenv_path</span><span class="o">=</span><span class="n">env_path</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loaded .env from:&quot;</span><span class="p">,</span> <span class="n">env_path</span><span class="p">)</span>

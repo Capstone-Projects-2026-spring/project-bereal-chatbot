@@ -38,27 +38,32 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="src.bot.oauth_server.get_db">
 <span class="sig-prename descclassname"><span class="pre">src.bot.oauth_server.</span></span><span class="sig-name descname"><span class="pre">get_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/bot/oauth_server.html#get_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.bot.oauth_server.get_db" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Return the MongoDB installations collection, creating the client lazily on first call.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.bot.oauth_server.install">
 <span class="sig-prename descclassname"><span class="pre">src.bot.oauth_server.</span></span><span class="sig-name descname"><span class="pre">install</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/bot/oauth_server.html#install"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.bot.oauth_server.install" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Redirect the browser to the Slack OAuth v2 authorization URL to begin app installation.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.bot.oauth_server.oauth_redirect">
 <span class="sig-prename descclassname"><span class="pre">src.bot.oauth_server.</span></span><span class="sig-name descname"><span class="pre">oauth_redirect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/bot/oauth_server.html#oauth_redirect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.bot.oauth_server.oauth_redirect" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Complete the OAuth v2 flow, exchange the code for a token, and persist the installation to MongoDB.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.bot.oauth_server.run_oauth_server">
 <span class="sig-prename descclassname"><span class="pre">src.bot.oauth_server.</span></span><span class="sig-name descname"><span class="pre">run_oauth_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bolt_app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/bot/oauth_server.html#run_oauth_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.bot.oauth_server.run_oauth_server" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Wire up the Bolt handler and start the Flask server on the configured PORT.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.bot.oauth_server.slack_events">
 <span class="sig-prename descclassname"><span class="pre">src.bot.oauth_server.</span></span><span class="sig-name descname"><span class="pre">slack_events</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/bot/oauth_server.html#slack_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.bot.oauth_server.slack_events" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Forward incoming Slack event payloads to the Bolt request handler.</p>
+</dd></dl>
 
 </section>
 

@@ -33,8 +33,6 @@ From there you can:
 *Other Commands*
 `/forceprompt` — immediately post a random prompt to the current channel
 `/forceprompt #channel-name` — post a prompt to a specific channel
-`/connect` — run the social connector now in the current channel
-`/setchannel #channel-name` — change the active channel
 `/vibestatus` — show current bot configuration
 `/picktags` — set or update your personal topic interest tags
 `/connect` — set or update your personal topic interest tags

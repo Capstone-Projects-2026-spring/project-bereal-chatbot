@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: Backend API Contract (OpenAPI)
+title: Backend API
 description: VibeCheck external HTTP contract rendered from openapi.yml.yaml
 hide_table_of_contents: true
 ---

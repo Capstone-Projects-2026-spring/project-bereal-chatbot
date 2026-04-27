@@ -1,4 +1,4 @@
-# src/bot/scheduler.py
+# src/bot/dm.py
 import random
 import time
 from datetime import datetime, date
@@ -7,7 +7,9 @@ from slack_sdk import WebClient
 
 from services.time_library import preSet_time_library
 from bot.posting import display_current_time, post_csv_prompt, post_custom_prompt
+
 def load_prompts():
+    """Load non-empty prompt strings from the prompts CSV into a list."""
     prompts = []
     with open(PROMPTS_CSV, "r") as f:
         for line in f:
@@ -23,8 +25,9 @@ def load_prompts():
 #     "user_id": "U12345678",
 #     "prompt": "How are you feeling today?",
 #     "response": null
-# } 
+# }
 def log_no_response(user_id, prompt):
+    """Build a structured log entry for a user who did not respond to a vibe check."""
     log_entry = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "user_id": user_id,
@@ -33,6 +36,7 @@ def log_no_response(user_id, prompt):
     }
 
 def send_dm(client: WebClient, user_id: str, prompt: str):
+    """Send a direct message to a user and return the Slack API response, or None on error."""
     try:
         response = client.chat_postMessage(
             channel=user_id,

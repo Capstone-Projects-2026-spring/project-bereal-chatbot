@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>src.bot.posting &#8212; VibeCheck 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for src.bot.posting</h1><div class="highlight"><pre>
+<span></span><span class="c1"># src/bot/posting.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">services.prompt_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_random_prompt_text</span><span class="p">,</span> <span class="n">get_random_prompt_by_topic</span><span class="p">,</span> <span class="n">mark_prompt_asked</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">services.mongo_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_tracker</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+<div class="viewcode-block" id="display_current_time">
+<a class="viewcode-back" href="../../../_generated/src.bot.posting.html#src.bot.posting.display_current_time">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">display_current_time</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%I:%M:%S %p&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="post_csv_prompt">
+<a class="viewcode-back" href="../../../_generated/src.bot.posting.html#src.bot.posting.post_csv_prompt">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">post_csv_prompt</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">team_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">prefix_text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">active_tags</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">set</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">footnote_text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">topic</span><span class="p">:</span>
+        <span class="n">prompt_id</span><span class="p">,</span> <span class="n">prompt_text</span><span class="p">,</span> <span class="n">tags</span> <span class="o">=</span> <span class="n">get_random_prompt_by_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prompt_id</span><span class="p">,</span> <span class="n">prompt_text</span><span class="p">,</span> <span class="n">tags</span> <span class="o">=</span> <span class="n">get_random_prompt_text</span><span class="p">(</span><span class="n">active_tags</span><span class="o">=</span><span class="n">active_tags</span><span class="p">)</span>
+
+    <span class="n">mark_prompt_asked</span><span class="p">(</span><span class="n">prompt_id</span><span class="p">)</span>
+
+    <span class="n">tracker</span> <span class="o">=</span> <span class="n">get_tracker</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">tracker</span><span class="p">:</span>
+        <span class="n">tracker</span><span class="o">.</span><span class="n">record_prompt_sent</span><span class="p">(</span><span class="n">prompt_id</span><span class="p">,</span> <span class="n">prompt_text</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">team_id</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&gt;</span><span class="si">{</span><span class="n">prompt_text</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">prefix_text</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;### **</span><span class="si">{</span><span class="n">prefix_text</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">**</span><span class="se">\n\n</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">prompt_text</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">footnote_text</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2">```</span><span class="si">{</span><span class="n">footnote_text</span><span class="si">}</span><span class="s2">```&quot;</span>
+
+    <span class="n">msg_block</span> <span class="o">=</span> <span class="n">randomize_message_block</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat_postMessage</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span> <span class="n">blocks</span><span class="o">=</span><span class="n">msg_block</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ts&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="post_custom_prompt">
+<a class="viewcode-back" href="../../../_generated/src.bot.posting.html#src.bot.posting.post_custom_prompt">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">post_custom_prompt</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">prompt_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">team_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">prefix_text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">footnote_text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Post a user-authored prompt text to the channel.&quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&gt;</span><span class="si">{</span><span class="n">prompt_text</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">prefix_text</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;### **</span><span class="si">{</span><span class="n">prefix_text</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">**</span><span class="se">\n\n</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">prompt_text</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">footnote_text</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2">```</span><span class="si">{</span><span class="n">footnote_text</span><span class="si">}</span><span class="s2">```&quot;</span>
+
+    <span class="n">msg_block</span> <span class="o">=</span> <span class="n">randomize_message_block</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat_postMessage</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span> <span class="n">blocks</span><span class="o">=</span><span class="n">msg_block</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ts&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="randomize_message_block">
+<a class="viewcode-back" href="../../../_generated/src.bot.posting.html#src.bot.posting.randomize_message_block">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">randomize_message_block</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">headerMSGs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;:bangbang: NEW VIBE CHECK :bangbang:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:bangbang: VIBE CHECK :bangbang:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:bangbang: VIBE CHECK! :bangbang:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:bangbang: VIBE CHECK ALERT :bangbang:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:interrobang: NEW VIBE CHECK :interrobang:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:interrobang: VIBE CHECK :interrobang:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:interrobang: VIBE CHECK! :interrobang:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:interrobang: VIBE CHECK ALERT :interrobang:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:exclamation: NEW VIBE CHECK :exclamation:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:exclamation: VIBE CHECK :exclamation:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:exclamation: VIBE CHECK! :exclamation:&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;:exclamation: VIBE CHECK ALERT :exclamation:&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">image_lists</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;https://media1.tenor.com/m/1CcXIDK6YboAAAAC/the-simpsons-bart.gif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://media1.tenor.com/m/hV2TZljEW1kAAAAd/vibby-vibby-vibes.gif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://media.tenor.com/y0hD2LSxx_8AAAAi/vibe.gif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://media.tenor.com/X9mVHTwAHXoAAAAi/vibes-woodstock.gif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://media1.tenor.com/m/LCpcrdtI0GYAAAAd/vibing-st6.gif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://media1.tenor.com/m/3fWNoUgRYFEAAAAd/cat-vibe-cat-meme.gif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://media1.tenor.com/m/Tfm5oTF9Xt0AAAAd/cat-sunglasses.gif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://media1.tenor.com/m/dEjkUvV_ieoAAAAC/dance-victro.gif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://media1.tenor.com/m/HCyNMWQv868AAAAC/good-night.gif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://media.tenor.com/sbfBfp3FeY8AAAAi/oia-uia.gif&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">msg_block</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">num</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+         <span class="n">msg_block</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;header&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">headerMSGs</span><span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">headerMSGs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span> <span class="p">,</span>
+                        <span class="s2">&quot;emoji&quot;</span><span class="p">:</span> <span class="kc">True</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">2</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;markdown&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">message</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+         <span class="n">msg_block</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;header&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">headerMSGs</span><span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">headerMSGs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)],</span>
+                        <span class="s2">&quot;emoji&quot;</span><span class="p">:</span> <span class="kc">True</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">2</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;divider&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;image_url&quot;</span><span class="p">:</span> <span class="n">image_lists</span><span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_lists</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)],</span>
+                    <span class="s2">&quot;alt_text&quot;</span><span class="p">:</span> <span class="s2">&quot;an image relating to the vibes.&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;markdown&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">message</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+    <span class="k">return</span> <span class="n">msg_block</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">VibeCheck</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">API Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_generated/modules.html">src</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -41,14 +41,89 @@ No hardware requirements. Resources are commonly available within standard Compu
 
 ## How to Run the Project
 
-Join the Slack workspace: [VibeCheck Bot Team](https://join.slack.com/t/vibecheckbotteam/shared_invite/zt-3tdl9nbvm-dKMeo~DRH4KJoJbDhVQgFw)
+Follow these steps to set up and run VibeCheck in your own Slack workspace.
 
-You can also add the chatbot to your own workspace: [VibeCheck Bot](https://worker-production-234c.up.railway.app/slack/install) 
+### 1. Slack App Setup
 
+Go to the Slack developer portal: https://api.slack.com/apps
 
-Running the chatbot locally is not necessary, since it is already deployed on Railway. Use the slash command "/help" in # bot-test channel to see what the bot can do and check out the docusaurus for additional details.
+**Create and configure the Slack app:**
 
-Any and all critiques will be greatly appreciated. Have fun testing! 🙂
+1. Click **Create New App** → choose **From scratch**.
+2. Enter an app name and select the Slack workspace where you want to install it.
+3. In the app settings, open **Socket Mode** and turn on **Enable Socket Mode**.
+4. In **Basic Information**, create an app-level token with the `connections:write` scope. Save the generated token (starts with `xapp-`) as `SLACK_APP_TOKEN`.
+5. Also in **Basic Information**, copy the **Signing Secret** and save it as `SLACK_SIGNING_SECRET`.
+6. Open **OAuth & Permissions**. Under **Bot Token Scopes**, add the following scopes:
+   - `app_mentions:read`
+   - `channels:read`
+   - `channels:history`
+   - `chat:write`
+   - `chat:write.public`
+   - `commands`
+   - `im:history`
+   - `im:write`
+   - `mpim:write`
+   - `reactions:read`
+   - `users:read`
+7. Under **Redirect URLs**, add your redirect URI (e.g. `https://your-host/slack/oauth_redirect`) and save it as `SLACK_REDIRECT_URI`.
+8. Click **Install App to Workspace**.
+9. Copy the bot token (starts with `xoxb-`) and save it as `SLACK_BOT_TOKEN`.
+10. From the **Basic Information** page, copy the **Client ID** and **Client Secret** and save them as `SLACK_CLIENT_ID` and `SLACK_CLIENT_SECRET`.
+
+---
+
+### 2. Groq API Key Setup
+
+Go to the Groq console: https://console.groq.com/
+
+1. Sign in or create an account.
+2. Open the **API Keys** section and create a new key.
+3. Copy the key and save it as `GROQ_API_KEY`.
+
+---
+
+### 3. MongoDB Setup
+
+1. Create a free cluster at https://www.mongodb.com/atlas
+2. Create a database user and allow access from your IP (or `0.0.0.0/0` for open access).
+3. Copy the connection string and save it as `MONGO_URI`.
+
+---
+
+### 4. Create your `.env` file
+
+Create a `.env` file in the project root with the following variables:
+
+```
+SLACK_BOT_TOKEN=xoxb-your-bot-token
+SLACK_APP_TOKEN=xapp-your-app-token
+SLACK_CLIENT_ID=your-client-id
+SLACK_CLIENT_SECRET=your-client-secret
+SLACK_SIGNING_SECRET=your-signing-secret
+SLACK_REDIRECT_URI=https://your-host/slack/oauth_redirect
+MONGO_URI=mongodb+srv://your-connection-string
+GROQ_API_KEY=your-groq-api-key
+```
+
+---
+
+### 5. Run the Bot
+
+Install dependencies and start the bot:
+
+```bash
+pip install -r requirements.txt
+python src/app.py
+```
+
+You should see:
+
+```
+⚡️ Bolt app is running in Socket Mode!
+```
+
+Use the slash command `/help` in any channel where the bot is present to see all available commands.
 
 ## Contact Information
 To reach out for any questions, comments, or concerns regarding this project, you can contact me via email or text:

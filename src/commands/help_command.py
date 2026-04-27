@@ -34,6 +34,15 @@ Admins can also manually assign any user as prompt creator from the *Control Pan
 Each afternoon the bot may pair two teammates who share common interest tags and post a friendly
 intro message in the main channel to help them get to know each other.
 Set your interest tags with `/picktags` or during onboarding.
+ 
+*Mentor-Mentee Program* :handshake:
+The bot supports a mentor-mentee program to help teammates connect for guidance and learning:
+• `/mentor signup mentor` — join as a mentor (opens a profile form)
+• `/mentor signup mentee` — join as a mentee (opens a profile form)
+• `/mentor status` — see your current pairing
+• `/mentor leave` — leave the program
+• `/mentor admin` — _(admin)_ view all profiles & manually pair users
+• `/mentor match` — _(admin)_ auto-match all unmatched users by interests
 """.strip()
 
 

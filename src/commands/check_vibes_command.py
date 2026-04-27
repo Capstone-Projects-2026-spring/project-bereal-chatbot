@@ -376,6 +376,7 @@ def organize_data(db, bot_id):
     vibe_prompt_list = []
     MaxVibeID = 0
     LatestVibeInstance = None
+    print(f"Organizing the Data Base: {db}")
     for record in db:
         isoString = record.get("ingested_at_utc")
        
@@ -477,7 +478,7 @@ def organize_data(db, bot_id):
                     VibeInstance["unique_users"].append(record.get("user_id"))
 
                 VibeInstance["engagement"] += engageVal
-   
+    print(f"Prompt List: {vibe_prompt_list}")
     return  vibe_prompt_list
    
     

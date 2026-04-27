@@ -25,7 +25,7 @@ https://YOUR-USERNAME.github.io/YOUR-REPOSITORY-NAME/
 
 ### Monitoring deployments
 
-You can watch the deployment process:
+You can watch the deployment process in the [Deploy workflow on GitHub Actions](https://github.com/Capstone-Projects-2026-spring/project-bereal-chatbot/actions/workflows/deploy.yml).
 
 1. Go to your repository on GitHub
 2. Click the **Actions** tab

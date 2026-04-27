@@ -55,21 +55,41 @@ Go to the Slack developer portal: https://api.slack.com/apps
 4. In **Basic Information**, create an app-level token with the `connections:write` scope. Save the generated token (starts with `xapp-`) as `SLACK_APP_TOKEN`.
 5. Also in **Basic Information**, copy the **Signing Secret** and save it as `SLACK_SIGNING_SECRET`.
 6. Open **OAuth & Permissions**. Under **Bot Token Scopes**, add the following scopes:
-   - `app_mentions:read`
-   - `channels:read`
-   - `channels:history`
-   - `chat:write`
-   - `chat:write.public`
-   - `commands`
-   - `im:history`
-   - `im:write`
-   - `mpim:write`
-   - `reactions:read`
-   - `users:read`
+   - `chat:write` — send messages as the bot
+   - `chat:write.public` — post in channels without being invited
+   - `commands` — register and respond to slash commands
+   - `channels:read` — list channels and look up channel info
+   - `channels:history` — read messages in public channels
+   - `im:write` — open and send direct messages
+   - `im:history` — read messages in DMs
+   - `mpim:write` — create and post to group DMs (used for mentor-mentee group chats)
+   - `reactions:read` — read emoji reactions on messages
+   - `users:read` — look up user profile information
+   - `app_mentions:read` — receive events when the bot is mentioned
 7. Under **Redirect URLs**, add your redirect URI (e.g. `https://your-host/slack/oauth_redirect`) and save it as `SLACK_REDIRECT_URI`.
 8. Click **Install App to Workspace**.
 9. Copy the bot token (starts with `xoxb-`) and save it as `SLACK_BOT_TOKEN`.
 10. From the **Basic Information** page, copy the **Client ID** and **Client Secret** and save them as `SLACK_CLIENT_ID` and `SLACK_CLIENT_SECRET`.
+
+**Register Slash Commands:**
+
+In your app settings, go to **Slash Commands** and add each of the following. Set the **Request URL** to your hosted bot URL (e.g. `https://your-host/slack/events`) for each one — or leave it blank if you are using Socket Mode.
+
+| Command | Description |
+|---|---|
+| `/help` | Show setup guide and list of all commands |
+| `/setchannel` | Set the channel where daily prompts are posted (e.g. `/setchannel #general`) |
+| `/forceprompt` | Immediately post a vibe check prompt; optionally pass `text`, `image`, or `#channel` |
+| `/vibestatus` | Display the current bot configuration for this workspace |
+| `/checkvibes` | Show response stats and submission data for the current channel |
+| `/picktags` | Set your personal interest tags used for social matching and prompt filtering |
+| `/picktopic` | Set a topic so the next prompt is drawn from that category |
+| `/picktime` | Manually pick a time slot number (1–11) for today's prompt |
+| `/findtime` | Show the currently scheduled prompt time and active mode |
+| `/connect` | Update your interest profile for social connector matching |
+| `/streak` | View your current vibe check response streak |
+| `/promptstats` | Show stats on prompts that have been sent (admin use) |
+| `/mentor` | Mentor-mentee program — use `signup mentor`, `signup mentee`, `status`, `leave`, `admin`, or `match` |
 
 ---
 

@@ -17,6 +17,7 @@ _bolt_handler = None
 _mongo_client = None
 
 def get_db():
+    """Return the MongoDB installations collection, creating the client lazily on first call."""
     global _mongo_client
     if _mongo_client is None:
         _mongo_client = MongoClient(MONGO_URI)
@@ -25,6 +26,7 @@ def get_db():
 
 @flask_app.route("/slack/install")
 def install():
+    """Redirect the browser to the Slack OAuth v2 authorization URL to begin app installation."""
     scopes = "chat:write,channels:history,groups:history,im:history,mpim:history,commands,reactions:write, files:read"
     url = (
         f"https://slack.com/oauth/v2/authorize"
@@ -37,11 +39,13 @@ def install():
 
 @flask_app.route("/slack/events", methods=["POST"])
 def slack_events():
+    """Forward incoming Slack event payloads to the Bolt request handler."""
     return _bolt_handler.handle(request)
 
 
 @flask_app.route("/slack/oauth_redirect")
 def oauth_redirect():
+    """Complete the OAuth v2 flow, exchange the code for a token, and persist the installation to MongoDB."""
     code = request.args.get("code")
     if not code:
         return "Missing code", 400
@@ -76,6 +80,7 @@ def oauth_redirect():
 
 
 def run_oauth_server(bolt_app):
+    """Wire up the Bolt handler and start the Flask server on the configured PORT."""
     global _bolt_handler
     _bolt_handler = SlackRequestHandler(bolt_app)
     port = int(os.getenv("PORT", 8080))

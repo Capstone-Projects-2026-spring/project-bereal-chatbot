@@ -28,9 +28,11 @@ from commands.mentor_mentee_command import register_mentor_mentee_command
 from app_logging.structured_logger import install_structured_message_logging
 from services.mongo_service import init_tracker, init_user_interests
 from services.prompt_service import load_prompts_df
+from services.streak_service import register_streak_command
 
 
 def make_authorize(cfg, mongo_uri):
+    """Return a Bolt authorize callback that looks up bot tokens from MongoDB, falling back to the default token."""
     mongo_client = MongoClient(mongo_uri)
     installations = mongo_client["vibecheck"]["installations"]
 
@@ -57,10 +59,10 @@ def make_authorize(cfg, mongo_uri):
             )
 
     return authorize
-from services.streak_service import register_streak_command
 
 
 def main():
+    """Bootstrap the bot: load config, register all commands, start the scheduler thread, and serve HTTP."""
     print("\n[BOOT] Starting bot...")
 
     cfg = load_config()
@@ -95,6 +97,7 @@ def main():
     register_user_prompt_handlers(bolt_app, state_manager)
     register_check_vibes_command(bolt_app, state_manager)
     register_mentor_mentee_command(bolt_app, state_manager)
+    register_streak_command(bolt_app, client)
 
     # Online message to primary workspace
     try:

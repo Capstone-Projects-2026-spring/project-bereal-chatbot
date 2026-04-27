@@ -1,0 +1,24 @@
+src.bot package
+===============
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   src.bot.config
+   src.bot.main
+   src.bot.oauth_server
+   src.bot.paths
+   src.bot.posting
+   src.bot.scheduler
+   src.bot.state
+
+Module contents
+---------------
+
+.. automodule:: src.bot
+   :members:
+   :show-inheritance:
+   :undoc-members:

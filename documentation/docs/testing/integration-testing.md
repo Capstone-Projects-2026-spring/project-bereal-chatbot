@@ -3,14 +3,34 @@ sidebar_position: 2
 ---
 # Integration tests
 
+This page tracks integration-level command and workflow coverage for the current Slack app implementation.
+
+### Current slash command inventory
+
+Active slash commands currently registered in the bot:
+
+- `/setchannel`
+- `/forceprompt`
+- `/picktags`
+- `/connect`
+- `/findtime`
+- `/picktime`
+- `/vibestatus`
+- `/promptstats`
+- `/picktopic`
+- `/checkvibes`
+- `/mentor`
+- `/streak`
+- `/help`
+
+---
+
 ### Use Case 1 - Installing VibeCheck in a Slack Workspace
 
 ***test_install_workspace_success()***
 
-	Status: Planned
-
+	
 	Purpose: Verifies OAuth install flow persists installation data and returns success.
-
 	Input parameters:
 	- Mocked request query string containing a valid authorization code
 	- Mocked Slack OAuth response with team.id, team.name, and access_token
@@ -26,7 +46,7 @@ sidebar_position: 2
 
 ***test_install_workspace_missing_code_returns_400()***
 
-	Status: Planned
+	
 	Purpose: Verifies installation request fails fast when OAuth code is missing.
 	Input parameters:
 	- Request payload without code
@@ -39,12 +59,11 @@ sidebar_position: 2
 
 ---
 
-### Use Case 2 - Setting Active Channel
+### Use Case 2 - Setting Active Channel (`/setchannel`)
 
 ***test_setchannel_updates_state()***
 
-	Status: Implemented (tests/test_commands.py)
-	Purpose: Verifies /setchannel updates workspace channel state and posts confirmation.
+	Purpose: Verifies `/setchannel` updates workspace channel state and posts confirmation.
 	Input parameters:
 	- Command body: `{"text":"#new-channel", "team_id":"T123"}`
 	- Mocked callbacks: ack, respond
@@ -60,8 +79,7 @@ sidebar_position: 2
 
 ***test_setchannel_rejects_missing_channel()***
 
-	Status: Implemented (tests/test_commands.py)
-	Purpose: Verifies /setchannel rejects missing channel input.
+	Purpose: Verifies `/setchannel` rejects missing channel input.
 	Input parameters:
 	- Command body: `{"text":"", "team_id":"T123"}`
 	- Mocked callbacks: ack, respond
@@ -75,46 +93,23 @@ sidebar_position: 2
 
 ---
 
-### Use Case 3 - Configuring Prompt Time
+### Use Case 3 - Sending Prompt (`/forceprompt`)
 
-***test_pick_random_time_from_range()***
+***test_forceprompt_acks()***
 
-	Status: Implemented (tests/test_acceptance.py)
-	Purpose: Verifies scheduler time selection returns a valid time within configured bounds.
+	Purpose: Verifies `/forceprompt` acknowledges immediately.
 	Input parameters:
-	- start_str="09:30:00 AM"
-	- end_str="10:50:00 AM"
+	- Command body: `{"text":"", "channel_id":"C123"}`
 	Expected results:
-	- Returned time is not None
-	- Parsed time is within start/end range
+	- ack() called exactly once
 	Uses:
-	- Scheduler component: _pick_random_time(...)
+	- DummyApp command registry
+	- Mock callbacks and Slack client object
 
-
-***test_full_flow_state_and_scheduler()***
-
-	Status: Implemented (tests/test_acceptance.py)
-	Purpose: Verifies state + scheduler integration preserves selected mode, selected channel, and chosen time.
-	Input parameters:
-	- State created with default_channel="#general"
-	- Mode set to mode_random
-	- Time generated from _pick_random_time(...)
-	Expected results:
-	- get_daily_target_time() matches selected time
-	- get_selected_mode() returns mode_random
-	- get_active_channel() returns #general
-	Uses:
-	- Bot state component: create_state
-	- Scheduler component: _pick_random_time
-
----
-
-### Use Case 4 - Sending Prompt
 
 ***test_forceprompt_posts_to_command_channel()***
 
-	Status: Implemented (tests/test_commands.py)
-	Purpose: Verifies /forceprompt posts to command channel when no override channel is supplied.
+	Purpose: Verifies `/forceprompt` posts to command channel when no override channel is supplied.
 	Input parameters:
 	- Command body: `{"text":"", "channel_id":"C123"}`
 	- Patched prompt lookup returning (prompt_id, prompt_text, tags)
@@ -131,52 +126,230 @@ sidebar_position: 2
 
 ***test_forceprompt_posts_to_specified_channel()***
 
-	Status: Implemented (tests/test_commands.py)
-	Purpose: Verifies /forceprompt #channel overrides the command channel.
+	Purpose: Verifies `/forceprompt #channel` overrides the command channel.
 	Input parameters:
 	- Command body: `{"text":"#general", "channel_id":"C123"}`
-	- Same patched prompt dependencies as above
 	Expected results:
 	- chat_postMessage(...) called with channel="#general"
 	Uses:
-	- Same patched prompt dependencies and mocked client setup
+	- Patched prompt dependencies and mocked client setup
 
 ---
 
-### Use Case 5 - Viewing Prompt Statistics
+### Use Case 4 - Managing User Interest Tags (`/picktags`)
+
+***test_picktags_command_opens_static_checkbox_modal()***
+
+	Purpose: Verifies `/picktags` opens the modal with static checkbox options and pre-selected existing tags.
+	Input parameters:
+	- Command body with team_id, user_id, trigger_id
+	- Mocked existing interest tags
+	Expected results:
+	- ack() called once
+	- client.views_open(...) called with expected checkbox options and initial selections
+	Uses:
+	- DummyApp command registry
+	- Patched get_user_interests
+
+
+***test_picktags_submission_saves_selected_tags()***
+
+	Purpose: Verifies modal submission persists tags and sends confirmation DM.
+	Input parameters:
+	- View submission payload with selected options
+	Expected results:
+	- save_user_interests(team_id, user_id, tags) called
+	- client.chat_postMessage(...) called once
+	Uses:
+	- Patched save_user_interests
+	- Mocked Slack client
+
+---
+
+### Use Case 5 - Running Social Connector (`/connect`)
+
+***test_social_connector_finds_pair_from_shared_tags()***
+
+	Purpose: Verifies shared-tag matching logic returns a valid pair.
+
+
+***test_social_connector_randomly_selects_from_all_matching_pairs()***
+
+	Purpose: Verifies random selection occurs from all valid matching pairs.
+
+
+***test_social_connector_posts_soft_intro_message()***
+
+	Purpose: Verifies connector posts intro plus icebreaker to the channel.
+
+
+***test_social_connector_command_posts_in_current_channel()***
+
+	Purpose: Verifies `/connect` calls connector flow for current channel/workspace.
+
+
+***test_social_connector_command_responds_when_no_match_found()***
+
+	Purpose: Verifies user gets a friendly no-match response when no eligible pair exists.
+
+---
+
+### Use Case 6 - Scheduler and State Integration (time behavior used by `/findtime`, `/picktime`, and App Home settings)
+
+***test_pick_random_time_from_range()***
+
+	Status: Implemented (tests/test_acceptance.py)
+	Purpose: Verifies scheduler time selection returns a valid time within configured bounds.
+
+
+***test_pick_random_time_falls_back_to_preset_when_no_range()***
+
+	Status: Implemented (tests/test_acceptance.py)
+	Purpose: Verifies fallback behavior when no explicit random range is configured.
+
+
+***test_pick_random_time_after_filters_past_times()***
+
+	Status: Implemented (tests/test_acceptance.py)
+	Purpose: Verifies selected time is constrained to valid future choices for the day.
+
+
+***test_full_flow_state_and_scheduler()***
+
+	Status: Implemented (tests/test_acceptance.py)
+	Purpose: Verifies state + scheduler integration preserves selected mode, selected channel, and chosen time.
+
+---
+
+### Use Case 7 - Viewing Prompt Statistics (`/promptstats`)
 
 ***test_promptstats_returns_sorted_summary()***
 
-	Status: Planned
-	Purpose: Verifies /promptstats returns formatted prompt engagement summary.
+	Purpose: Verifies `/promptstats` returns formatted prompt engagement summary.
 	Input parameters:
 	- Mocked tracker get_all_stats() returns prompt records with ask/respond counts
-	- Mocked callbacks: ack, respond
 	Expected results:
 	- ack() called once
 	- respond() includes ask/response totals in formatted output
-	Uses:
-	- Patch get_tracker() to return mocked tracker
-	- Mock callbacks
 
 
 ***test_promptstats_handles_empty_data()***
 
-	Status: Planned
-	Purpose: Verifies /promptstats returns no-data message when stats list is empty.
+	Purpose: Verifies `/promptstats` returns no-data message when stats list is empty.
 	Input parameters:
 	- Mocked tracker returns []
 	Expected results:
 	- respond() returns no-data message path
-	Uses:
-	- Patch get_tracker() and mock callbacks
 
 ---
 
-### Automation Notes
+### Use Case 8 - Picking Topic (`/picktopic`)
 
-- All integration tests are run with pytest.
-- External services (Slack API, OAuth requests, and database operations) are mocked or patched.
-- Test outcomes are assertion-based and pass/fail automatically.
+***test_picktopic_lists_topics_when_no_arg()***
+
+	Purpose: Verifies `/picktopic` (without args) lists available topics and usage hint.
+
+
+***test_picktopic_sets_pending_topic_when_valid()***
+
+	Purpose: Verifies `/picktopic <topic>` stores one-time pending topic in workspace state.
+
+
+***test_picktopic_rejects_unknown_topic()***
+
+	Purpose: Verifies `/picktopic` returns validation guidance for invalid topics.
+
+---
+
+### Use Case 9 - Time Commands (`/findtime` and `/picktime`)
+
+***test_findtime_returns_target_time_and_mode()***
+
+	Purpose: Verifies `/findtime` reports workspace target time and active mode.
+
+
+***test_picktime_lists_options_when_empty()***
+
+	Purpose: Verifies `/picktime` without argument returns preset list.
+
+
+***test_picktime_sets_target_time_for_valid_choice()***
+
+	Purpose: Verifies `/picktime <1..11>` updates state daily target time.
+
+
+***test_picktime_rejects_invalid_input()***
+
+	Purpose: Verifies `/picktime` handles non-numeric and out-of-range values safely.
+
+---
+
+### Use Case 10 - Viewing Status (`/vibestatus`)
+
+***test_vibestatus_random_mode_summary()***
+
+	Purpose: Verifies `/vibestatus` includes mode label, channel, target time, active days, and posting status for random mode.
+
+
+***test_vibestatus_static_mode_summary()***
+
+	Purpose: Verifies `/vibestatus` reports static time correctly when static mode is active.
+
+---
+
+### Use Case 11 - Help Command (`/help`)
+
+***test_help_returns_setup_guide_text()***
+
+	Purpose: Verifies `/help` returns non-empty setup and usage guidance and acknowledges once.
+
+---
+
+### Use Case 12 - Mentor Program Command (`/mentor`)
+
+***test_mentor_signup_opens_modal_for_valid_role()***
+
+	Purpose: Verifies `/mentor signup mentor|mentee` opens the signup modal when user is not already registered.
+
+
+***test_mentor_status_returns_waiting_or_pairing()***
+
+	Purpose: Verifies `/mentor status` returns correct summary for unmatched and matched users.
+
+
+***test_mentor_leave_removes_registration_and_clears_pair()***
+
+	Purpose: Verifies `/mentor leave` removes profile and clears existing pairing.
+
+
+***test_mentor_match_notifies_pairs_when_available()***
+
+	Purpose: Verifies `/mentor match` creates and notifies pairs when compatible unmatched users exist.
+
+---
+
+### Use Case 13 - Vibe Analytics Command (`/checkvibes`)
+
+***test_checkvibes_defaults_to_today()***
+
+	Purpose: Verifies `/checkvibes` with no args triggers analysis for current day.
+
+
+***test_checkvibes_accepts_all_and_date_filters()***
+
+	Purpose: Verifies `/checkvibes all`, `/checkvibes yesterday`, and `/checkvibes MM-DD-YYYY` parse correctly.
+
+
+***test_checkvibes_invalid_date_returns_validation_error()***
+
+	Purpose: Verifies invalid date input returns a user-facing validation response.
+
+---
+
+### Automation notes
+
+- All automated tests are run with pytest.
+- External services (Slack API, OAuth requests, MongoDB, and LLM-dependent calls) are mocked or patched in integration-style tests.
+- Existing automated coverage for slash command flows is strongest today for `/forceprompt`, `/setchannel`, `/picktags`, and `/connect`; other active slash commands are now explicitly tracked as planned integration scenarios.
 
 

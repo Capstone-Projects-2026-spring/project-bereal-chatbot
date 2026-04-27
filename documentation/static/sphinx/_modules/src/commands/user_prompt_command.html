@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>src.commands.user_prompt_command &#8212; VibeCheck 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for src.commands.user_prompt_command</h1><div class="highlight"><pre>
+<span></span><span class="c1"># src/commands/user_prompt_command.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">bot.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">StateManager</span><span class="p">,</span> <span class="n">get_team_id</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">services.prompt_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_available_topics</span>
+
+<span class="n">_TIME_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;%I:%M:%S %p&quot;</span>
+
+<span class="n">_PRESET_TIME_OPTIONS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;09:30:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;09:30:00 AM&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:00:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;10:00:00 AM&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;10:30:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;10:30:00 AM&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;11:00:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;11:00:00 AM&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;11:30:00 AM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;11:30:00 AM&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;12:00:00 PM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;12:00:00 PM&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;12:30:00 PM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;12:30:00 PM&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;01:00:00 PM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;01:00:00 PM&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;02:00:00 PM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;02:00:00 PM&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;03:00:00 PM&quot;</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;03:00:00 PM&quot;</span><span class="p">},</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="send_user_prompt_invitation">
+<a class="viewcode-back" href="../../../_generated/src.commands.user_prompt_command.html#src.commands.user_prompt_command.send_user_prompt_invitation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">send_user_prompt_invitation</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">team_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    DM a user to invite them to create today&#39;s prompt.</span>
+<span class="sd">    Called by the scheduler when it randomly selects a user.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">chat_postMessage</span><span class="p">(</span>
+            <span class="n">channel</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;You&#39;ve been selected to create today&#39;s vibe check prompt! :writing_hand:&quot;</span><span class="p">,</span>
+            <span class="n">blocks</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">(</span>
+                            <span class="s2">&quot;:writing_hand: *You&#39;ve been selected to create today&#39;s vibe check prompt!*</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                            <span class="s2">&quot;You can write your own prompt, choose a topic, and pick when it goes out. &quot;</span>
+                            <span class="s2">&quot;Hit the button below to get started.&quot;</span>
+                        <span class="p">),</span>
+                    <span class="p">},</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;actions&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;block_id&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;user_prompt_invite|</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;button&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;:pencil: Create Today&#39;s Prompt&quot;</span><span class="p">},</span>
+                            <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;open_user_prompt_modal&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;style&quot;</span><span class="p">:</span> <span class="s2">&quot;primary&quot;</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[USER PROMPT] Sent prompt invitation to user </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2"> (team </span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[USER PROMPT] Failed to DM user </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="register_user_prompt_handlers">
+<a class="viewcode-back" href="../../../_generated/src.commands.user_prompt_command.html#src.commands.user_prompt_command.register_user_prompt_handlers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_user_prompt_handlers</span><span class="p">(</span><span class="n">bolt_app</span><span class="p">,</span> <span class="n">state_manager</span><span class="p">:</span> <span class="n">StateManager</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Registers the action and modal handlers for the user-created daily prompt feature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s2">&quot;open_user_prompt_modal&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_open_modal</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+        <span class="n">ack</span><span class="p">()</span>
+
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">expiry</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">+</span> <span class="mi">300</span>  <span class="c1"># 5-minute window from button click</span>
+        <span class="n">topics</span> <span class="o">=</span> <span class="n">get_available_topics</span><span class="p">()</span>
+
+        <span class="n">topic_options</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">},</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">}</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">]</span>
+
+        <span class="n">client</span><span class="o">.</span><span class="n">views_open</span><span class="p">(</span>
+            <span class="n">trigger_id</span><span class="o">=</span><span class="n">body</span><span class="p">[</span><span class="s2">&quot;trigger_id&quot;</span><span class="p">],</span>
+            <span class="n">view</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;modal&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;callback_id&quot;</span><span class="p">:</span> <span class="s2">&quot;user_prompt_modal&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;private_metadata&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">expiry</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Create Today&#39;s Prompt&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;submit&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Submit&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Cancel&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;blocks&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mrkdwn&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Pick a topic for today&#39;s prompt — required. Then optionally write your own prompt below. If you leave it blank, a random prompt from that topic will be used.&quot;</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;block_id&quot;</span><span class="p">:</span> <span class="s2">&quot;topic_block&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Topic&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;element&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;static_select&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;topic_select&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;placeholder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Pick a topic...&quot;</span><span class="p">},</span>
+                            <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">topic_options</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;block_id&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_prompt_block&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;optional&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Write your own prompt (optional)&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;hint&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Leave blank to use a random prompt from the topic above.&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;element&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text_input&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_prompt_input&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;multiline&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="s2">&quot;placeholder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;e.g. If you could live anywhere in the world, where would it be?&quot;</span><span class="p">},</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;block_id&quot;</span><span class="p">:</span> <span class="s2">&quot;time_block&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;optional&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Send time&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;hint&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Leave blank to keep today&#39;s scheduled time.&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;element&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;static_select&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;time_select&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;placeholder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Pick a time...&quot;</span><span class="p">},</span>
+                            <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">_PRESET_TIME_OPTIONS</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;block_id&quot;</span><span class="p">:</span> <span class="s2">&quot;send_now_block&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;optional&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Send immediately&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;element&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;checkboxes&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action_id&quot;</span><span class="p">:</span> <span class="s2">&quot;send_now_check&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span>
+                                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Post the prompt to the channel right now&quot;</span><span class="p">},</span>
+                                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;send_now&quot;</span><span class="p">,</span>
+                                <span class="p">}</span>
+                            <span class="p">],</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                <span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+    <span class="nd">@bolt_app</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s2">&quot;user_prompt_modal&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_user_prompt_modal</span><span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;view&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;private_metadata&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">team_id</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">get_team_id</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">expiry</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">expiry</span> <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">expiry</span><span class="p">:</span>
+            <span class="n">ack</span><span class="p">(</span>
+                <span class="n">response_action</span><span class="o">=</span><span class="s2">&quot;errors&quot;</span><span class="p">,</span>
+                <span class="n">errors</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;topic_block&quot;</span><span class="p">:</span> <span class="s2">&quot;Sorry, your 5-minute window to create a prompt has expired. The bot will use a regular prompt today.&quot;</span><span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[USER PROMPT] Submission rejected — window expired for team </span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">ack</span><span class="p">()</span>
+
+        <span class="n">state</span> <span class="o">=</span> <span class="n">state_manager</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">team_id</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;view&quot;</span><span class="p">][</span><span class="s2">&quot;state&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Topic (required)</span>
+        <span class="n">topic_opt</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;topic_block&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;topic_select&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;selected_option&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">topic</span> <span class="o">=</span> <span class="n">topic_opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">topic_opt</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="c1"># Custom prompt text (optional)</span>
+        <span class="n">custom_text</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_prompt_block&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_prompt_input&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c1"># Time (optional)</span>
+        <span class="n">time_opt</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_block&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_select&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;selected_option&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">selected_time</span> <span class="o">=</span> <span class="n">time_opt</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">time_opt</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="c1"># Send now checkbox (optional)</span>
+        <span class="n">send_now</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;send_now_block&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;send_now_check&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;selected_options&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">send_now</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">bot.posting</span><span class="w"> </span><span class="kn">import</span> <span class="n">post_custom_prompt</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">services.prompt_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_random_prompt_by_topic</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_active_channel</span><span class="p">()</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DEFAULT_CHANNEL&quot;</span><span class="p">)</span>
+            <span class="n">prompt_text</span> <span class="o">=</span> <span class="n">custom_text</span> <span class="ow">or</span> <span class="p">(</span><span class="n">get_random_prompt_by_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">topic</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[USER PROMPT] send_now=True channel=</span><span class="si">{</span><span class="n">channel</span><span class="si">!r}</span><span class="s2"> prompt_text=</span><span class="si">{</span><span class="n">prompt_text</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">prompt_text</span> <span class="ow">and</span> <span class="n">channel</span><span class="p">:</span>
+                <span class="n">ts</span> <span class="o">=</span> <span class="n">post_custom_prompt</span><span class="p">(</span>
+                    <span class="n">client</span><span class="p">,</span>
+                    <span class="n">prompt_text</span><span class="p">,</span>
+                    <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span>
+                    <span class="n">team_id</span><span class="o">=</span><span class="n">team_id</span><span class="p">,</span>
+                    <span class="n">prefix_text</span><span class="o">=</span><span class="s2">&quot;Prompt of the day:&quot;</span><span class="p">,</span>
+                    <span class="n">footnote_text</span><span class="o">=</span><span class="s2">&quot;user-created vibe check&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">ts</span><span class="p">:</span>
+                    <span class="n">state</span><span class="o">.</span><span class="n">set_last_prompt_ts</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[USER PROMPT] Sent immediately to </span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s2"> for team </span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">custom_text</span><span class="p">:</span>
+                <span class="n">state</span><span class="o">.</span><span class="n">set_pending_custom_prompt</span><span class="p">(</span><span class="n">custom_text</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[USER PROMPT] Custom prompt set for team </span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">custom_text</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">topic</span><span class="p">:</span>
+                <span class="n">state</span><span class="o">.</span><span class="n">set_pending_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[USER PROMPT] Topic set for team </span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">selected_time</span><span class="p">:</span>
+                <span class="n">state</span><span class="o">.</span><span class="n">set_daily_target_time</span><span class="p">(</span><span class="n">selected_time</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[USER PROMPT] Time overridden for team </span><span class="si">{</span><span class="n">team_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">selected_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+        <span class="n">summary_parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">send_now</span><span class="p">:</span>
+            <span class="n">summary_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;sent to the channel now&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">custom_text</span><span class="p">:</span>
+                <span class="n">summary_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prompt: _</span><span class="si">{</span><span class="n">custom_text</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">topic</span><span class="p">:</span>
+                <span class="n">summary_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;topic: `</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">summary_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;a random prompt&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">selected_time</span><span class="p">:</span>
+                <span class="n">summary_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;at `</span><span class="si">{</span><span class="n">selected_time</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+
+        <span class="n">client</span><span class="o">.</span><span class="n">chat_postMessage</span><span class="p">(</span>
+            <span class="n">channel</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;:tada: Got it! Today&#39;s vibe check will use </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">summary_parts</span><span class="p">)</span><span class="si">}</span><span class="s2">. Thanks for contributing! :tada:&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">VibeCheck</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">API Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_generated/modules.html">src</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

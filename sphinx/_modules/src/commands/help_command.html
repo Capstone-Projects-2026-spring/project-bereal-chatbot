@@ -48,40 +48,34 @@
 
 <span class="s2">*Step 3: Configure the bot via the Control Panel*</span>
 <span class="s2">Open the bot&#39;s *App Home* tab (click the bot&#39;s name in the sidebar).</span>
-<span class="s2">From there you can:</span>
-
-<span class="s2">• *Mode* — choose how the daily prompt time is picked:</span>
-<span class="s2">  - *Random Time* — picks a random time within your start/end range each day</span>
-<span class="s2">  - *Preset Time Select* — pick from a list of preset times</span>
-<span class="s2">  - *Static Set Time* — type in a specific time that repeats every day</span>
-
-<span class="s2">• *Random Time Range* — set the start and end window for random mode (e.g. `09:30:00 AM` to `05:00:00 PM`)</span>
-
-<span class="s2">• *Preset Times* — select a fixed time from the dropdown</span>
-
-<span class="s2">• *Static Set Time* — type an exact time in `HH:MM:SS AM/PM` format (e.g. `03:00:00 PM`)</span>
-
-<span class="s2">• *Active Days* — check the days you want the bot to post (uncheck days to skip them)</span>
 
 <span class="s2">*Other Commands*</span>
 <span class="s2">`/forceprompt` — immediately post a random prompt to the current channel</span>
 <span class="s2">`/forceprompt #channel-name` — post a prompt to a specific channel</span>
-<span class="s2">`/connect` — run the social connector now in the current channel</span>
-<span class="s2">`/setchannel #channel-name` — change the active channel</span>
 <span class="s2">`/vibestatus` — show current bot configuration</span>
+<span class="s2">`/checkvibes` — show response data and stats for the current channel</span>
 <span class="s2">`/picktags` — set or update your personal topic interest tags</span>
 <span class="s2">`/connect` — set or update your personal topic interest tags</span>
 <span class="s2">`/help` — show this message</span>
 
 <span class="s2">*User-Created Prompts*</span>
 <span class="s2">Once a day, the bot may randomly DM a channel member and invite them to write that day&#39;s prompt.</span>
-<span class="s2">You&#39;ll have *5 minutes* to submit — pick a topic (required) and optionally add your own custom text.</span>
+<span class="s2">You&#39;ll have *5 minutes* to submit — pick a topic and optionally add your own custom text.</span>
 <span class="s2">Admins can also manually assign any user as prompt creator from the *Control Panel* (App Home).</span>
 
 <span class="s2">*Social Connector*</span>
 <span class="s2">Each afternoon the bot may pair two teammates who share common interest tags and post a friendly</span>
 <span class="s2">intro message in the main channel to help them get to know each other.</span>
 <span class="s2">Set your interest tags with `/picktags` or during onboarding.</span>
+<span class="s2"> </span>
+<span class="s2">*Mentor-Mentee Program* :handshake:</span>
+<span class="s2">The bot supports a mentor-mentee program to help teammates connect for guidance and learning:</span>
+<span class="s2">• `/mentor signup mentor` — join as a mentor (opens a profile form)</span>
+<span class="s2">• `/mentor signup mentee` — join as a mentee (opens a profile form)</span>
+<span class="s2">• `/mentor status` — see your current pairing</span>
+<span class="s2">• `/mentor leave` — leave the program</span>
+<span class="s2">• `/mentor admin` — _(admin)_ view all profiles &amp; manually pair users</span>
+<span class="s2">• `/mentor match` — _(admin)_ auto-match all unmatched users by interests</span>
 <span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
 

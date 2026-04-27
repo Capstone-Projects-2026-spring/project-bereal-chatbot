@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">Hello from VibeCheck | VibeCheck</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docusaurus_tag" content="default"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docsearch:docusaurus_tag" content="default"><meta data-rh="true" property="og:title" content="Hello from VibeCheck | VibeCheck"><meta data-rh="true" name="description" content="Description will go into a meta tag in &lt;head /&gt;"><meta data-rh="true" property="og:description" content="Description will go into a meta tag in &lt;head /&gt;"><link data-rh="true" rel="icon" href="/project-bereal-chatbot/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/" hreflang="en"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-bereal-chatbot/" hreflang="x-default"><script data-rh="true">function insertBanner(){var n=document.createElement("div");n.id="__docusaurus-base-url-issue-banner-container";n.innerHTML='\n<div id="__docusaurus-base-url-issue-banner" style="border: thick solid red; background-color: rgb(255, 230, 179); margin: 20px; padding: 20px; font-size: 20px;">\n   <p style="font-weight: bold; font-size: 30px;">Your Docusaurus site did not load properly.</p>\n   <p>A very common reason is a wrong site <a href="https://docusaurus.io/docs/docusaurus.config.js/#baseUrl" style="font-weight: bold;">baseUrl configuration</a>.</p>\n   <p>Current configured baseUrl = <span style="font-weight: bold; color: red;">/project-bereal-chatbot/</span> </p>\n   <p>We suggest trying baseUrl = <span id="__docusaurus-base-url-issue-banner-suggestion-container" style="font-weight: bold; color: green;"></span></p>\n</div>\n',document.body.prepend(n);var e=document.getElementById("__docusaurus-base-url-issue-banner-suggestion-container"),o=window.location.pathname,s="/"===o.substr(-1)?o:o+"/";e.innerHTML=s}document.addEventListener("DOMContentLoaded",function(){void 0===window.docusaurus&&insertBanner()})</script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script><link rel="stylesheet" href="/project-bereal-chatbot/assets/css/styles.27a02265.css">
-<script src="/project-bereal-chatbot/assets/js/runtime~main.6108fcbf.js" defer="defer"></script>
+<script src="/project-bereal-chatbot/assets/js/runtime~main.d936c4ce.js" defer="defer"></script>
 <script src="/project-bereal-chatbot/assets/js/main.a9fb7a4e.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -42,17 +42,17 @@
 <li class="">Also in <strong>Basic Information</strong>, copy the <strong>Signing Secret</strong> and save it as <code>SLACK_SIGNING_SECRET</code>.</li>
 <li class="">Open <strong>OAuth &amp; Permissions</strong>. Under <strong>Bot Token Scopes</strong>, add the following scopes:<!-- -->
 <ul>
-<li class=""><code>app_mentions:read</code></li>
-<li class=""><code>channels:read</code></li>
-<li class=""><code>channels:history</code></li>
-<li class=""><code>chat:write</code></li>
-<li class=""><code>chat:write.public</code></li>
-<li class=""><code>commands</code></li>
-<li class=""><code>im:history</code></li>
-<li class=""><code>im:write</code></li>
-<li class=""><code>mpim:write</code></li>
-<li class=""><code>reactions:read</code></li>
-<li class=""><code>users:read</code></li>
+<li class=""><code>chat:write</code> — send messages as the bot</li>
+<li class=""><code>chat:write.public</code> — post in channels without being invited</li>
+<li class=""><code>commands</code> — register and respond to slash commands</li>
+<li class=""><code>channels:read</code> — list channels and look up channel info</li>
+<li class=""><code>channels:history</code> — read messages in public channels</li>
+<li class=""><code>im:write</code> — open and send direct messages</li>
+<li class=""><code>im:history</code> — read messages in DMs</li>
+<li class=""><code>mpim:write</code> — create and post to group DMs (used for mentor-mentee group chats)</li>
+<li class=""><code>reactions:read</code> — read emoji reactions on messages</li>
+<li class=""><code>users:read</code> — look up user profile information</li>
+<li class=""><code>app_mentions:read</code> — receive events when the bot is mentioned</li>
 </ul>
 </li>
 <li class="">Under <strong>Redirect URLs</strong>, add your redirect URI (e.g. <code>https://your-host/slack/oauth_redirect</code>) and save it as <code>SLACK_REDIRECT_URI</code>.</li>
@@ -60,6 +60,9 @@
 <li class="">Copy the bot token (starts with <code>xoxb-</code>) and save it as <code>SLACK_BOT_TOKEN</code>.</li>
 <li class="">From the <strong>Basic Information</strong> page, copy the <strong>Client ID</strong> and <strong>Client Secret</strong> and save them as <code>SLACK_CLIENT_ID</code> and <code>SLACK_CLIENT_SECRET</code>.</li>
 </ol>
+<p><strong>Register Slash Commands:</strong></p>
+<p>In your app settings, go to <strong>Slash Commands</strong> and add each of the following. Set the <strong>Request URL</strong> to your hosted bot URL (e.g. <code>https://your-host/slack/events</code>) for each one — or leave it blank if you are using Socket Mode.</p>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody><tr><td><code>/help</code></td><td>Show setup guide and list of all commands</td></tr><tr><td><code>/setchannel</code></td><td>Set the channel where daily prompts are posted (e.g. <code>/setchannel #general</code>)</td></tr><tr><td><code>/forceprompt</code></td><td>Immediately post a vibe check prompt; optionally pass <code>text</code>, <code>image</code>, or <code>#channel</code></td></tr><tr><td><code>/vibestatus</code></td><td>Display the current bot configuration for this workspace</td></tr><tr><td><code>/checkvibes</code></td><td>Show response stats and submission data for the current channel</td></tr><tr><td><code>/picktags</code></td><td>Set your personal interest tags used for social matching and prompt filtering</td></tr><tr><td><code>/picktopic</code></td><td>Set a topic so the next prompt is drawn from that category</td></tr><tr><td><code>/picktime</code></td><td>Manually pick a time slot number (1–11) for today&#x27;s prompt</td></tr><tr><td><code>/findtime</code></td><td>Show the currently scheduled prompt time and active mode</td></tr><tr><td><code>/connect</code></td><td>Update your interest profile for social connector matching</td></tr><tr><td><code>/streak</code></td><td>View your current vibe check response streak</td></tr><tr><td><code>/promptstats</code></td><td>Show stats on prompts that have been sent (admin use)</td></tr><tr><td><code>/mentor</code></td><td>Mentor-mentee program — use <code>signup mentor</code>, <code>signup mentee</code>, <code>status</code>, <code>leave</code>, <code>admin</code>, or <code>match</code></td></tr></tbody></table>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-groq-api-key-setup">2. Groq API Key Setup<a href="#2-groq-api-key-setup" class="hash-link" aria-label="Direct link to 2. Groq API Key Setup" title="Direct link to 2. Groq API Key Setup" translate="no">​</a></h3>
 <p>Go to the Groq console: <a href="https://console.groq.com/" target="_blank" rel="noopener noreferrer" class="">https://console.groq.com/</a></p>

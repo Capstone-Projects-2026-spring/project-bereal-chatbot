@@ -56,6 +56,8 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
             vibeDT = datetime.fromisoformat(vibe["time"])
             if (vibeDT.day == curDate.day and vibeDT.month == curDate.month and vibeDT.year == curDate.year):
                 CurrentDaysVibes.append(vibe)
+            else:
+                respond(f"Vibe Date: {vibeDT}, Current Date: {curDate}")
    
     if len(CurrentDaysVibes) == 0 and dayValue:
         respond(f"No Vibes Checks have been sent that day... :( | Day Value: {dayValue}, Amount of Current Days: {len(CurrentDaysVibes)}")

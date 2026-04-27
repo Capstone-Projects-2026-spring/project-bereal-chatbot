@@ -46,7 +46,6 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
         message_array = list(messages_col.find({}))
         
         prompt_list = organize_data(message_array, botID)
-        print(f"Bot ID: {botID} | \n Prompt List: {prompt_list}")
     except Exception as e:
         print(f"[CHECK VIBES COMMAND] Failed to create the message array: {e}")    
 
@@ -54,12 +53,12 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
     curDate = dayValue
     if dayValue:
         for vibe in prompt_list:
-            vibeDT = datetime.fromisoformat(vibe["time"])
+            vibeDT = datetime.fromisoformat(vibe["time"]).astimezone()
             if (vibeDT.day == curDate.day and vibeDT.month == curDate.month and vibeDT.year == curDate.year):
                 CurrentDaysVibes.append(vibe)
    
     if len(CurrentDaysVibes) == 0 and dayValue:
-        respond("No Vibes Checks have been sent that day... :(")
+        respond(f"No Vibes Checks have been sent that day... :( | Day Value: {dayValue}, Amount of Current Days: {len(CurrentDaysVibes)}")
         return
 
     msg_block = []
@@ -476,7 +475,6 @@ def organize_data(db, bot_id):
                     VibeInstance["unique_users"].append(record.get("user_id"))
 
                 VibeInstance["engagement"] += engageVal
-   
     return  vibe_prompt_list
    
     

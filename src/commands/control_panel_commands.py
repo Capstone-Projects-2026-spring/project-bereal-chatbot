@@ -132,7 +132,7 @@ def _build_home_view(selected_preset=None, selected_mode=None,
         blocks += [
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": "*2. Random Time Range*\nSet a window — the bot picks a random time within it each day."}
+                "text": {"type": "mrkdwn", "text": "Random Time Range\nSet a window — the bot picks a random time within it each day."}
             },
             {
                 "type": "input",
@@ -157,7 +157,7 @@ def _build_home_view(selected_preset=None, selected_mode=None,
         blocks += [
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": "*2. Preset Time*\nPick one of the preset times."}
+                "text": {"type": "mrkdwn", "text": "Preset Time\nPick one of the preset times."}
             },
             {
                 "type": "actions",
@@ -188,7 +188,7 @@ def _build_home_view(selected_preset=None, selected_mode=None,
                 "type": "input",
                 "dispatch_action": True,
                 "element": static_element,
-                "label": {"type": "plain_text", "text": "2. Static Set Time"}
+                "label": {"type": "plain_text", "text": "Static Set Time"}
             },
             {"type": "divider"},
         ]
@@ -207,7 +207,7 @@ def _build_home_view(selected_preset=None, selected_mode=None,
     blocks += [
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*3. Active Days*"}
+            "text": {"type": "mrkdwn", "text": "*2. Active Days*"}
         },
         {
             "type": "actions",
@@ -240,7 +240,7 @@ def _build_home_view(selected_preset=None, selected_mode=None,
     blocks += [
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*4. Topic Filter*\nOnly send prompts from these tags. Leave all unchecked for any topic."}
+            "text": {"type": "mrkdwn", "text": "*3. Topic Filter*\nOnly send prompts from these tags. Leave all unchecked for any topic."}
         },
         tag_filter_block,
         {"type": "divider"},
@@ -250,7 +250,7 @@ def _build_home_view(selected_preset=None, selected_mode=None,
     blocks += [
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*5. Next Prompt Override*\nForce the next scheduled prompt to use a specific topic. Resets after it fires."}
+            "text": {"type": "mrkdwn", "text": "*4. Next Prompt Override*\nForce the next scheduled prompt to use a specific topic. Resets after it fires."}
         },
         {
             "type": "actions",
@@ -298,13 +298,13 @@ def _build_home_view(selected_preset=None, selected_mode=None,
     blocks += [
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*6. Late Response Reminders*\nDM users who haven't responded 30 minutes after a vibe check posts."}
+            "text": {"type": "mrkdwn", "text": "*5. Late Response Reminders*\nDM users who haven't responded 30 minutes after a vibe check posts."}
         },
         reminder_block,
         {"type": "divider"},
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*7. Prompt Type*\nChoose whether prompts ask for a photo, a text response, or either."}
+            "text": {"type": "mrkdwn", "text": "*6. Prompt Type*\nChoose whether prompts ask for a photo, a text response, or either."}
         },
         {
             "type": "actions",
@@ -320,7 +320,7 @@ def _build_home_view(selected_preset=None, selected_mode=None,
         {"type": "divider"},
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*8. Assign Prompt Creator*\nPick a user to DM them the prompt creation invite! They will have 5 minutes to submit."}
+            "text": {"type": "mrkdwn", "text": "*7. Assign Prompt Creator*\nPick a user to DM them the prompt creation invite! They will have 5 minutes to submit."}
         },
         {
             "type": "actions",

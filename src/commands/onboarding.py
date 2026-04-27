@@ -80,7 +80,7 @@ def register_onboarding(bolt_app, state_manager: StateManager):
         try:
             client.chat_postMessage(
                 channel=user_id,
-                text="Welcome to Vibe Check! :wave: Choose which prompt topics interest you.",
+                text="Welcome to Vibe Check! :wave: Choose which topics interest you.",
                 blocks=[
                     {
                         "type": "section",
@@ -89,8 +89,9 @@ def register_onboarding(bolt_app, state_manager: StateManager):
                             "text": (
                                 ":wave: *Welcome to Vibe Check!*\n\n"
                                 "The bot sends regular prompts to get the team sharing and connecting. "
-                                "Let us know which *topics* interest you!"
-                                "Hit the button below to pick your interests."
+                                "Let us know which *topics* interest you!\n"
+                                "Hit the button below to pick your interests.\n\n"
+                                "For more information on the bot, use `/help`."
                             ),
                         },
                     },

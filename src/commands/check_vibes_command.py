@@ -58,7 +58,7 @@ def databse_Task(mongo_client, payload, respond, botID, client, dayValue, specif
                 CurrentDaysVibes.append(vibe)
    
     if len(CurrentDaysVibes) == 0 and dayValue:
-        respond("No Vibes Checks have been sent that day... :(")
+        respond(f"No Vibes Checks have been sent that day... :( | Day Value: {dayValue}, Amount of Current Days: {len(CurrentDaysVibes)}")
         return
 
     msg_block = []

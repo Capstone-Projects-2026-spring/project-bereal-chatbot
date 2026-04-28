@@ -7,4 +7,4 @@ Acceptance testing demonstrates that functional and non-functional requirements 
 
 ### Acceptance tests should be documented using this spreadsheet:
 
-[Download Acceptance QA Testing Spreadsheet](/Acceptance%20QA%20Testing%20Doc.xlsx)
+[Download Acceptance QA Testing Spreadsheet](./Acceptance%20QA%20Testing%20Doc.xlsx)

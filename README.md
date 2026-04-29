@@ -145,11 +145,6 @@ You should see:
 
 Use the slash command `/help` in any channel where the bot is present to see all available commands.
 
-## Contact Information
-To reach out for any questions, comments, or concerns regarding this project, you can contact me via email or text:
-
-Khai: tuq43307@temple.edu | 267-241-3304
-
 
 ## Running Tests
 

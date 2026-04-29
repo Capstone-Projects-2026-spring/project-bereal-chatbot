@@ -174,8 +174,3 @@ Use `/setchannel #channel-name` to set which channel receives daily prompts. Onl
 | `/mentor match` | Pair up mentors and mentees |
 | `/mentor admin` | See the mentor program summary |
 
-
-## Support
-
-To report a bug, open an issue on the project Jira board:
-https://temple-cis-projects-in-cs.atlassian.net/jira/software/c/projects/DT/issues

@@ -177,11 +177,5 @@ Use `/setchannel #channel-name` to set which channel receives daily prompts. Onl
 
 ## Support
 
-For questions, bugs, or feature requests related to this project, contact the development team:
-
-| Name | Email | Phone |
-|---|---|---|
-| Khai Thach | tuq43307@temple.edu | 267-241-3304 |
-
 To report a bug, open an issue on the project Jira board:
 https://temple-cis-projects-in-cs.atlassian.net/jira/software/c/projects/DT/issues
